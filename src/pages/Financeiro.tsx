@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
@@ -10,6 +9,8 @@ import { Plus, TrendingUp, TrendingDown, Calendar, Lock, Download, FileText } fr
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { PremiumButton } from '@/components/PremiumFeature';
+import { usePremium } from '@/hooks/use-premium';
 
 const Financeiro = () => {
   const [records, setRecords] = useState<FinancialRecord[]>([]);
@@ -21,6 +22,7 @@ const Financeiro = () => {
   });
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { isPremium } = usePremium();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -111,44 +113,17 @@ const Financeiro = () => {
       
       {/* Premium Features */}
       <div className="flex flex-wrap gap-2">
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" disabled className="opacity-70">
-                <Lock className="h-3 w-3 mr-1" /> Gerar Relatório
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Disponível no plano premium</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <PremiumButton variant="outline" size="sm">
+          <FileText className="h-3 w-3 mr-1" /> Gerar Relatório
+        </PremiumButton>
         
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" disabled className="opacity-70">
-                <Lock className="h-3 w-3 mr-1" /> <Download className="h-3 w-3 mr-1" /> Exportar CSV
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Disponível no plano premium</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <PremiumButton variant="outline" size="sm">
+          <Download className="h-3 w-3 mr-1" /> Exportar CSV
+        </PremiumButton>
         
-        <TooltipProvider>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" disabled className="opacity-70">
-                <Lock className="h-3 w-3 mr-1" /> <FileText className="h-3 w-3 mr-1" /> Controle de Recibos
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>
-              <p>Disponível no plano premium</p>
-            </TooltipContent>
-          </Tooltip>
-        </TooltipProvider>
+        <PremiumButton variant="outline" size="sm">
+          <FileText className="h-3 w-3 mr-1" /> Controle de Recibos
+        </PremiumButton>
       </div>
 
       {/* Transactions List */}

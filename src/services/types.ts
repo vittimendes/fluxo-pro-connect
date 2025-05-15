@@ -1,16 +1,14 @@
-
-// Define all the interfaces used across the application
-
 export interface User {
   id: string;
   name: string;
   email: string;
   password: string;
-  profession: string;
-  workHours: string;
-  cancelPolicy: string;
-  whatsappNumber: string;
-  defaultMessage: string;
+  profession?: string;
+  workHours?: string;
+  cancelPolicy?: string;
+  whatsappNumber?: string;
+  defaultMessage?: string;
+  plan?: 'free' | 'pro'; // Added plan property
 }
 
 export interface Client {
@@ -19,8 +17,8 @@ export interface Client {
   phone: string;
   email?: string;
   notes?: string;
-  feedbackStatus?: 'pending' | 'completed' | 'not_sent';
-  userId?: string; // To associate client with specific user
+  feedbackStatus: 'not_sent' | 'pending' | 'completed';
+  userId: string;
 }
 
 export interface AppointmentType {
@@ -35,26 +33,25 @@ export interface Appointment {
   clientId: string;
   clientName: string;
   type: string;
-  date: string; // ISO format
+  date: string;
   time: string;
-  duration: number; // in minutes
-  location: 'online' | 'in_person' | 'home_visit';
-  status: 'scheduled' | 'confirmed' | 'canceled' | 'no_show' | 'completed';
-  notes?: string;
-  userId?: string; // To associate appointment with specific user
+  duration: number;
+  location: 'online' | 'in_person' | 'home_visit' | string;
+  status: 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show';
+  userId: string;
 }
 
 export interface FinancialRecord {
   id: string;
   amount: number;
   description: string;
-  date: string; // ISO format
+  date: string;
   type: 'income' | 'expense';
   category?: string;
+  userId: string;
   relatedAppointment?: string;
-  clientId?: string; // To associate with client
-  userId?: string; // To associate financial record with specific user
-  clientName?: string; // Add clientName property
-  appointmentId?: string; // Add appointmentId property
-  notes?: string; // Add notes property
+  appointmentId?: string; // Added property
+  clientId?: string; // Added property
+  clientName?: string; // Added property
+  notes?: string; // Added property
 }

@@ -53,9 +53,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       if (loggedInUser) {
         mockAuthService.saveUser(loggedInUser);
         setUser(loggedInUser);
+        
+        // Add plan information to toast message
+        const planText = loggedInUser.plan === 'pro' ? ' (Plano Pro)' : '';
         toast({
           title: "Login realizado",
-          description: `Bem-vindo(a), ${loggedInUser.name}!`,
+          description: `Bem-vindo(a), ${loggedInUser.name}${planText}!`,
         });
         return true;
       } else {

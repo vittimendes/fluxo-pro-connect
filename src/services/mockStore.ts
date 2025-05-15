@@ -1,4 +1,3 @@
-
 import { User, Client, AppointmentType, Appointment, FinancialRecord } from './types';
 import { formatDate } from './utils';
 
@@ -13,7 +12,20 @@ export const users: User[] = [
     workHours: 'Segunda a Sexta, 8h às 18h',
     cancelPolicy: 'Cancelamentos devem ser feitos com 24h de antecedência para evitar cobrança.',
     whatsappNumber: '5511999999999',
-    defaultMessage: 'Olá! Sou a Ana Silva, psicóloga. Como posso ajudar?'
+    defaultMessage: 'Olá! Sou a Ana Silva, psicóloga. Como posso ajudar?',
+    plan: 'free'
+  },
+  {
+    id: '2',
+    name: 'Vitor Andrade',
+    email: 'vitor@exemplo.com',
+    password: '123456',
+    profession: 'Psicólogo',
+    workHours: 'Segunda a Sexta, 9h às 19h',
+    cancelPolicy: 'Cancelamentos devem ser feitos com 48h de antecedência para evitar cobrança.',
+    whatsappNumber: '5511988887777',
+    defaultMessage: 'Olá! Sou o Vitor Andrade, psicólogo. Como posso ajudar?',
+    plan: 'pro'
   }
 ];
 
@@ -23,7 +35,10 @@ export const clients: Client[] = [
   { id: '2', name: 'João Carlos', phone: '5511988882222', notes: 'Primeira consulta', feedbackStatus: 'pending', userId: '1' },
   { id: '3', name: 'Carla Mendes', phone: '5511988883333', feedbackStatus: 'not_sent', userId: '1' },
   { id: '4', name: 'Roberto Alves', phone: '5511988884444', feedbackStatus: 'not_sent', userId: '1' },
-  { id: '5', name: 'Patrícia Lima', phone: '5511988885555', email: 'patricia@email.com', feedbackStatus: 'pending', userId: '1' }
+  { id: '5', name: 'Patrícia Lima', phone: '5511988885555', email: 'patricia@email.com', feedbackStatus: 'pending', userId: '1' },
+  // Vitor's clients (Pro user)
+  { id: '6', name: 'Lucas Oliveira', phone: '5511988886666', email: 'lucas@email.com', feedbackStatus: 'completed', userId: '2' },
+  { id: '7', name: 'Amanda Santos', phone: '5511988887777', notes: 'Cliente recorrente', feedbackStatus: 'pending', userId: '2' }
 ];
 
 // Default appointment types
@@ -31,12 +46,17 @@ export const appointmentTypes: AppointmentType[] = [
   { id: '1', name: 'Terapia Individual', description: 'Sessão de terapia individual', userId: '1' },
   { id: '2', name: 'Avaliação Inicial', description: 'Primeira consulta para avaliação', userId: '1' },
   { id: '3', name: 'Avaliação de Progresso', description: 'Revisão do progresso do tratamento', userId: '1' },
+  // Vitor's appointment types (Pro user)
+  { id: '4', name: 'Mentoria', description: 'Sessão de mentoria profissional', userId: '2' },
+  { id: '5', name: 'Consulta Avançada', description: 'Consulta com técnicas avançadas', userId: '2' },
 ];
 
 // Today and tomorrow for initial data
 const today = new Date();
 const tomorrow = new Date();
 tomorrow.setDate(today.getDate() + 1);
+const nextWeek = new Date();
+nextWeek.setDate(today.getDate() + 7);
 
 // Storage for user-specific data
 export const appointmentsByUser: { [userId: string]: Appointment[] } = {};
@@ -157,8 +177,85 @@ financialRecordsByUser['1'] = [
   }
 ];
 
-// Initialize clients for default user
-clientsByUser['1'] = [...clients];
+// Initialize appointments for Vitor (Pro user)
+appointmentsByUser['2'] = [
+  {
+    id: '6',
+    clientId: '6',
+    clientName: 'Lucas Oliveira',
+    type: 'Mentoria',
+    date: formatDate(tomorrow),
+    time: '10:00',
+    duration: 60,
+    location: 'online',
+    status: 'scheduled',
+    userId: '2'
+  },
+  {
+    id: '7',
+    clientId: '7',
+    clientName: 'Amanda Santos',
+    type: 'Consulta Avançada',
+    date: formatDate(nextWeek),
+    time: '14:30',
+    duration: 90,
+    location: 'in_person',
+    status: 'confirmed',
+    userId: '2'
+  },
+  {
+    id: '8',
+    clientId: '6',
+    clientName: 'Lucas Oliveira',
+    type: 'Mentoria',
+    date: formatDate(today),
+    time: '16:00',
+    duration: 60,
+    location: 'online',
+    status: 'scheduled',
+    userId: '2'
+  }
+];
 
-// Initialize appointment types for default user
-appointmentTypesByUser['1'] = [...appointmentTypes];
+// Initialize financial records for Vitor (Pro user)
+financialRecordsByUser['2'] = [
+  {
+    id: '6',
+    amount: 300,
+    description: 'Mentoria - Lucas Oliveira',
+    date: formatDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 3)),
+    type: 'income',
+    relatedAppointment: '6',
+    clientId: '6',
+    clientName: 'Lucas Oliveira',
+    userId: '2'
+  },
+  {
+    id: '7',
+    amount: 450,
+    description: 'Consulta Avançada - Amanda Santos',
+    date: formatDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)),
+    type: 'income',
+    relatedAppointment: '7',
+    clientId: '7',
+    clientName: 'Amanda Santos',
+    userId: '2'
+  },
+  {
+    id: '8',
+    amount: -120,
+    description: 'Software para notas de sessão',
+    date: formatDate(new Date(today.getFullYear(), today.getMonth(), 5)),
+    type: 'expense',
+    category: 'Software',
+    userId: '2'
+  }
+];
+
+// Initialize clients for both users
+clientsByUser['1'] = [...clients.filter(client => client.userId === '1')];
+clientsByUser['2'] = [...clients.filter(client => client.userId === '2')];
+
+// Initialize appointment types for both users
+appointmentTypesByUser['1'] = [...appointmentTypes.filter(type => type.userId === '1')];
+appointmentTypesByUser['2'] = [...appointmentTypes.filter(type => type.userId === '2')];

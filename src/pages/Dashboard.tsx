@@ -5,14 +5,17 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Appointment, mockDataService } from '@/services/mockData';
-import { Calendar, Clock, Wallet, Plus, User, MapPin, ChevronDown } from 'lucide-react';
+import { Calendar, Clock, Wallet, Plus, User, MapPin, ChevronDown, Lock } from 'lucide-react';
 import { format, addMonths, subMonths, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
 import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { usePremium } from '@/hooks/use-premium';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 
 const Dashboard = () => {
   const { user } = useAuth();
+  const { isPremium } = usePremium();
   const navigate = useNavigate();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -104,12 +107,14 @@ const Dashboard = () => {
   };
   
   const handlePreviousMonth = () => {
+    if (!isPremium) return;
     const prevDate = subMonths(new Date(selectedYear, selectedMonth), 1);
     setSelectedMonth(prevDate.getMonth());
     setSelectedYear(prevDate.getFullYear());
   };
   
   const handleNextMonth = () => {
+    if (!isPremium) return;
     const nextDate = addMonths(new Date(selectedYear, selectedMonth), 1);
     setSelectedMonth(nextDate.getMonth());
     setSelectedYear(nextDate.getFullYear());
@@ -170,6 +175,7 @@ const Dashboard = () => {
               <PopoverTrigger asChild>
                 <Button variant="outline" size="sm" className="h-8 gap-1 border-dashed">
                   {getPeriodLabel()}
+                  {!isPremium && <Lock className="h-3 w-3 ml-1 text-muted-foreground" />}
                   <ChevronDown className="h-4 w-4 opacity-50" />
                 </Button>
               </PopoverTrigger>
@@ -187,16 +193,31 @@ const Dashboard = () => {
                     </Button>
                     
                     <div className="flex flex-col gap-2">
-                      <Button 
-                        variant={selectedPeriod === 'custom' ? 'default' : 'outline'} 
-                        size="sm"
-                        className="justify-start"
-                        onClick={() => setSelectedPeriod('custom')}
-                      >
-                        Mês Específico
-                      </Button>
+                      <TooltipProvider>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <div>
+                              <Button 
+                                variant={selectedPeriod === 'custom' ? 'default' : 'outline'} 
+                                size="sm"
+                                className="justify-start w-full"
+                                onClick={() => isPremium && setSelectedPeriod('custom')}
+                                disabled={!isPremium}
+                              >
+                                {!isPremium && <Lock className="h-3 w-3 mr-1" />}
+                                Mês Específico
+                              </Button>
+                            </div>
+                          </TooltipTrigger>
+                          {!isPremium && (
+                            <TooltipContent>
+                              <p>Disponível no Plano Pro. Saiba mais nas configurações.</p>
+                            </TooltipContent>
+                          )}
+                        </Tooltip>
+                      </TooltipProvider>
                       
-                      {selectedPeriod === 'custom' && (
+                      {selectedPeriod === 'custom' && isPremium && (
                         <div className="flex items-center gap-1 p-1">
                           <Button 
                             size="icon" 
@@ -221,14 +242,29 @@ const Dashboard = () => {
                       )}
                     </div>
                     
-                    <Button 
-                      variant={selectedPeriod === 'all' ? 'default' : 'outline'} 
-                      size="sm"
-                      className="justify-start"
-                      onClick={() => setSelectedPeriod('all')}
-                    >
-                      Total Geral
-                    </Button>
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <div>
+                            <Button 
+                              variant={selectedPeriod === 'all' ? 'default' : 'outline'} 
+                              size="sm"
+                              className="justify-start w-full"
+                              onClick={() => isPremium && setSelectedPeriod('all')}
+                              disabled={!isPremium}
+                            >
+                              {!isPremium && <Lock className="h-3 w-3 mr-1" />}
+                              Total Geral
+                            </Button>
+                          </div>
+                        </TooltipTrigger>
+                        {!isPremium && (
+                          <TooltipContent>
+                            <p>Disponível no Plano Pro. Saiba mais nas configurações.</p>
+                          </TooltipContent>
+                        )}
+                      </Tooltip>
+                    </TooltipProvider>
                   </div>
                 </div>
               </PopoverContent>
