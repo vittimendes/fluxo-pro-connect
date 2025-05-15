@@ -10,26 +10,26 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-// Define language options explicitly to avoid potential circular references
-type Language = 'pt' | 'en';
+// Define supported languages as string literals instead of a recursive type
+const LANGUAGES = {
+  pt: 'Português',
+  en: 'English'
+} as const;
+
+type SupportedLanguage = keyof typeof LANGUAGES;
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   
-  const changeLanguage = (language: Language) => {
+  const changeLanguage = (language: SupportedLanguage) => {
     i18n.changeLanguage(language);
     setOpen(false);
   };
   
-  // Helper function to get language display name
-  const getLanguageDisplay = (lang: Language): string => {
-    switch (lang) {
-      case 'pt': return 'Português';
-      case 'en': return 'English';
-      default: return 'English';
-    }
-  };
+  // Get current language or default to 'en'
+  const currentLanguage = i18n.language as SupportedLanguage || 'en';
+  const displayName = LANGUAGES[currentLanguage as SupportedLanguage] || LANGUAGES.en;
   
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -37,16 +37,16 @@ const LanguageSwitcher = () => {
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <Globe className="h-4 w-4" />
           <span className="hidden sm:inline">
-            {getLanguageDisplay(i18n.language as Language)}
+            {displayName}
           </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
         <DropdownMenuItem onClick={() => changeLanguage('pt')}>
-          🇧🇷 Português
+          🇧🇷 {LANGUAGES.pt}
         </DropdownMenuItem>
         <DropdownMenuItem onClick={() => changeLanguage('en')}>
-          🇺🇸 English
+          🇺🇸 {LANGUAGES.en}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
