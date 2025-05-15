@@ -6,9 +6,65 @@ import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { mockDataService, Appointment, Client } from '@/services/mockData';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, User, MapPin, MessageSquare, Lock } from 'lucide-react';
+import { 
+  Calendar as CalendarIcon, 
+  ChevronLeft, 
+  ChevronRight, 
+  Plus, 
+  Clock, 
+  User, 
+  MapPin, 
+  MessageSquare, 
+  Lock,
+  CheckCircle2,
+  XCircle,
+  Clock8,
+  AlertCircle,
+  DollarSign
+} from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
+import { 
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
+} from '@/components/ui/dropdown-menu';
+
+// Define appointment status properties
+type StatusConfig = {
+  label: string;
+  icon: React.ReactNode;
+  color: string;
+};
+
+const statusConfig: Record<string, StatusConfig> = {
+  scheduled: {
+    label: 'Agendado',
+    icon: <Clock8 className="h-3 w-3" />,
+    color: 'text-blue-500',
+  },
+  confirmed: {
+    label: 'Confirmado',
+    icon: <CheckCircle2 className="h-3 w-3" />,
+    color: 'text-emerald-500',
+  },
+  canceled: {
+    label: 'Cancelado',
+    icon: <XCircle className="h-3 w-3" />,
+    color: 'text-red-500',
+  },
+  no_show: {
+    label: 'Não Compareceu',
+    icon: <AlertCircle className="h-3 w-3" />,
+    color: 'text-amber-500',
+  },
+  completed: {
+    label: 'Concluído',
+    icon: <CheckCircle2 className="h-3 w-3" />,
+    color: 'text-purple-500',
+  },
+};
 
 const Agenda = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -138,6 +194,50 @@ const Agenda = () => {
     return premiumFeatures.includes(featureName);
   };
 
+  // Update appointment status
+  const updateAppointmentStatus = async (appointmentId: string, status: string) => {
+    try {
+      const updatedAppointment = await mockDataService.updateAppointment(appointmentId, {
+        status: status as 'scheduled' | 'confirmed' | 'canceled' | 'no_show' | 'completed'
+      });
+      
+      // Update the local state to reflect the change
+      setAppointments(prev => 
+        prev.map(app => app.id === appointmentId ? updatedAppointment : app)
+      );
+      
+      toast({
+        title: "Status atualizado",
+        description: `Status alterado para ${statusConfig[status].label}`,
+      });
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+      toast({
+        title: "Erro ao atualizar status",
+        description: "Não foi possível atualizar o status do agendamento.",
+        variant: "destructive"
+      });
+    }
+  };
+
+  // Create a financial record for an appointment
+  const navigateToFinancialRecord = (appointment: Appointment) => {
+    navigate(`/financeiro/novo?appointmentId=${appointment.id}`);
+  };
+
+  // Render status badge
+  const renderStatusBadge = (status: string) => {
+    const config = statusConfig[status];
+    if (!config) return null;
+
+    return (
+      <div className={`flex items-center gap-1 ${config.color} text-xs font-medium`}>
+        {config.icon}
+        <span>{config.label}</span>
+      </div>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -234,6 +334,7 @@ const Agenda = () => {
                           >
                             <div className="font-semibold truncate">{formatTime(app.time)}</div>
                             <div className="truncate">{app.clientName}</div>
+                            <div className="mt-1">{renderStatusBadge(app.status)}</div>
                           </div>
                         ))
                       ) : (
@@ -277,8 +378,11 @@ const Agenda = () => {
                             <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
                             <span className="text-sm">{getLocationText(appointment.location)}</span>
                           </div>
-                          <div className="inline-block bg-primary-muted text-primary text-xs px-2 py-0.5 rounded-full">
-                            {appointment.type}
+                          <div className="flex items-center justify-between">
+                            <div className="inline-block bg-primary-muted text-primary text-xs px-2 py-0.5 rounded-full">
+                              {appointment.type}
+                            </div>
+                            {renderStatusBadge(appointment.status)}
                           </div>
                         </div>
                         
@@ -299,6 +403,38 @@ const Agenda = () => {
                           >
                             <MessageSquare className="h-3 w-3 mr-1" />
                             Lembrete
+                          </Button>
+                          
+                          {/* Status dropdown */}
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button variant="outline" size="sm" className="text-xs h-8">
+                                {statusConfig[appointment.status]?.label || 'Status'}
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end">
+                              {Object.entries(statusConfig).map(([status, config]) => (
+                                <DropdownMenuItem 
+                                  key={status} 
+                                  className="flex items-center gap-2"
+                                  onClick={() => updateAppointmentStatus(appointment.id, status)}
+                                >
+                                  <span className={config.color}>{config.icon}</span>
+                                  {config.label}
+                                </DropdownMenuItem>
+                              ))}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                          
+                          {/* Financial record button */}
+                          <Button
+                            variant="outline"
+                            size="sm"
+                            className="text-xs h-8"
+                            onClick={() => navigateToFinancialRecord(appointment)}
+                          >
+                            <DollarSign className="h-3 w-3 mr-1" />
+                            Registrar Financeiro
                           </Button>
                         </div>
                       </div>

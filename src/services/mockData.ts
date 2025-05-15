@@ -1,4 +1,3 @@
-
 // Mock data for the MVP
 
 export interface User {
@@ -20,6 +19,14 @@ export interface Client {
   email?: string;
   notes?: string;
   feedbackStatus?: 'pending' | 'completed' | 'not_sent';
+  userId?: string; // To associate client with specific user
+}
+
+export interface AppointmentType {
+  id: string;
+  name: string;
+  description?: string;
+  userId: string;
 }
 
 export interface Appointment {
@@ -44,6 +51,7 @@ export interface FinancialRecord {
   type: 'income' | 'expense';
   category?: string;
   relatedAppointment?: string;
+  clientId?: string; // New field to associate with client
   userId?: string; // To associate financial record with specific user
 }
 
@@ -64,11 +72,18 @@ const users: User[] = [
 
 // Client data (shared for demo purposes)
 const clients: Client[] = [
-  { id: '1', name: 'Maria Fernandes', phone: '5511988881111', email: 'maria@email.com', feedbackStatus: 'completed' },
-  { id: '2', name: 'João Carlos', phone: '5511988882222', notes: 'Primeira consulta', feedbackStatus: 'pending' },
-  { id: '3', name: 'Carla Mendes', phone: '5511988883333', feedbackStatus: 'not_sent' },
-  { id: '4', name: 'Roberto Alves', phone: '5511988884444', feedbackStatus: 'not_sent' },
-  { id: '5', name: 'Patrícia Lima', phone: '5511988885555', email: 'patricia@email.com', feedbackStatus: 'pending' }
+  { id: '1', name: 'Maria Fernandes', phone: '5511988881111', email: 'maria@email.com', feedbackStatus: 'completed', userId: '1' },
+  { id: '2', name: 'João Carlos', phone: '5511988882222', notes: 'Primeira consulta', feedbackStatus: 'pending', userId: '1' },
+  { id: '3', name: 'Carla Mendes', phone: '5511988883333', feedbackStatus: 'not_sent', userId: '1' },
+  { id: '4', name: 'Roberto Alves', phone: '5511988884444', feedbackStatus: 'not_sent', userId: '1' },
+  { id: '5', name: 'Patrícia Lima', phone: '5511988885555', email: 'patricia@email.com', feedbackStatus: 'pending', userId: '1' }
+];
+
+// Default appointment types
+const appointmentTypes: AppointmentType[] = [
+  { id: '1', name: 'Terapia Individual', description: 'Sessão de terapia individual', userId: '1' },
+  { id: '2', name: 'Avaliação Inicial', description: 'Primeira consulta para avaliação', userId: '1' },
+  { id: '3', name: 'Avaliação de Progresso', description: 'Revisão do progresso do tratamento', userId: '1' },
 ];
 
 // Today and tomorrow for initial data
@@ -82,6 +97,8 @@ const formatDate = (date: Date) => date.toISOString().split('T')[0];
 // Storage for user-specific data
 const appointmentsByUser: { [userId: string]: Appointment[] } = {};
 const financialRecordsByUser: { [userId: string]: FinancialRecord[] } = {};
+const clientsByUser: { [userId: string]: Client[] } = {};
+const appointmentTypesByUser: { [userId: string]: AppointmentType[] } = {};
 
 // Initialize demo data for default user
 appointmentsByUser['1'] = [
@@ -196,6 +213,12 @@ financialRecordsByUser['1'] = [
   }
 ];
 
+// Initialize clients for default user
+clientsByUser['1'] = [...clients];
+
+// Initialize appointment types for default user
+appointmentTypesByUser['1'] = [...appointmentTypes];
+
 // Generate a unique ID based on timestamp and random number
 const generateUniqueId = (prefix: string) => {
   return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
@@ -290,9 +313,204 @@ export const mockAuthService = {
 
 export const mockDataService = {
   // Client methods
-  getClients: (): Promise<Client[]> => {
+  getClients: (userId?: string): Promise<Client[]> => {
     return new Promise((resolve) => {
-      setTimeout(() => resolve([...clients]), 500);
+      setTimeout(() => {
+        if (!userId) {
+          const currentUserJson = localStorage.getItem('currentUser');
+          if (currentUserJson) {
+            const currentUser = JSON.parse(currentUserJson) as User;
+            userId = currentUser.id;
+          } else {
+            userId = '1'; // Default to first user if none found
+          }
+        }
+        
+        const userClients = clientsByUser[userId] || [];
+        resolve([...userClients]);
+      }, 500);
+    });
+  },
+
+  addClient: (client: Omit<Client, 'id'>): Promise<Client> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        const newClient = {
+          ...client,
+          id: generateUniqueId('client'),
+          userId
+        };
+        
+        if (!clientsByUser[userId]) {
+          clientsByUser[userId] = [];
+        }
+        
+        clientsByUser[userId].push(newClient);
+        resolve(newClient);
+      }, 500);
+    });
+  },
+
+  updateClient: (id: string, data: Partial<Client>): Promise<Client> => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        if (!clientsByUser[userId]) {
+          reject(new Error('No clients found for this user'));
+          return;
+        }
+        
+        const index = clientsByUser[userId].findIndex(client => client.id === id);
+        if (index !== -1) {
+          clientsByUser[userId][index] = { ...clientsByUser[userId][index], ...data };
+          resolve(clientsByUser[userId][index]);
+        } else {
+          reject(new Error('Client not found'));
+        }
+      }, 500);
+    });
+  },
+
+  deleteClient: (id: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        if (!clientsByUser[userId]) {
+          resolve(false);
+          return;
+        }
+        
+        const index = clientsByUser[userId].findIndex(client => client.id === id);
+        if (index !== -1) {
+          clientsByUser[userId].splice(index, 1);
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }, 500);
+    });
+  },
+
+  // Appointment types methods
+  getAppointmentTypes: (userId?: string): Promise<AppointmentType[]> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (!userId) {
+          const currentUserJson = localStorage.getItem('currentUser');
+          if (currentUserJson) {
+            const currentUser = JSON.parse(currentUserJson) as User;
+            userId = currentUser.id;
+          } else {
+            userId = '1'; // Default to first user if none found
+          }
+        }
+        
+        const userAppointmentTypes = appointmentTypesByUser[userId] || [];
+        resolve([...userAppointmentTypes]);
+      }, 500);
+    });
+  },
+
+  addAppointmentType: (appointmentType: Omit<AppointmentType, 'id'>): Promise<AppointmentType> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        const newAppointmentType = {
+          ...appointmentType,
+          id: generateUniqueId('type'),
+          userId
+        };
+        
+        if (!appointmentTypesByUser[userId]) {
+          appointmentTypesByUser[userId] = [];
+        }
+        
+        appointmentTypesByUser[userId].push(newAppointmentType);
+        resolve(newAppointmentType);
+      }, 500);
+    });
+  },
+
+  updateAppointmentType: (id: string, data: Partial<AppointmentType>): Promise<AppointmentType> => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        if (!appointmentTypesByUser[userId]) {
+          reject(new Error('No appointment types found for this user'));
+          return;
+        }
+        
+        const index = appointmentTypesByUser[userId].findIndex(type => type.id === id);
+        if (index !== -1) {
+          appointmentTypesByUser[userId][index] = { ...appointmentTypesByUser[userId][index], ...data };
+          resolve(appointmentTypesByUser[userId][index]);
+        } else {
+          reject(new Error('Appointment type not found'));
+        }
+      }, 500);
+    });
+  },
+
+  deleteAppointmentType: (id: string): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        if (!appointmentTypesByUser[userId]) {
+          resolve(false);
+          return;
+        }
+        
+        const index = appointmentTypesByUser[userId].findIndex(type => type.id === id);
+        if (index !== -1) {
+          appointmentTypesByUser[userId].splice(index, 1);
+          resolve(true);
+        } else {
+          resolve(false);
+        }
+      }, 500);
     });
   },
 

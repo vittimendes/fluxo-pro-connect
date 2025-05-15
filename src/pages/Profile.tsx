@@ -1,246 +1,232 @@
-
-import { useState } from 'react';
+import React, { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
+import { mockAuthService } from '@/services/mockData';
 import { useAuth } from '@/contexts/AuthContext';
-import { 
-  Card, 
-  CardContent, 
-  CardDescription, 
-  CardFooter, 
-  CardHeader, 
-  CardTitle 
-} from '@/components/ui/card';
+import { useToast } from '@/hooks/use-toast';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Textarea } from '@/components/ui/textarea';
 import { Label } from '@/components/ui/label';
-import { Phone, LogOut, Save, Globe } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
-import { useToast } from '@/hooks/use-toast';
-import { useTranslation } from 'react-i18next';
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+import { Loader, User, Mail, Phone, Briefcase, Clock, AlertTriangle } from 'lucide-react';
+import { Textarea } from '@/components/ui/textarea';
+
+// Use LucideIcon instead of React.ElementType for icon types
+import { LucideIcon } from 'lucide-react';
 
 const Profile = () => {
-  const { user, updateProfile, logout } = useAuth();
-  const [isEditing, setIsEditing] = useState(false);
-  const [formData, setFormData] = useState({
-    name: user?.name || '',
-    profession: user?.profession || '',
-    workHours: user?.workHours || '',
-    cancelPolicy: user?.cancelPolicy || '',
-    whatsappNumber: user?.whatsappNumber || '',
-    defaultMessage: user?.defaultMessage || ''
-  });
-  const [isSaving, setIsSaving] = useState(false);
-  const { toast } = useToast();
   const navigate = useNavigate();
-  const { t, i18n } = useTranslation();
+  const { currentUser, updateCurrentUser, logout } = useAuth();
+  const { toast } = useToast();
+  const [isEditing, setIsEditing] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [profileData, setProfileData] = useState({
+    name: '',
+    email: '',
+    profession: '',
+    workHours: '',
+    cancelPolicy: '',
+    whatsappNumber: '',
+    defaultMessage: '',
+  });
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+  useEffect(() => {
+    if (currentUser) {
+      setProfileData({
+        name: currentUser.name,
+        email: currentUser.email,
+        profession: currentUser.profession,
+        workHours: currentUser.workHours,
+        cancelPolicy: currentUser.cancelPolicy,
+        whatsappNumber: currentUser.whatsappNumber,
+        defaultMessage: currentUser.defaultMessage,
+      });
+    }
+  }, [currentUser]);
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
+    setProfileData(prev => ({ ...prev, [name]: value }));
   };
 
-  const handleSave = async () => {
-    setIsSaving(true);
+  const handleSaveProfile = async () => {
+    setLoading(true);
     try {
-      await updateProfile(formData);
+      const updatedUser = await mockAuthService.updateProfile(profileData);
+      updateCurrentUser(updatedUser);
+      toast({
+        title: "Perfil atualizado",
+        description: "Seu perfil foi atualizado com sucesso!",
+      });
       setIsEditing(false);
     } catch (error) {
-      console.error('Error saving profile:', error);
+      console.error('Error updating profile:', error);
+      toast({
+        title: "Erro ao atualizar perfil",
+        description: "Não foi possível atualizar seu perfil. Tente novamente.",
+        variant: "destructive",
+      });
     } finally {
-      setIsSaving(false);
+      setLoading(false);
     }
   };
 
   const handleLogout = async () => {
-    await logout();
-    navigate('/login');
-  };
-
-  const handleWhatsAppLink = () => {
-    if (!formData.whatsappNumber) {
+    setLoading(true);
+    try {
+      await logout();
+      navigate('/login');
+    } catch (error) {
+      console.error('Logout failed:', error);
       toast({
-        title: t('profile.number_not_configured'),
-        description: t('profile.number_not_configured_message'),
-        variant: "destructive"
+        title: "Erro ao sair",
+        description: "Não foi possível sair da sua conta. Tente novamente.",
+        variant: "destructive",
       });
-      return;
+    } finally {
+      setLoading(false);
     }
-    
-    let number = formData.whatsappNumber.replace(/\D/g, '');
-    const message = encodeURIComponent(formData.defaultMessage);
-    
-    const url = `https://wa.me/${number}?text=${message}`;
-    window.open(url, '_blank');
   };
 
-  const changeLanguage = (language: string) => {
-    i18n.changeLanguage(language);
-  };
+  if (!currentUser) {
+    return (
+      <div className="flex justify-center items-center py-16">
+        <Loader className="mr-2 h-6 w-6 animate-spin" /> Carregando...
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold tracking-tight text-primary">{t('profile.title')}</h2>
-        <Button variant="outline" size="icon" onClick={handleLogout}>
-          <LogOut className="h-4 w-4" />
-        </Button>
-      </div>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('profile.professional_info')}</CardTitle>
-          <CardDescription>
-            {t('profile.professional_details')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="name">{t('profile.full_name')}</Label>
-            {isEditing ? (
-              <Input
-                id="name"
-                name="name"
-                value={formData.name}
-                onChange={handleChange}
-              />
-            ) : (
-              <p className="p-2 bg-gray-50 rounded-md">{formData.name}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="profession">{t('profile.profession')}</Label>
-            {isEditing ? (
-              <Input
-                id="profession"
-                name="profession"
-                value={formData.profession}
-                onChange={handleChange}
-              />
-            ) : (
-              <p className="p-2 bg-gray-50 rounded-md">{formData.profession}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="workHours">{t('profile.work_hours')}</Label>
-            {isEditing ? (
-              <Input
-                id="workHours"
-                name="workHours"
-                value={formData.workHours}
-                onChange={handleChange}
-              />
-            ) : (
-              <p className="p-2 bg-gray-50 rounded-md">{formData.workHours}</p>
-            )}
-          </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="cancelPolicy">{t('profile.cancel_policy')}</Label>
-            {isEditing ? (
-              <Textarea
-                id="cancelPolicy"
-                name="cancelPolicy"
-                rows={3}
-                value={formData.cancelPolicy}
-                onChange={handleChange}
-              />
-            ) : (
-              <p className="p-2 bg-gray-50 rounded-md whitespace-pre-wrap">{formData.cancelPolicy}</p>
-            )}
-          </div>
-        </CardContent>
-        <CardFooter className="flex justify-end">
-          {isEditing ? (
-            <Button
-              onClick={handleSave}
-              disabled={isSaving}
-              className="flex items-center gap-2"
-            >
-              {isSaving ? t('common.loading') : t('common.save')}
-              <Save className="h-4 w-4" />
+        <h2 className="text-2xl font-bold tracking-tight text-primary">
+          Meu Perfil
+        </h2>
+        {isEditing ? (
+          <div className="space-x-2">
+            <Button variant="outline" onClick={() => setIsEditing(false)}>
+              Cancelar
             </Button>
-          ) : (
-            <Button onClick={() => setIsEditing(true)}>{t('common.edit')}</Button>
-          )}
-        </CardFooter>
-      </Card>
-      
-      <Card>
-        <CardHeader>
-          <CardTitle>{t('profile.whatsapp')}</CardTitle>
-          <CardDescription>
-            {t('profile.whatsapp_details')}
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="space-y-2">
-            <Label htmlFor="whatsappNumber">{t('profile.whatsapp_number')}</Label>
-            {isEditing ? (
-              <Input
-                id="whatsappNumber"
-                name="whatsappNumber"
-                value={formData.whatsappNumber}
-                onChange={handleChange}
-                placeholder={t('profile.whatsapp_number_placeholder')}
-              />
-            ) : (
-              <p className="p-2 bg-gray-50 rounded-md">{formData.whatsappNumber}</p>
-            )}
+            <Button onClick={handleSaveProfile} disabled={loading}>
+              {loading ? (
+                <>
+                  <Loader className="mr-2 h-4 w-4 animate-spin" />
+                  Salvando...
+                </>
+              ) : "Salvar"}
+            </Button>
           </div>
-          
-          <div className="space-y-2">
-            <Label htmlFor="defaultMessage">{t('profile.default_message')}</Label>
-            {isEditing ? (
-              <Textarea
-                id="defaultMessage"
-                name="defaultMessage"
-                rows={3}
-                value={formData.defaultMessage}
-                onChange={handleChange}
-              />
-            ) : (
-              <p className="p-2 bg-gray-50 rounded-md whitespace-pre-wrap">{formData.defaultMessage}</p>
-            )}
-          </div>
-          
-          <Button 
-            onClick={handleWhatsAppLink} 
-            className="w-full mt-4"
-            variant="outline"
-          >
-            <Phone className="mr-2 h-4 w-4" /> {t('profile.test_whatsapp')}
+        ) : (
+          <Button onClick={() => setIsEditing(true)}>
+            Editar Perfil
           </Button>
-        </CardContent>
-      </Card>
+        )}
+      </div>
 
       <Card>
         <CardHeader>
-          <CardTitle>{t('profile.language_setting')}</CardTitle>
+          <CardTitle>Informações Pessoais</CardTitle>
+          {/* <CardDescription>
+            Altere suas informações pessoais e configurações.
+          </CardDescription> */}
         </CardHeader>
-        <CardContent>
-          <Label htmlFor="language">{t('profile.language')}</Label>
-          <Select 
-            value={i18n.language} 
-            onValueChange={changeLanguage}
-          >
-            <SelectTrigger className="w-full mt-2">
-              <SelectValue />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="pt">🇧🇷 Português</SelectItem>
-              <SelectItem value="en">🇺🇸 English</SelectItem>
-            </SelectContent>
-          </Select>
+        <CardContent className="space-y-4">
+          <div className="flex items-center space-x-2">
+            <User className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="name">Nome</Label>
+          </div>
+          <Input
+            id="name"
+            name="name"
+            value={profileData.name}
+            onChange={handleInputChange}
+            disabled={!isEditing}
+          />
+
+          <div className="flex items-center space-x-2">
+            <Mail className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="email">Email</Label>
+          </div>
+          <Input
+            id="email"
+            name="email"
+            type="email"
+            value={profileData.email}
+            onChange={handleInputChange}
+            disabled={!isEditing}
+          />
+
+          <div className="flex items-center space-x-2">
+            <Briefcase className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="profession">Profissão</Label>
+          </div>
+          <Input
+            id="profession"
+            name="profession"
+            value={profileData.profession}
+            onChange={handleInputChange}
+            disabled={!isEditing}
+          />
+
+          <div className="flex items-center space-x-2">
+            <Clock className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="workHours">Horário de Trabalho</Label>
+          </div>
+          <Input
+            id="workHours"
+            name="workHours"
+            value={profileData.workHours}
+            onChange={handleInputChange}
+            disabled={!isEditing}
+          />
+
+          <div className="flex items-center space-x-2">
+            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="cancelPolicy">Política de Cancelamento</Label>
+          </div>
+          <Textarea
+            id="cancelPolicy"
+            name="cancelPolicy"
+            value={profileData.cancelPolicy}
+            onChange={handleInputChange}
+            disabled={!isEditing}
+            className="resize-none"
+          />
+
+          <div className="flex items-center space-x-2">
+            <Phone className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="whatsappNumber">Número do WhatsApp</Label>
+          </div>
+          <Input
+            id="whatsappNumber"
+            name="whatsappNumber"
+            value={profileData.whatsappNumber}
+            onChange={handleInputChange}
+            disabled={!isEditing}
+          />
+
+          <div className="flex items-center space-x-2">
+            <User className="h-4 w-4 text-muted-foreground" />
+            <Label htmlFor="defaultMessage">Mensagem Padrão</Label>
+          </div>
+           <Textarea
+            id="defaultMessage"
+            name="defaultMessage"
+            value={profileData.defaultMessage}
+            onChange={handleInputChange}
+            disabled={!isEditing}
+            className="resize-none"
+          />
         </CardContent>
+        <CardFooter>
+          <Button variant="destructive" onClick={handleLogout} disabled={loading}>
+            {loading ? (
+              <>
+                <Loader className="mr-2 h-4 w-4 animate-spin" />
+                Saindo...
+              </>
+            ) : "Sair da Conta"}
+          </Button>
+        </CardFooter>
       </Card>
     </div>
   );

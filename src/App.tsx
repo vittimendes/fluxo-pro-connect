@@ -19,6 +19,9 @@ import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import AppointmentView from "./pages/AppointmentView";
 import Register from "./pages/Register";
+import Clients from "./pages/Clients";
+import ClientForm from "./pages/ClientForm";
+import AppointmentTypes from "./pages/AppointmentTypes";
 
 const queryClient = new QueryClient();
 
@@ -43,6 +46,10 @@ const App = () => (
                 <Route path="/financeiro" element={<Financeiro />} />
                 <Route path="/financeiro/novo" element={<NovoRegistroFinanceiro />} />
                 <Route path="/financeiro/:id" element={<NotFound />} />
+                <Route path="/clientes" element={<Clients />} />
+                <Route path="/clientes/novo" element={<ClientForm />} />
+                <Route path="/clientes/:id" element={<ClientForm />} />
+                <Route path="/tipos-de-atendimento" element={<AppointmentTypes />} />
                 <Route path="/perfil" element={<Profile />} />
               </Route>
             </Route>
