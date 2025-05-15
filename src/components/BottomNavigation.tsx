@@ -5,11 +5,11 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import * as React from 'react';
 
-// Define a simple type for our nav items without using LucideIcon
-type NavItem = {
+// Define a simple type for our nav items
+interface NavItem {
   name: string;
   path: string;
-  icon: React.ElementType; // Use React.ElementType instead of LucideIcon
+  icon: React.ComponentType<{ className?: string }>;
 }
 
 const BottomNavigation = () => {
