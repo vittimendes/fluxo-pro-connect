@@ -10,13 +10,25 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
+// Define language options explicitly to avoid potential circular references
+type Language = 'pt' | 'en';
+
 const LanguageSwitcher = () => {
-  const { i18n, t } = useTranslation();
+  const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   
-  const changeLanguage = (language: string) => {
+  const changeLanguage = (language: Language) => {
     i18n.changeLanguage(language);
     setOpen(false);
+  };
+  
+  // Helper function to get language display name
+  const getLanguageDisplay = (lang: Language): string => {
+    switch (lang) {
+      case 'pt': return 'Português';
+      case 'en': return 'English';
+      default: return 'English';
+    }
   };
   
   return (
@@ -25,7 +37,7 @@ const LanguageSwitcher = () => {
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <Globe className="h-4 w-4" />
           <span className="hidden sm:inline">
-            {i18n.language === 'pt' ? 'Português' : 'English'}
+            {getLanguageDisplay(i18n.language as Language)}
           </span>
         </Button>
       </DropdownMenuTrigger>

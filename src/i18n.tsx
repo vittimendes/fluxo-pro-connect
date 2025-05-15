@@ -15,6 +15,7 @@ const resources = {
   }
 };
 
+// Initialize i18n with explicit typing
 i18n
   .use(LanguageDetector)
   .use(initReactI18next)
@@ -27,7 +28,8 @@ i18n
     detection: {
       order: ['localStorage', 'navigator'],
       caches: ['localStorage']
-    }
+    },
+    supportedLngs: ['pt', 'en'] // Explicitly define supported languages
   });
 
 export default i18n;
