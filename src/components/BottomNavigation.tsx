@@ -5,10 +5,13 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import * as React from 'react';
 
+// Define a simpler icon type using LucideIcon
+type IconType = typeof Calendar | typeof Wallet | typeof LayoutDashboard | typeof User;
+
 type NavItem = {
   name: string;
   path: string;
-  icon: React.ComponentType<any>;
+  icon: IconType;
 }
 
 const BottomNavigation = () => {
@@ -42,22 +45,25 @@ const BottomNavigation = () => {
   return (
     <nav className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white shadow-lg animate-fade-in">
       <div className="flex items-center justify-around px-2">
-        {navItems.map((item) => (
-          <Link
-            key={item.path}
-            to={item.path}
-            className={cn(
-              "flex flex-1 flex-col items-center py-3 px-1",
-              "transition-colors duration-200",
-              currentPath === item.path ? 
-                "text-primary font-medium" : 
-                "text-gray-500 hover:text-primary"
-            )}
-          >
-            {React.createElement(item.icon, { className: "h-6 w-6 mb-1" })}
-            <span className="text-xs">{item.name}</span>
-          </Link>
-        ))}
+        {navItems.map((item) => {
+          const Icon = item.icon;
+          return (
+            <Link
+              key={item.path}
+              to={item.path}
+              className={cn(
+                "flex flex-1 flex-col items-center py-3 px-1",
+                "transition-colors duration-200",
+                currentPath === item.path ? 
+                  "text-primary font-medium" : 
+                  "text-gray-500 hover:text-primary"
+              )}
+            >
+              <Icon className="h-6 w-6 mb-1" />
+              <span className="text-xs">{item.name}</span>
+            </Link>
+          );
+        })}
       </div>
     </nav>
   );
