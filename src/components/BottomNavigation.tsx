@@ -4,11 +4,11 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import * as React from 'react';
 
-// Type for icon component
+// Use a simpler approach to type the icons
 interface NavItem {
   name: string;
   path: string;
-  icon: React.ElementType;
+  icon: React.ElementType; // This is a simpler type that works with any component type
 }
 
 const BottomNavigation = () => {
@@ -16,29 +16,35 @@ const BottomNavigation = () => {
   const currentPath = location.pathname;
   const { t } = useTranslation();
 
-  // ✅ useMemo para evitar reavaliação excessiva e quebra de tipos
+  // Extract translated strings first to simplify type inference within useMemo
+  const agendaTitle = t("agenda.title");
+  const financialTitle = t("financial.title");
+  const dashboardTitle = t("dashboard.title");
+  const profileTitle = t("profile.title");
+
+  // Using useMemo to avoid excessive re-evaluation
   const navItems: NavItem[] = React.useMemo(() => [
     {
-      name: t("agenda.title"),
+      name: agendaTitle,
       path: "/agenda",
       icon: Calendar,
     },
     {
-      name: t("financial.title"),
+      name: financialTitle,
       path: "/financeiro",
       icon: Wallet,
     },
     {
-      name: t("dashboard.title"),
+      name: dashboardTitle,
       path: "/dashboard",
       icon: LayoutDashboard,
     },
     {
-      name: t("profile.title"),
+      name: profileTitle,
       path: "/perfil",
       icon: User,
     },
-  ], [t]);
+  ], [agendaTitle, financialTitle, dashboardTitle, profileTitle]); // Dependencies are now the translated strings
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white shadow-lg animate-fade-in">
@@ -68,3 +74,4 @@ const BottomNavigation = () => {
 };
 
 export default BottomNavigation;
+
