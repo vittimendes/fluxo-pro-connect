@@ -6,12 +6,13 @@ import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
-import { ArrowLeft, CalendarClock, CreditCard } from 'lucide-react';
+import { ArrowLeft, CalendarClock, CreditCard, Paperclip } from 'lucide-react';
 
-// Import our new components
+// Import our components
 import ClientHeader from '@/components/client/ClientHeader';
 import AppointmentsList from '@/components/client/AppointmentsList';
 import FinancialRecordsList from '@/components/client/FinancialRecordsList';
+import ClientAttachments from '@/components/client/ClientAttachments';
 
 const ClientView = () => {
   const { id } = useParams<{ id: string }>();
@@ -114,12 +115,15 @@ const ClientView = () => {
 
       {/* Client History */}
       <Tabs defaultValue="appointments" className="w-full">
-        <TabsList className="grid grid-cols-2 mb-4">
+        <TabsList className="grid grid-cols-3 mb-4">
           <TabsTrigger value="appointments" className="flex items-center gap-1">
             <CalendarClock className="h-4 w-4" /> Atendimentos
           </TabsTrigger>
           <TabsTrigger value="financial" className="flex items-center gap-1">
             <CreditCard className="h-4 w-4" /> Financeiro
+          </TabsTrigger>
+          <TabsTrigger value="attachments" className="flex items-center gap-1">
+            <Paperclip className="h-4 w-4" /> Anexos
           </TabsTrigger>
         </TabsList>
         
@@ -131,6 +135,18 @@ const ClientView = () => {
         <TabsContent value="financial" className="space-y-4">
           <h3 className="text-lg font-medium">Histórico Financeiro</h3>
           <FinancialRecordsList financialRecords={financialRecords} clientId={client.id} />
+        </TabsContent>
+        
+        <TabsContent value="attachments" className="space-y-4">
+          <h3 className="text-lg font-medium">Anexos</h3>
+          <ClientAttachments 
+            clientId={client.id} 
+            appointments={appointments.map(app => ({
+              id: app.id,
+              date: app.date,
+              type: app.type
+            }))} 
+          />
         </TabsContent>
       </Tabs>
     </div>

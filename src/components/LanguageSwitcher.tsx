@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,28 +10,36 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-// Define language codes and display names separately as literals
-type LanguageCode = 'pt' | 'en';
-type LanguageDisplay = { [key in LanguageCode]: string };
+// Simple type definitions with string literals
+const LANGUAGES = [
+  { code: 'pt', name: 'Português', flag: '🇧🇷' },
+  { code: 'en', name: 'English', flag: '🇺🇸' }
+] as const;
 
-// Language display names mapping
-const LANGUAGES: LanguageDisplay = {
-  pt: 'Português',
-  en: 'English'
-};
+type LanguageCode = typeof LANGUAGES[number]['code'];
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   
-  const changeLanguage = (language: LanguageCode) => {
-    i18n.changeLanguage(language);
-    setOpen(false);
+  // Get current language with fallback
+  const getCurrentLanguage = (): LanguageCode => {
+    const current = i18n.language || 'pt-BR';
+    
+    // Handle pt-BR -> pt mapping
+    if (current.startsWith('pt')) return 'pt';
+    if (current.startsWith('en')) return 'en';
+    
+    return 'pt'; // Default fallback
   };
   
-  // Get current language or default to 'en'
-  const currentLanguage = (i18n.language || 'en') as LanguageCode;
-  const displayName = LANGUAGES[currentLanguage] || LANGUAGES.en;
+  const currentLang = getCurrentLanguage();
+  const currentLanguage = LANGUAGES.find(lang => lang.code === currentLang) || LANGUAGES[0];
+  
+  const changeLanguage = (code: LanguageCode) => {
+    i18n.changeLanguage(code);
+    setOpen(false);
+  };
   
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>
@@ -39,17 +47,21 @@ const LanguageSwitcher = () => {
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <Globe className="h-4 w-4" />
           <span className="hidden sm:inline">
-            {displayName}
+            {currentLanguage.name}
           </span>
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={() => changeLanguage('pt')}>
-          🇧🇷 {LANGUAGES.pt}
-        </DropdownMenuItem>
-        <DropdownMenuItem onClick={() => changeLanguage('en')}>
-          🇺🇸 {LANGUAGES.en}
-        </DropdownMenuItem>
+        {LANGUAGES.map((language) => (
+          <DropdownMenuItem 
+            key={language.code}
+            className={currentLang === language.code ? "bg-accent" : ""}
+            onClick={() => changeLanguage(language.code)}
+          >
+            <span className="mr-2">{language.flag}</span>
+            {language.name}
+          </DropdownMenuItem>
+        ))}
       </DropdownMenuContent>
     </DropdownMenu>
   );
