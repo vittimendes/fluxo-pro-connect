@@ -445,7 +445,7 @@ const Agenda = () => {
                             onClick={() => navigateToFinancialRecord(appointment)}
                           >
                             <DollarSign className="h-3 w-3 mr-1" />
-                            Registrar Financeiro
+                            Registro Financeiro
                           </Button>
                         </div>
                       </div>
