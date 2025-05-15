@@ -84,6 +84,15 @@ const appointmentTypes: AppointmentType[] = [
   { id: '1', name: 'Terapia Individual', description: 'Sessão de terapia individual', userId: '1' },
   { id: '2', name: 'Avaliação Inicial', description: 'Primeira consulta para avaliação', userId: '1' },
   { id: '3', name: 'Avaliação de Progresso', description: 'Revisão do progresso do tratamento', userId: '1' },
+  { id: '1', name: 'Terapia Individual', description: 'Sessão de terapia individual', userId: '2' },
+  { id: '2', name: 'Avaliação Inicial', description: 'Primeira consulta para avaliação', userId: '2' },
+  { id: '3', name: 'Avaliação de Progresso', description: 'Revisão do progresso do tratamento', userId: '2' },
+  { id: '1', name: 'Terapia Individual', description: 'Sessão de terapia individual', userId: '3' },
+  { id: '2', name: 'Avaliação Inicial', description: 'Primeira consulta para avaliação', userId: '3' },
+  { id: '3', name: 'Avaliação de Progresso', description: 'Revisão do progresso do tratamento', userId: '3' },
+  { id: '1', name: 'Terapia Individual', description: 'Sessão de terapia individual', userId: '4' },
+  { id: '2', name: 'Avaliação Inicial', description: 'Primeira consulta para avaliação', userId: '4' },
+  { id: '3', name: 'Avaliação de Progresso', description: 'Revisão do progresso do tratamento', userId: '4' },
 ];
 
 // Today and tomorrow for initial data
