@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { mockDataService, Client } from '@/services/mockData';
@@ -87,14 +86,24 @@ const ClientForm = () => {
     try {
       if (id) {
         // Update existing client
-        await mockDataService.updateClient(id, data);
+        await mockDataService.updateClient(id, {
+          name: data.name,
+          phone: data.phone,
+          email: data.email || '',
+          notes: data.notes || ''
+        });
         toast({
           title: "Cliente atualizado",
           description: "As informações do cliente foram atualizadas com sucesso.",
         });
       } else {
-        // Create new client
-        await mockDataService.addClient(data);
+        // Create new client - make sure required fields are present
+        await mockDataService.addClient({
+          name: data.name, // Required
+          phone: data.phone, // Required
+          email: data.email || '',
+          notes: data.notes || ''
+        });
         toast({
           title: "Cliente cadastrado",
           description: "O cliente foi cadastrado com sucesso.",

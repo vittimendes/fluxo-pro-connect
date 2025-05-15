@@ -3,12 +3,12 @@ import React from 'react';
 import { NavLink } from 'react-router-dom';
 import { LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
-import { useMobile } from '@/hooks/use-mobile';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface NavItem {
   path: string;
   label: string;
-  icon: LucideIcon;  // Changed from React.ElementType to LucideIcon
+  icon: LucideIcon;
 }
 
 type BottomNavigationProps = {
@@ -16,7 +16,7 @@ type BottomNavigationProps = {
 };
 
 const BottomNavigation: React.FC<BottomNavigationProps> = ({ navItems }) => {
-  const isMobile = useMobile();
+  const isMobile = useIsMobile();
   
   if (!isMobile) return null;
   
