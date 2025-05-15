@@ -10,14 +10,18 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-// Define languages with simple string literals
-const LANGUAGES = [
-  { code: 'pt' as const, name: 'Português', flag: '🇧🇷' },
-  { code: 'en' as const, name: 'English', flag: '🇺🇸' }
-];
-
-// Type for language code
+// Define supported language codes as a string union type
 type LanguageCode = 'pt' | 'en';
+
+// Define language information
+const LANGUAGES: Array<{
+  code: LanguageCode;
+  name: string;
+  flag: string;
+}> = [
+  { code: 'pt', name: 'Português', flag: '🇧🇷' },
+  { code: 'en', name: 'English', flag: '🇺🇸' }
+];
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
