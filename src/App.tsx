@@ -12,7 +12,9 @@ import AppLayout from "./components/AppLayout";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
 import Agenda from "./pages/Agenda";
+import NovoAgendamento from "./pages/NovoAgendamento";
 import Financeiro from "./pages/Financeiro";
+import NovoRegistroFinanceiro from "./pages/NovoRegistroFinanceiro";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 
@@ -33,13 +35,12 @@ const App = () => (
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/agenda" element={<Agenda />} />
-                <Route path="/financeiro" element={<Financeiro />} />
-                <Route path="/perfil" element={<Profile />} />
-                {/* These routes would be implemented in the next iteration */}
-                <Route path="/agenda/novo" element={<NotFound />} />
+                <Route path="/agenda/novo" element={<NovoAgendamento />} />
                 <Route path="/agenda/:id" element={<NotFound />} />
-                <Route path="/financeiro/novo" element={<NotFound />} />
+                <Route path="/financeiro" element={<Financeiro />} />
+                <Route path="/financeiro/novo" element={<NovoRegistroFinanceiro />} />
                 <Route path="/financeiro/:id" element={<NotFound />} />
+                <Route path="/perfil" element={<Profile />} />
               </Route>
             </Route>
             

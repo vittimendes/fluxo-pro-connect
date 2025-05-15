@@ -6,9 +6,10 @@ import { Button } from '@/components/ui/button';
 import { FinancialRecord, mockDataService } from '@/services/mockData';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Calendar, Lock, Download, FileText } from 'lucide-react';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Financeiro = () => {
   const [records, setRecords] = useState<FinancialRecord[]>([]);
@@ -36,6 +37,11 @@ const Financeiro = () => {
           currentDate.getFullYear()
         );
         setSummary(monthlySummary);
+        
+        toast({
+          title: "Dados carregados",
+          description: "Registros financeiros atualizados.",
+        });
       } catch (error) {
         console.error('Error fetching financial data:', error);
         toast({
@@ -96,6 +102,48 @@ const Financeiro = () => {
           </div>
         </CardContent>
       </Card>
+      
+      {/* Premium Features */}
+      <div className="flex flex-wrap gap-2">
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" disabled className="opacity-70">
+                <Lock className="h-3 w-3 mr-1" /> Gerar Relatório
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Disponível no plano premium</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" disabled className="opacity-70">
+                <Lock className="h-3 w-3 mr-1" /> <Download className="h-3 w-3 mr-1" /> Exportar CSV
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Disponível no plano premium</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+        
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" disabled className="opacity-70">
+                <Lock className="h-3 w-3 mr-1" /> <FileText className="h-3 w-3 mr-1" /> Controle de Recibos
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Disponível no plano premium</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
+      </div>
 
       {/* Transactions List */}
       <Tabs defaultValue="all" className="w-full">

@@ -5,9 +5,10 @@ import { addDays, format, getDay, isSameDay, parseISO, startOfWeek } from 'date-
 import { ptBR } from 'date-fns/locale';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
-import { mockDataService, Appointment } from '@/services/mockData';
-import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, User, MapPin, MessageSquare } from 'lucide-react';
+import { mockDataService, Appointment, Client } from '@/services/mockData';
+import { Calendar as CalendarIcon, ChevronLeft, ChevronRight, Plus, Clock, User, MapPin, MessageSquare, Lock } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 
 const Agenda = () => {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -15,13 +16,18 @@ const Agenda = () => {
   const [weekStartDate, setWeekStartDate] = useState<Date>(startOfWeek(currentDate, { weekStartsOn: 0 }));
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
+  const [clients, setClients] = useState<Client[]>([]);
   const navigate = useNavigate();
   const { toast } = useToast();
 
   useEffect(() => {
-    const fetchAppointments = async () => {
+    const fetchData = async () => {
       setLoading(true);
       try {
+        // Fetch clients first so we have phone numbers
+        const clientsData = await mockDataService.getClients();
+        setClients(clientsData);
+        
         if (currentView === 'day') {
           const formattedDate = format(currentDate, 'yyyy-MM-dd');
           const data = await mockDataService.getAppointmentsByDate(formattedDate);
@@ -43,7 +49,7 @@ const Agenda = () => {
       }
     };
 
-    fetchAppointments();
+    fetchData();
   }, [currentDate, weekStartDate, currentView, toast]);
 
   // Move to previous/next day or week
@@ -88,20 +94,26 @@ const Agenda = () => {
     return appointments.filter(app => app.date === dateStr);
   };
 
+  // Get client phone number from the client list
+  const getClientPhone = (clientId: string): string => {
+    const client = clients.find(c => c.id === clientId);
+    return client?.phone || "5511999999999"; // Default fallback if not found
+  };
+
   // Send WhatsApp reminder
   const sendWhatsAppReminder = (appointment: Appointment) => {
-    // Find client phone from the mock data (in a real app, this would be fetched from the database)
-    // For the MVP, we'll use a placeholder number
-    const phone = '5511999999999';
+    const phone = getClientPhone(appointment.clientId);
+    const formattedDate = format(parseISO(appointment.date), 'dd/MM/yyyy');
+    
     const message = encodeURIComponent(
-      `Olá ${appointment.clientName}! Este é um lembrete para seu agendamento de ${appointment.type} em ${format(parseISO(appointment.date), 'dd/MM/yyyy')} às ${formatTime(appointment.time)}.`
+      `Olá ${appointment.clientName}! Este é um lembrete para seu agendamento de ${appointment.type} em ${formattedDate} às ${formatTime(appointment.time)}.`
     );
     
     window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
     
     toast({
-      title: "Link gerado com sucesso",
-      description: "O WhatsApp foi aberto com sua mensagem personalizada.",
+      title: "Lembrete enviado",
+      description: "Link do WhatsApp foi aberto com a mensagem personalizada.",
     });
   };
 
@@ -117,6 +129,13 @@ const Agenda = () => {
       default:
         return location;
     }
+  };
+
+  // Check if feature is locked (premium)
+  const isFeatureLocked = (featureName: string): boolean => {
+    // For this demo, let's assume certain features are premium
+    const premiumFeatures = ['export', 'bulk_reminder', 'recurring'];
+    return premiumFeatures.includes(featureName);
   };
 
   return (
@@ -154,6 +173,35 @@ const Agenda = () => {
               <ChevronRight className="h-4 w-4" />
             </Button>
           </div>
+        </div>
+
+        {/* Premium Features Section */}
+        <div className="flex justify-between items-center gap-2">
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" disabled className="opacity-70">
+                  <Lock className="h-3 w-3 mr-1" /> Exportar Agenda
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Disponível no plano premium</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
+          
+          <TooltipProvider>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" disabled className="opacity-70">
+                  <Lock className="h-3 w-3 mr-1" /> Lembretes em Massa
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>
+                <p>Disponível no plano premium</p>
+              </TooltipContent>
+            </Tooltip>
+          </TooltipProvider>
         </div>
 
         {/* Calendar View (Week) */}
