@@ -4,12 +4,18 @@ import { Calendar, Wallet, LayoutDashboard, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 
+type NavItem = {
+  name: string;
+  path: string;
+  icon: React.ElementType; // Changed from using the icon component type directly to React.ElementType
+}
+
 const BottomNavigation = () => {
   const location = useLocation();
   const currentPath = location.pathname;
   const { t } = useTranslation();
   
-  const navItems = [
+  const navItems: NavItem[] = [
     {
       name: t('agenda.title'),
       path: '/agenda',
@@ -47,7 +53,8 @@ const BottomNavigation = () => {
                 "text-gray-500 hover:text-primary"
             )}
           >
-            <item.icon className="h-6 w-6 mb-1" />
+            {/* Using the icon component with the correct typing */}
+            {React.createElement(item.icon, { className: "h-6 w-6 mb-1" })}
             <span className="text-xs">{item.name}</span>
           </Link>
         ))}
