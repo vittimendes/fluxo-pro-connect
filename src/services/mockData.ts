@@ -1,5 +1,3 @@
-// Mock data for the MVP
-
 export interface User {
   id: string;
   name: string;
@@ -51,8 +49,11 @@ export interface FinancialRecord {
   type: 'income' | 'expense';
   category?: string;
   relatedAppointment?: string;
-  clientId?: string; // New field to associate with client
+  clientId?: string; // To associate with client
   userId?: string; // To associate financial record with specific user
+  clientName?: string; // Add clientName property
+  appointmentId?: string; // Add appointmentId property
+  notes?: string; // Add notes property
 }
 
 // Demo user data
@@ -84,15 +85,6 @@ const appointmentTypes: AppointmentType[] = [
   { id: '1', name: 'Terapia Individual', description: 'Sessão de terapia individual', userId: '1' },
   { id: '2', name: 'Avaliação Inicial', description: 'Primeira consulta para avaliação', userId: '1' },
   { id: '3', name: 'Avaliação de Progresso', description: 'Revisão do progresso do tratamento', userId: '1' },
-  { id: '1', name: 'Terapia Individual', description: 'Sessão de terapia individual', userId: '2' },
-  { id: '2', name: 'Avaliação Inicial', description: 'Primeira consulta para avaliação', userId: '2' },
-  { id: '3', name: 'Avaliação de Progresso', description: 'Revisão do progresso do tratamento', userId: '2' },
-  { id: '1', name: 'Terapia Individual', description: 'Sessão de terapia individual', userId: '3' },
-  { id: '2', name: 'Avaliação Inicial', description: 'Primeira consulta para avaliação', userId: '3' },
-  { id: '3', name: 'Avaliação de Progresso', description: 'Revisão do progresso do tratamento', userId: '3' },
-  { id: '1', name: 'Terapia Individual', description: 'Sessão de terapia individual', userId: '4' },
-  { id: '2', name: 'Avaliação Inicial', description: 'Primeira consulta para avaliação', userId: '4' },
-  { id: '3', name: 'Avaliação de Progresso', description: 'Revisão do progresso do tratamento', userId: '4' },
 ];
 
 // Today and tomorrow for initial data
@@ -910,5 +902,90 @@ export const mockDataService = {
         resolve([...filteredRecords]);
       }, 500);
     });
-  }
+  },
+
+  // Add getClientById method
+  getClientById: (id: string): Promise<Client | null> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        const userClients = clientsByUser[userId] || [];
+        const client = userClients.find(client => client.id === id);
+        
+        resolve(client || null);
+      }, 500);
+    });
+  },
+
+  // Add getAppointmentsByClientId method
+  getAppointmentsByClientId: (clientId: string, userId?: string): Promise<Appointment[]> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (!userId) {
+          const currentUserJson = localStorage.getItem('currentUser');
+          if (currentUserJson) {
+            const currentUser = JSON.parse(currentUserJson) as User;
+            userId = currentUser.id;
+          } else {
+            userId = '1';
+          }
+        }
+        
+        const userAppointments = appointmentsByUser[userId] || [];
+        const clientAppointments = userAppointments.filter(app => app.clientId === clientId);
+        
+        resolve([...clientAppointments]);
+      }, 500);
+    });
+  },
+  
+  // Add getFinancialRecordsByClientId method
+  getFinancialRecordsByClientId: (clientId: string, userId?: string): Promise<FinancialRecord[]> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (!userId) {
+          const currentUserJson = localStorage.getItem('currentUser');
+          if (currentUserJson) {
+            const currentUser = JSON.parse(currentUserJson) as User;
+            userId = currentUser.id;
+          } else {
+            userId = '1';
+          }
+        }
+        
+        const userRecords = financialRecordsByUser[userId] || [];
+        const clientRecords = userRecords.filter(record => record.clientId === clientId);
+        
+        resolve([...clientRecords]);
+      }, 500);
+    });
+  },
+  
+  // Add getFinancialRecordById method
+  getFinancialRecordById: (id: number | string): Promise<FinancialRecord | null> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        const recordId = typeof id === 'number' ? id.toString() : id;
+        const userRecords = financialRecordsByUser[userId] || [];
+        const record = userRecords.find(record => record.id === recordId);
+        
+        resolve(record || null);
+      }, 500);
+    });
+  },
 };

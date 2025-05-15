@@ -26,7 +26,7 @@ const ClientView = () => {
         if (!id) return;
         
         // Fetch client data
-        const clientData = await mockDataService.getClientById(parseInt(id));
+        const clientData = await mockDataService.getClientById(id);
         if (!clientData) {
           toast({
             title: "Cliente não encontrado",
@@ -40,7 +40,7 @@ const ClientView = () => {
         setClient(clientData);
         
         // Fetch client appointments
-        const clientAppointments = await mockDataService.getAppointmentsByClientId(parseInt(id));
+        const clientAppointments = await mockDataService.getAppointmentsByClientId(id);
         
         // Sort appointments by date (newest first)
         const sortedAppointments = [...clientAppointments].sort((a, b) => {
@@ -52,7 +52,7 @@ const ClientView = () => {
         setAppointments(sortedAppointments);
         
         // Fetch client financial records
-        const clientRecords = await mockDataService.getFinancialRecordsByClientId(parseInt(id));
+        const clientRecords = await mockDataService.getFinancialRecordsByClientId(id);
         
         // Sort financial records by date (newest first)
         const sortedRecords = [...clientRecords].sort((a, b) => {
@@ -222,14 +222,14 @@ const ClientView = () => {
                           className={`text-xs px-2 py-1 rounded-full font-medium
                             ${appointment.status === 'scheduled' ? 'bg-blue-100 text-blue-800' : ''}
                             ${appointment.status === 'confirmed' ? 'bg-green-100 text-green-800' : ''}
+                            ${appointment.status === 'canceled' ? 'bg-red-100 text-red-800' : ''}
                             ${appointment.status === 'completed' ? 'bg-purple-100 text-purple-800' : ''}
-                            ${appointment.status === 'cancelled' ? 'bg-red-100 text-red-800' : ''}
                           `}
                         >
                           {appointment.status === 'scheduled' && 'Agendado'}
                           {appointment.status === 'confirmed' && 'Confirmado'}
+                          {appointment.status === 'canceled' && 'Cancelado'}
                           {appointment.status === 'completed' && 'Concluído'}
-                          {appointment.status === 'cancelled' && 'Cancelado'}
                         </span>
                       </div>
                     </div>

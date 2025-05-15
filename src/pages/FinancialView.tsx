@@ -23,7 +23,7 @@ const FinancialView = () => {
       try {
         if (!id) return;
         
-        const financialRecord = await mockDataService.getFinancialRecordById(parseInt(id));
+        const financialRecord = await mockDataService.getFinancialRecordById(id);
         if (financialRecord) {
           setRecord(financialRecord);
         } else {
