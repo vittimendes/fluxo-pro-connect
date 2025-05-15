@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { mockDataService, Client, AppointmentType } from '@/services/mockData';
@@ -109,7 +108,7 @@ const NovoAgendamento = () => {
         duration: parseInt(formData.duration),
         location: formData.location as 'online' | 'in_person' | 'home_visit',
         status: formData.status as 'scheduled' | 'confirmed' | 'canceled' | 'no_show' | 'completed',
-        notes: formData.notes || undefined,
+        notes: formData.notes
       });
 
       toast({

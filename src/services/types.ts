@@ -1,3 +1,4 @@
+
 export interface User {
   id: string;
   name: string;
@@ -39,6 +40,7 @@ export interface Appointment {
   location: 'online' | 'in_person' | 'home_visit' | string;
   status: 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show';
   userId: string;
+  notes?: string; // Added missing notes property
 }
 
 export interface FinancialRecord {

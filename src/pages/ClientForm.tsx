@@ -99,10 +99,11 @@ const ClientForm = () => {
       } else {
         // Create new client - make sure required fields are present
         await mockDataService.addClient({
-          name: data.name, // Required
-          phone: data.phone, // Required
+          name: data.name, 
+          phone: data.phone,
           email: data.email || '',
-          notes: data.notes || ''
+          notes: data.notes || '',
+          feedbackStatus: 'not_sent' // Add required feedbackStatus field
         });
         toast({
           title: "Cliente cadastrado",

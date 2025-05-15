@@ -4,6 +4,7 @@ import { Lock } from 'lucide-react';
 import { usePremium } from '@/hooks/use-premium';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
+import { Button, ButtonProps } from '@/components/ui/button';
 
 interface PremiumFeatureProps {
   children: React.ReactNode;
@@ -54,25 +55,25 @@ export function PremiumButton({
   children,
   className,
   ...props
-}: React.ComponentPropsWithoutRef<'button'> & { className?: string }) {
+}: ButtonProps) { // Using ButtonProps from shadcn/ui Button component
   const { isPremium } = usePremium();
   
   if (isPremium) {
-    return <button className={className} {...props}>{children}</button>;
+    return <Button className={className} {...props}>{children}</Button>;
   }
   
   return (
     <TooltipProvider>
       <Tooltip>
         <TooltipTrigger asChild>
-          <button 
+          <Button 
             className={cn("opacity-70 cursor-not-allowed flex items-center gap-1", className)} 
             disabled 
             {...props}
           >
             <Lock className="h-3 w-3" />
             {children}
-          </button>
+          </Button>
         </TooltipTrigger>
         <TooltipContent>
           <p>Disponível no Plano Pro. Saiba mais nas configurações.</p>

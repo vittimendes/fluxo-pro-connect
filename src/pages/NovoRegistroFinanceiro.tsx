@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { format } from 'date-fns';
@@ -126,7 +125,8 @@ const NovoRegistroFinanceiro = () => {
         type: formData.type as 'income' | 'expense',
         category: formData.category || undefined,
         relatedAppointment: formData.relatedAppointment || undefined,
-        clientId: formData.clientId || undefined
+        clientId: formData.clientId || undefined,
+        userId: '' // Adding required field (mockDataService will replace this)
       });
 
       toast({
