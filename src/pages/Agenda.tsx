@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { addDays, format, getDay, isSameDay, parseISO, startOfWeek } from 'date-fns';
@@ -31,7 +30,7 @@ import {
   DropdownMenuTrigger 
 } from '@/components/ui/dropdown-menu';
 
-// Define appointment status properties
+// Define appointment status properties with improved styling
 type StatusConfig = {
   label: string;
   icon: React.ReactNode;
@@ -42,27 +41,27 @@ const statusConfig: Record<string, StatusConfig> = {
   scheduled: {
     label: 'Agendado',
     icon: <Clock8 className="h-3 w-3" />,
-    color: 'text-blue-500',
+    color: 'bg-blue-100 text-blue-700 border-blue-300',
   },
   confirmed: {
     label: 'Confirmado',
     icon: <CheckCircle2 className="h-3 w-3" />,
-    color: 'text-emerald-500',
+    color: 'bg-emerald-100 text-emerald-700 border-emerald-300',
   },
   canceled: {
     label: 'Cancelado',
     icon: <XCircle className="h-3 w-3" />,
-    color: 'text-red-500',
+    color: 'bg-red-100 text-red-700 border-red-300',
   },
   no_show: {
     label: 'Não Compareceu',
     icon: <AlertCircle className="h-3 w-3" />,
-    color: 'text-amber-500',
+    color: 'bg-amber-100 text-amber-700 border-amber-300',
   },
   completed: {
     label: 'Concluído',
     icon: <CheckCircle2 className="h-3 w-3" />,
-    color: 'text-purple-500',
+    color: 'bg-purple-100 text-purple-700 border-purple-300',
   },
 };
 
@@ -238,6 +237,39 @@ const Agenda = () => {
     );
   };
 
+  // Render status dropdown button with appropriate styling
+  const renderStatusButton = (appointment: Appointment) => {
+    const config = statusConfig[appointment.status];
+    if (!config) return null;
+
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            variant="outline" 
+            size="sm" 
+            className={`text-xs h-8 flex items-center gap-1 ${config.color} border`}
+          >
+            {config.icon}
+            <span>{config.label}</span>
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end">
+          {Object.entries(statusConfig).map(([status, config]) => (
+            <DropdownMenuItem 
+              key={status} 
+              className="flex items-center gap-2"
+              onClick={() => updateAppointmentStatus(appointment.id, status)}
+            >
+              <span className={`flex items-center ${config.color.split(' ')[1]}`}>{config.icon}</span>
+              {config.label}
+            </DropdownMenuItem>
+          ))}
+        </DropdownMenuContent>
+      </DropdownMenu>
+    );
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -378,11 +410,8 @@ const Agenda = () => {
                             <MapPin className="h-4 w-4 mr-1 text-muted-foreground" />
                             <span className="text-sm">{getLocationText(appointment.location)}</span>
                           </div>
-                          <div className="flex items-center justify-between">
-                            <div className="inline-block bg-primary-muted text-primary text-xs px-2 py-0.5 rounded-full">
-                              {appointment.type}
-                            </div>
-                            {renderStatusBadge(appointment.status)}
+                          <div className="inline-block bg-primary-muted text-primary text-xs px-2 py-0.5 rounded-full">
+                            {appointment.type}
                           </div>
                         </div>
                         
@@ -405,26 +434,8 @@ const Agenda = () => {
                             Lembrete
                           </Button>
                           
-                          {/* Status dropdown */}
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="outline" size="sm" className="text-xs h-8">
-                                {statusConfig[appointment.status]?.label || 'Status'}
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end">
-                              {Object.entries(statusConfig).map(([status, config]) => (
-                                <DropdownMenuItem 
-                                  key={status} 
-                                  className="flex items-center gap-2"
-                                  onClick={() => updateAppointmentStatus(appointment.id, status)}
-                                >
-                                  <span className={config.color}>{config.icon}</span>
-                                  {config.label}
-                                </DropdownMenuItem>
-                              ))}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          {/* Updated Status Dropdown */}
+                          {renderStatusButton(appointment)}
                           
                           {/* Financial record button */}
                           <Button

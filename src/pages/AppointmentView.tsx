@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { 
@@ -57,6 +56,24 @@ const statusOptions = [
   { value: 'no_show', label: 'Não Compareceu', icon: UserX },
   { value: 'completed', label: 'Concluído', icon: CheckCircle },
 ];
+
+// Update this function to return appropriate background/text colors
+const getStatusStyles = (status: string) => {
+  switch (status) {
+    case 'scheduled':
+      return 'bg-blue-100 text-blue-700 border-blue-300';
+    case 'confirmed':
+      return 'bg-emerald-100 text-emerald-700 border-emerald-300';
+    case 'canceled':
+      return 'bg-red-100 text-red-700 border-red-300';
+    case 'no_show':
+      return 'bg-gray-100 text-gray-700 border-gray-300';
+    case 'completed':
+      return 'bg-purple-100 text-purple-700 border-purple-300';
+    default:
+      return 'bg-gray-100 text-gray-700 border-gray-300';
+  }
+};
 
 const getStatusBadgeVariant = (status: string) => {
   switch (status) {
@@ -234,8 +251,18 @@ const AppointmentView = () => {
             onValueChange={handleStatusChange}
             disabled={statusLoading}
           >
-            <SelectTrigger className="w-[180px]">
-              <SelectValue placeholder="Alterar status" />
+            <SelectTrigger className={`w-[180px] ${getStatusStyles(appointment.status)}`}>
+              <SelectValue 
+                placeholder="Alterar status" 
+                className="flex items-center"
+              >
+                <div className="flex items-center gap-2">
+                  {getStatusIcon(appointment.status)}
+                  <span>
+                    {statusOptions.find(s => s.value === appointment.status)?.label || 'Agendado'}
+                  </span>
+                </div>
+              </SelectValue>
             </SelectTrigger>
             <SelectContent>
               {statusOptions.map(option => (
