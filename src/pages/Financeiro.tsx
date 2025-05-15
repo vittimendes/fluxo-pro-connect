@@ -28,7 +28,13 @@ const Financeiro = () => {
       try {
         // Get financial records
         const financialRecords = await mockDataService.getFinancialRecords();
-        setRecords(financialRecords);
+        
+        // Sort records by date (newest first)
+        const sortedRecords = [...financialRecords].sort((a, b) => {
+          return new Date(b.date).getTime() - new Date(a.date).getTime();
+        });
+        
+        setRecords(sortedRecords);
 
         // Get current month's summary
         const currentDate = new Date();
@@ -209,7 +215,7 @@ function renderTransactions(
       key={record.id}
       className={`hover:shadow-md transition-shadow border-l-4 ${
         record.type === 'income' ? 'border-l-green-500' : 'border-l-red-500'
-      }`}
+      } cursor-pointer`}
       onClick={() => navigate(`/financeiro/${record.id}`)}
     >
       <CardContent className="p-4 flex justify-between items-center">

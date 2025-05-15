@@ -14,6 +14,7 @@ import Dashboard from "./pages/Dashboard";
 import Agenda from "./pages/Agenda";
 import NovoAgendamento from "./pages/NovoAgendamento";
 import Financeiro from "./pages/Financeiro";
+import FinancialView from "./pages/FinancialView";
 import NovoRegistroFinanceiro from "./pages/NovoRegistroFinanceiro";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
@@ -21,6 +22,7 @@ import AppointmentView from "./pages/AppointmentView";
 import Register from "./pages/Register";
 import Clients from "./pages/Clients";
 import ClientForm from "./pages/ClientForm";
+import ClientView from "./pages/ClientView";
 import AppointmentTypes from "./pages/AppointmentTypes";
 
 const queryClient = new QueryClient();
@@ -45,10 +47,11 @@ const App = () => (
                 <Route path="/agenda/:id" element={<AppointmentView />} />
                 <Route path="/financeiro" element={<Financeiro />} />
                 <Route path="/financeiro/novo" element={<NovoRegistroFinanceiro />} />
-                <Route path="/financeiro/:id" element={<NotFound />} />
+                <Route path="/financeiro/:id" element={<FinancialView />} />
                 <Route path="/clientes" element={<Clients />} />
                 <Route path="/clientes/novo" element={<ClientForm />} />
-                <Route path="/clientes/:id" element={<ClientForm />} />
+                <Route path="/clientes/:id" element={<ClientView />} />
+                <Route path="/clientes/:id/editar" element={<ClientForm />} />
                 <Route path="/tipos-de-atendimento" element={<AppointmentTypes />} />
                 <Route path="/perfil" element={<Profile />} />
               </Route>

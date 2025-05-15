@@ -91,6 +91,17 @@ const Clients = () => {
       setClientToDelete(null);
     }
   };
+  
+  const handleCardClick = (client: Client, e: React.MouseEvent) => {
+    // Check if the click was on a button inside the card
+    const target = e.target as HTMLElement;
+    const isButton = target.closest('button');
+    
+    if (!isButton) {
+      // If not clicking a button, navigate to client details
+      navigate(`/clientes/${client.id}`);
+    }
+  };
 
   return (
     <div className="space-y-6">
@@ -119,7 +130,11 @@ const Clients = () => {
         <div className="space-y-4">
           {filteredClients.length > 0 ? (
             filteredClients.map(client => (
-              <Card key={client.id} className="hover:shadow-md transition-shadow">
+              <Card 
+                key={client.id} 
+                className="hover:shadow-md transition-shadow cursor-pointer"
+                onClick={(e) => handleCardClick(client, e)}
+              >
                 <CardContent className="p-4">
                   <div className="flex justify-between items-start">
                     <div className="space-y-1 flex-1">

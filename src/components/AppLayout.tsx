@@ -3,7 +3,7 @@ import { Outlet } from 'react-router-dom';
 import BottomNavigation from './BottomNavigation';
 import SidebarNavigation from './SidebarNavigation';
 import LanguageSwitcher from './LanguageSwitcher';
-import { Home, Calendar, DollarSign, Users, User } from 'lucide-react';
+import { Home, Calendar, DollarSign, Users, User, Wrench } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
 const AppLayout = () => {
@@ -15,6 +15,7 @@ const AppLayout = () => {
     { path: '/agenda', label: 'Agenda', icon: Calendar },
     { path: '/financeiro', label: 'Finanças', icon: DollarSign },
     { path: '/clientes', label: 'Clientes', icon: Users },
+    { path: '/tipos-de-atendimento', label: 'Tipos de Atendimento', icon: Wrench },
     { path: '/perfil', label: 'Perfil', icon: User },
   ];
 

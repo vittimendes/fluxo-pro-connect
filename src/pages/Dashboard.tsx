@@ -5,9 +5,11 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Button } from '@/components/ui/button';
 import { useAuth } from '@/contexts/AuthContext';
 import { Appointment, mockDataService } from '@/services/mockData';
-import { Calendar, Clock, Wallet, Plus, User, MapPin } from 'lucide-react';
-import { format } from 'date-fns';
+import { Calendar, Clock, Wallet, Plus, User, MapPin, ChevronDown } from 'lucide-react';
+import { format, addMonths, subMonths, parse } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { Select, SelectContent, SelectGroup, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 const Dashboard = () => {
   const { user } = useAuth();
@@ -19,7 +21,12 @@ const Dashboard = () => {
     expenses: 0,
     balance: 0
   });
-
+  
+  const currentDate = new Date();
+  const [selectedPeriod, setSelectedPeriod] = useState('current');
+  const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
+  const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
+  
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
@@ -28,13 +35,32 @@ const Dashboard = () => {
         const todayAppointments = await mockDataService.getTodayAppointments();
         setAppointments(todayAppointments);
 
-        // Get current month's financial summary
-        const currentDate = new Date();
-        const summary = await mockDataService.getMonthlyFinancialSummary(
-          currentDate.getMonth(),
-          currentDate.getFullYear()
-        );
-        setFinancialSummary(summary);
+        // Get financial summary based on selected period
+        if (selectedPeriod === 'current') {
+          const summary = await mockDataService.getMonthlyFinancialSummary(
+            currentDate.getMonth(),
+            currentDate.getFullYear()
+          );
+          setFinancialSummary(summary);
+        } else if (selectedPeriod === 'custom') {
+          const summary = await mockDataService.getMonthlyFinancialSummary(
+            selectedMonth,
+            selectedYear
+          );
+          setFinancialSummary(summary);
+        } else if (selectedPeriod === 'all') {
+          // This would fetch all-time summary in a real implementation
+          // For mock, we'll just double the current month's data
+          const summary = await mockDataService.getMonthlyFinancialSummary(
+            currentDate.getMonth(),
+            currentDate.getFullYear()
+          );
+          setFinancialSummary({
+            income: summary.income * 3,
+            expenses: summary.expenses * 3,
+            balance: summary.balance * 3
+          });
+        }
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {
@@ -43,7 +69,7 @@ const Dashboard = () => {
     };
 
     fetchData();
-  }, []);
+  }, [selectedPeriod, selectedMonth, selectedYear]);
 
   // Format appointment time for display (9:00 -> 09:00)
   const formatTime = (time: string): string => {
@@ -74,6 +100,28 @@ const Dashboard = () => {
         return 'Domicílio';
       default:
         return location;
+    }
+  };
+  
+  const handlePreviousMonth = () => {
+    const prevDate = subMonths(new Date(selectedYear, selectedMonth), 1);
+    setSelectedMonth(prevDate.getMonth());
+    setSelectedYear(prevDate.getFullYear());
+  };
+  
+  const handleNextMonth = () => {
+    const nextDate = addMonths(new Date(selectedYear, selectedMonth), 1);
+    setSelectedMonth(nextDate.getMonth());
+    setSelectedYear(nextDate.getFullYear());
+  };
+  
+  const getPeriodLabel = () => {
+    if (selectedPeriod === 'current') {
+      return 'Mês Atual';
+    } else if (selectedPeriod === 'custom') {
+      return format(new Date(selectedYear, selectedMonth), 'MMMM yyyy', { locale: ptBR });
+    } else {
+      return 'Total Geral';
     }
   };
 
@@ -109,14 +157,84 @@ const Dashboard = () => {
         </Button>
       </div>
 
-      {/* Finance Summary Card */}
+      {/* Finance Summary Card with Period Selection */}
       <Card className="border-l-4 border-l-primary shadow-md hover:shadow-lg transition-shadow">
         <CardHeader className="pb-2">
-          <CardTitle className="text-lg flex items-center gap-2">
-            <Wallet className="h-5 w-5" />
-            Resumo Financeiro
-          </CardTitle>
-          <CardDescription>Mês atual</CardDescription>
+          <div className="flex justify-between items-center">
+            <CardTitle className="text-lg flex items-center gap-2">
+              <Wallet className="h-5 w-5" />
+              Resumo Financeiro
+            </CardTitle>
+            
+            <Popover>
+              <PopoverTrigger asChild>
+                <Button variant="outline" size="sm" className="h-8 gap-1 border-dashed">
+                  {getPeriodLabel()}
+                  <ChevronDown className="h-4 w-4 opacity-50" />
+                </Button>
+              </PopoverTrigger>
+              <PopoverContent className="w-56 p-3" align="end">
+                <div className="space-y-3">
+                  <h4 className="font-medium text-sm">Selecionar período</h4>
+                  <div className="flex flex-col gap-2">
+                    <Button 
+                      variant={selectedPeriod === 'current' ? 'default' : 'outline'} 
+                      size="sm"
+                      className="justify-start"
+                      onClick={() => setSelectedPeriod('current')}
+                    >
+                      Mês Atual
+                    </Button>
+                    
+                    <div className="flex flex-col gap-2">
+                      <Button 
+                        variant={selectedPeriod === 'custom' ? 'default' : 'outline'} 
+                        size="sm"
+                        className="justify-start"
+                        onClick={() => setSelectedPeriod('custom')}
+                      >
+                        Mês Específico
+                      </Button>
+                      
+                      {selectedPeriod === 'custom' && (
+                        <div className="flex items-center gap-1 p-1">
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-7 w-7"
+                            onClick={handlePreviousMonth}
+                          >
+                            <ChevronDown className="h-4 w-4 rotate-90" />
+                          </Button>
+                          <span className="flex-1 text-center text-sm">
+                            {format(new Date(selectedYear, selectedMonth), 'MMMM yyyy', { locale: ptBR })}
+                          </span>
+                          <Button 
+                            size="icon" 
+                            variant="ghost" 
+                            className="h-7 w-7"
+                            onClick={handleNextMonth}
+                          >
+                            <ChevronDown className="h-4 w-4 -rotate-90" />
+                          </Button>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <Button 
+                      variant={selectedPeriod === 'all' ? 'default' : 'outline'} 
+                      size="sm"
+                      className="justify-start"
+                      onClick={() => setSelectedPeriod('all')}
+                    >
+                      Total Geral
+                    </Button>
+                  </div>
+                </div>
+              </PopoverContent>
+            </Popover>
+          </div>
+          <CardDescription>{getPeriodLabel()}</CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-3 gap-2 text-center">
