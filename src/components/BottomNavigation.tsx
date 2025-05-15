@@ -10,6 +10,7 @@ interface NavItem {
   name: string;
   path: string;
   icon: React.ComponentType<LucideProps>;
+  
 }
 
 const BottomNavigation = () => {
