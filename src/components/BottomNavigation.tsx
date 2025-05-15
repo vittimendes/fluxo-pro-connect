@@ -5,13 +5,13 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import * as React from 'react';
 
-// Define a simpler icon type using LucideIcon
-type IconType = typeof Calendar | typeof Wallet | typeof LayoutDashboard | typeof User;
+// Use LucideIcon directly from lucide-react
+import { LucideIcon } from 'lucide-react';
 
 type NavItem = {
   name: string;
   path: string;
-  icon: IconType;
+  icon: LucideIcon;
 }
 
 const BottomNavigation = () => {
