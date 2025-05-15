@@ -1,16 +1,15 @@
 
 import { useLocation, Link } from 'react-router-dom';
-import { Calendar, Wallet, LayoutDashboard, User, type LucideProps } from 'lucide-react';
+import { Calendar, Wallet, LayoutDashboard, User, type LucideIcon } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import * as React from 'react';
 
-// Define a more specific type for our icons using React.ComponentType
+// Define a more specific type for our icons
 interface NavItem {
   name: string;
   path: string;
-  icon: React.ComponentType<LucideProps>;
-  
+  icon: LucideIcon;
 }
 
 const BottomNavigation = () => {
