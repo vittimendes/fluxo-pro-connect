@@ -1,15 +1,15 @@
 
 import { useLocation, Link } from 'react-router-dom';
-import { Calendar, Wallet, LayoutDashboard, User, LucideIcon } from 'lucide-react';
+import { Calendar, Wallet, LayoutDashboard, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import * as React from 'react';
 
-// Define a more specific type for our icons using LucideIcon
+// Define a type for NavItem with the correct icon type
 interface NavItem {
   name: string;
   path: string;
-  icon: LucideIcon;
+  icon: React.ElementType;
 }
 
 const BottomNavigation = () => {
@@ -17,7 +17,7 @@ const BottomNavigation = () => {
   const currentPath = location.pathname;
   const { t } = useTranslation();
 
-  // ✅ Armazene os textos antes
+  // Store the texts before using them
   const navLabels = {
     agenda: t("agenda.title"),
     financial: t("financial.title"),
@@ -74,6 +74,5 @@ const BottomNavigation = () => {
     </nav>
   );
 };
-
 
 export default BottomNavigation;
