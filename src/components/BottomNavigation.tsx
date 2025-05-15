@@ -5,11 +5,11 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import * as React from 'react';
 
-// Define a simple type for our nav items
+// Define a simple type for our nav items using a more specific and simpler type
 interface NavItem {
   name: string;
   path: string;
-  icon: React.ComponentType<{ className?: string }>;
+  icon: React.FC<{ className?: string }>;
 }
 
 const BottomNavigation = () => {
