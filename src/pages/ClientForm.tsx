@@ -12,6 +12,7 @@ import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
+import { getCurrentUserId } from '@/services/utils';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
@@ -103,7 +104,8 @@ const ClientForm = () => {
           phone: data.phone,
           email: data.email || '',
           notes: data.notes || '',
-          feedbackStatus: 'not_sent' // Add required feedbackStatus field
+          feedbackStatus: 'not_sent', // Add required feedbackStatus field
+          userId: getCurrentUserId() // Add required userId field
         });
         toast({
           title: "Cliente cadastrado",

@@ -13,6 +13,7 @@ import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { CalendarIcon, ChevronLeft, Clock, Loader } from 'lucide-react';
 import { Textarea } from '@/components/ui/textarea';
+import { getCurrentUserId } from '@/services/utils';
 
 const NovoAgendamento = () => {
   const navigate = useNavigate();
@@ -108,7 +109,8 @@ const NovoAgendamento = () => {
         duration: parseInt(formData.duration),
         location: formData.location as 'online' | 'in_person' | 'home_visit',
         status: formData.status as 'scheduled' | 'confirmed' | 'canceled' | 'no_show' | 'completed',
-        notes: formData.notes
+        notes: formData.notes,
+        userId: getCurrentUserId() // Add required userId field
       });
 
       toast({
