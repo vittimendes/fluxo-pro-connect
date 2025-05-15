@@ -16,27 +16,35 @@ const BottomNavigation = () => {
   const location = useLocation();
   const currentPath = location.pathname;
   const { t } = useTranslation();
-  
+
+  // ✅ Armazene os textos antes
+  const navLabels = {
+    agenda: t("agenda.title"),
+    financial: t("financial.title"),
+    dashboard: t("dashboard.title"),
+    profile: t("profile.title"),
+  };
+
   const navItems: NavItem[] = [
     {
-      name: t('agenda.title'),
+      name: navLabels.agenda,
       path: '/agenda',
-      icon: Calendar
+      icon: Calendar,
     },
     {
-      name: t('financial.title'),
+      name: navLabels.financial,
       path: '/financeiro',
-      icon: Wallet
+      icon: Wallet,
     },
     {
-      name: t('dashboard.title'),
+      name: navLabels.dashboard,
       path: '/dashboard',
-      icon: LayoutDashboard
+      icon: LayoutDashboard,
     },
     {
-      name: t('profile.title'),
+      name: navLabels.profile,
       path: '/perfil',
-      icon: User
+      icon: User,
     },
   ];
 
@@ -52,9 +60,9 @@ const BottomNavigation = () => {
               className={cn(
                 "flex flex-1 flex-col items-center py-3 px-1",
                 "transition-colors duration-200",
-                currentPath === item.path ? 
-                  "text-primary font-medium" : 
-                  "text-gray-500 hover:text-primary"
+                currentPath === item.path
+                  ? "text-primary font-medium"
+                  : "text-gray-500 hover:text-primary"
               )}
             >
               <Icon className="h-6 w-6 mb-1" />
@@ -66,5 +74,6 @@ const BottomNavigation = () => {
     </nav>
   );
 };
+
 
 export default BottomNavigation;
