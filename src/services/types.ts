@@ -1,7 +1,8 @@
 
+// Change the re-export to use 'export type'
 import { User } from '../types/user';
 
-export { User };
+export type { User };
 
 export interface Client {
   id: string;

@@ -10,26 +10,27 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-// Define languages using a simple object with string literals
-const LANGUAGES = {
+// Define language codes and display names separately as literals
+type LanguageCode = 'pt' | 'en';
+type LanguageDisplay = { [key in LanguageCode]: string };
+
+// Language display names mapping
+const LANGUAGES: LanguageDisplay = {
   pt: 'Português',
   en: 'English'
 };
-
-// Define a type for supported languages
-type SupportedLanguage = 'pt' | 'en';
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   
-  const changeLanguage = (language: SupportedLanguage) => {
+  const changeLanguage = (language: LanguageCode) => {
     i18n.changeLanguage(language);
     setOpen(false);
   };
   
   // Get current language or default to 'en'
-  const currentLanguage = (i18n.language || 'en') as SupportedLanguage;
+  const currentLanguage = (i18n.language || 'en') as LanguageCode;
   const displayName = LANGUAGES[currentLanguage] || LANGUAGES.en;
   
   return (
