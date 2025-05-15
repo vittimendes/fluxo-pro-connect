@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
 import {
@@ -10,20 +10,24 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-// Simple type definitions with string literals
-const LANGUAGES = [
+// Define language options with explicit types
+type Language = {
+  code: 'pt' | 'en';
+  name: string;
+  flag: string;
+};
+
+const LANGUAGES: Language[] = [
   { code: 'pt', name: 'Português', flag: '🇧🇷' },
   { code: 'en', name: 'English', flag: '🇺🇸' }
-] as const;
-
-type LanguageCode = typeof LANGUAGES[number]['code'];
+];
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   
   // Get current language with fallback
-  const getCurrentLanguage = (): LanguageCode => {
+  const getCurrentLanguage = (): Language['code'] => {
     const current = i18n.language || 'pt-BR';
     
     // Handle pt-BR -> pt mapping
@@ -36,7 +40,7 @@ const LanguageSwitcher = () => {
   const currentLang = getCurrentLanguage();
   const currentLanguage = LANGUAGES.find(lang => lang.code === currentLang) || LANGUAGES[0];
   
-  const changeLanguage = (code: LanguageCode) => {
+  const changeLanguage = (code: Language['code']) => {
     i18n.changeLanguage(code);
     setOpen(false);
   };

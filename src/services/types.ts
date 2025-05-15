@@ -1,6 +1,6 @@
 
 // Change the re-export to use 'export type'
-import { User } from '../types/user';
+import type { User } from '../types/user';
 
 export type { User };
 
