@@ -9,7 +9,7 @@ import * as React from 'react';
 interface NavItem {
   name: string;
   path: string;
-  icon: React.FC<{ className?: string }>;
+  icon: React.ElementType;
 }
 
 const BottomNavigation = () => {
