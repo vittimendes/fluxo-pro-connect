@@ -1,4 +1,4 @@
-import { User, Client, AppointmentType, Appointment, FinancialRecord } from './types';
+import { User, Client, AppointmentType, Appointment, FinancialRecord, Attachment } from './types';
 import { formatDate } from './utils';
 
 // Demo user data
@@ -63,6 +63,7 @@ export const appointmentsByUser: { [userId: string]: Appointment[] } = {};
 export const financialRecordsByUser: { [userId: string]: FinancialRecord[] } = {};
 export const clientsByUser: { [userId: string]: Client[] } = {};
 export const appointmentTypesByUser: { [userId: string]: AppointmentType[] } = {};
+export const attachmentsByUser: { [userId: string]: Attachment[] } = {};
 
 // Initialize demo data for default user
 appointmentsByUser['1'] = [
@@ -259,3 +260,7 @@ clientsByUser['2'] = [...clients.filter(client => client.userId === '2')];
 // Initialize appointment types for both users
 appointmentTypesByUser['1'] = [...appointmentTypes.filter(type => type.userId === '1')];
 appointmentTypesByUser['2'] = [...appointmentTypes.filter(type => type.userId === '2')];
+
+// Initialize attachments for both users (empty arrays)
+attachmentsByUser['1'] = [];
+attachmentsByUser['2'] = [];

@@ -49,3 +49,16 @@ export interface FinancialRecord {
   clientName?: string;
   notes?: string;
 }
+
+export interface Attachment {
+  id: string;
+  name: string;
+  type: string;
+  size: number;
+  url: string;
+  clientId: string;
+  userId: string;
+  appointmentId?: string;
+  notes?: string;
+  dateUploaded: string;
+}

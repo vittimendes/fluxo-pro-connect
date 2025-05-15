@@ -1,5 +1,5 @@
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,17 +10,7 @@ import { usePremium } from '@/hooks/use-premium';
 import PremiumOverlay from '@/components/PremiumOverlay';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-
-interface Attachment {
-  id: string;
-  name: string;
-  type: string;
-  size: number;
-  url: string; // For demo, this would be a blob URL
-  appointmentId?: string;
-  notes?: string;
-  dateUploaded: Date;
-}
+import { Attachment, mockDataService } from '@/services/mockData';
 
 interface ClientAttachmentsProps {
   clientId: string;
@@ -40,6 +30,7 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
   const { isPremium } = usePremium();
   const { toast } = useToast();
   const [attachments, setAttachments] = useState<Attachment[]>([]);
+  const [loading, setLoading] = useState(true);
   const [newAttachment, setNewAttachment] = useState<{
     file?: File;
     appointmentId?: string;
@@ -48,6 +39,27 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
     notes: '',
   });
   const [isUploading, setIsUploading] = useState(false);
+  
+  useEffect(() => {
+    const loadAttachments = async () => {
+      setLoading(true);
+      try {
+        const data = await mockDataService.getAttachmentsByClientId(clientId);
+        setAttachments(data);
+      } catch (error) {
+        console.error('Error loading attachments:', error);
+        toast({
+          title: "Erro ao carregar anexos",
+          description: "Não foi possível carregar os anexos do cliente.",
+          variant: "destructive"
+        });
+      } finally {
+        setLoading(false);
+      }
+    };
+    
+    loadAttachments();
+  }, [clientId, toast]);
   
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -79,7 +91,7 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
     setNewAttachment(prev => ({ ...prev, file }));
   };
   
-  const handleUpload = () => {
+  const handleUpload = async () => {
     if (!newAttachment.file) {
       toast({
         title: "Selecione um arquivo",
@@ -91,21 +103,22 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
     
     setIsUploading(true);
     
-    // Simulate upload
-    setTimeout(() => {
-      const file = newAttachment.file!;
+    try {
+      const file = newAttachment.file;
+      
+      // Create a blob URL for the file (in a real app, this would be an upload to a storage service)
       const url = URL.createObjectURL(file);
       
-      const attachment: Attachment = {
-        id: Date.now().toString(),
+      // Add the attachment to the mock service
+      const attachment = await mockDataService.addAttachment({
         name: file.name,
         type: file.type,
         size: file.size,
         url,
+        clientId: clientId,
         appointmentId: newAttachment.appointmentId,
         notes: newAttachment.notes || undefined,
-        dateUploaded: new Date()
-      };
+      });
       
       setAttachments(prev => [...prev, attachment]);
       
@@ -117,21 +130,44 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
         description: `${file.name} foi anexado ao cliente.`
       });
       
-      setIsUploading(false);
-      
       // Reset file input
       const fileInput = document.getElementById('file-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
-    }, 1000);
+      
+    } catch (error) {
+      console.error('Error uploading attachment:', error);
+      toast({
+        title: "Erro ao anexar arquivo",
+        description: "Não foi possível anexar o arquivo. Tente novamente.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsUploading(false);
+    }
   };
   
-  const handleRemove = (id: string) => {
-    setAttachments(prev => prev.filter(a => a.id !== id));
-    
-    toast({
-      title: "Anexo removido",
-      description: "O anexo foi removido com sucesso."
-    });
+  const handleRemove = async (id: string) => {
+    try {
+      const success = await mockDataService.deleteAttachment(id);
+      
+      if (success) {
+        setAttachments(prev => prev.filter(a => a.id !== id));
+        
+        toast({
+          title: "Anexo removido",
+          description: "O anexo foi removido com sucesso."
+        });
+      } else {
+        throw new Error("Failed to delete attachment");
+      }
+    } catch (error) {
+      console.error('Error removing attachment:', error);
+      toast({
+        title: "Erro ao remover anexo",
+        description: "Não foi possível remover o anexo. Tente novamente.",
+        variant: "destructive"
+      });
+    }
   };
   
   const formatFileSize = (bytes: number) => {
@@ -224,8 +260,26 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
         </CardContent>
       </Card>
       
+      {/* Loading state */}
+      {loading && (
+        <div className="flex justify-center items-center py-12">
+          <div className="animate-spin rounded-full h-8 w-8 border-2 border-primary border-t-transparent"></div>
+        </div>
+      )}
+      
+      {/* Empty state */}
+      {!loading && attachments.length === 0 && (
+        <div className="text-center py-12 bg-muted/20 rounded-lg border border-dashed">
+          <FileIcon className="mx-auto h-12 w-12 text-muted" />
+          <h3 className="mt-2 text-sm font-medium">Nenhum anexo</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Adicione um arquivo para este cliente usando o formulário acima.
+          </p>
+        </div>
+      )}
+      
       {/* Attachments list */}
-      {attachments.length > 0 && (
+      {!loading && attachments.length > 0 && (
         <div className="grid gap-4 sm:grid-cols-2">
           {attachments.map(attachment => {
             const FileIconComponent = getFileIcon(attachment.type);
@@ -264,7 +318,7 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
                     <div className="flex justify-between text-xs text-muted-foreground">
                       <span>{formatFileSize(attachment.size)}</span>
                       <span>
-                        {new Date(attachment.dateUploaded).toLocaleDateString()}
+                        {attachment.dateUploaded ? new Date(attachment.dateUploaded).toLocaleDateString() : ''}
                       </span>
                     </div>
                     {attachment.notes && (

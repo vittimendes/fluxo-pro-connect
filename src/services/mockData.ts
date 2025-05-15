@@ -11,6 +11,7 @@ import { clientService } from './clientService';
 import { appointmentTypeService } from './appointmentTypeService';
 import { appointmentService } from './appointmentService';
 import { financialService } from './financialService';
+import { attachmentService } from './attachmentService';
 
 // Combine all services into a single mockDataService object
 export const mockDataService = {
@@ -47,4 +48,9 @@ export const mockDataService = {
   addFinancialRecord: financialService.addFinancialRecord,
   updateFinancialRecord: financialService.updateFinancialRecord,
   deleteFinancialRecord: financialService.deleteFinancialRecord,
+  
+  // Attachment methods
+  getAttachmentsByClientId: attachmentService.getAttachmentsByClientId,
+  addAttachment: attachmentService.addAttachment,
+  deleteAttachment: attachmentService.deleteAttachment,
 };
