@@ -1,11 +1,10 @@
-
 import { useLocation, Link } from 'react-router-dom';
 import { Calendar, Wallet, LayoutDashboard, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import * as React from 'react';
 
-// Define a type for NavItem with the correct icon type
+// Type for icon component
 interface NavItem {
   name: string;
   path: string;
@@ -17,36 +16,29 @@ const BottomNavigation = () => {
   const currentPath = location.pathname;
   const { t } = useTranslation();
 
-  // Store the texts before using them
-  const navLabels = {
-    agenda: t("agenda.title"),
-    financial: t("financial.title"),
-    dashboard: t("dashboard.title"),
-    profile: t("profile.title"),
-  };
-
-  const navItems: NavItem[] = [
+  // ✅ useMemo para evitar reavaliação excessiva e quebra de tipos
+  const navItems: NavItem[] = React.useMemo(() => [
     {
-      name: navLabels.agenda,
-      path: '/agenda',
+      name: t("agenda.title"),
+      path: "/agenda",
       icon: Calendar,
     },
     {
-      name: navLabels.financial,
-      path: '/financeiro',
+      name: t("financial.title"),
+      path: "/financeiro",
       icon: Wallet,
     },
     {
-      name: navLabels.dashboard,
-      path: '/dashboard',
+      name: t("dashboard.title"),
+      path: "/dashboard",
       icon: LayoutDashboard,
     },
     {
-      name: navLabels.profile,
-      path: '/perfil',
+      name: t("profile.title"),
+      path: "/perfil",
       icon: User,
     },
-  ];
+  ], [t]);
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 border-t border-gray-200 bg-white shadow-lg animate-fade-in">
