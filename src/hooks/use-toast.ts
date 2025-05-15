@@ -1,6 +1,6 @@
 
 import * as React from "react";
-import { Toast, ToastActionElement, ToastProps } from "@/components/ui/toast";
+import { Toast, ToastActionElement, type ToastProps } from "@/components/ui/toast";
 
 const TOAST_LIMIT = 5;
 const TOAST_REMOVE_DELAY = 1000000;
@@ -168,4 +168,5 @@ export function useToast() {
   };
 }
 
-export { Toast, ToastActionElement, ToastProps };
+export { Toast };
+export type { ToastActionElement, ToastProps };
