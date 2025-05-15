@@ -7,6 +7,7 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
+  register: (userData: Omit<User, 'id'>) => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (userData: Partial<User>) => Promise<User>;
 }
@@ -70,6 +71,30 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     }
   };
+  
+  const register = async (userData: Omit<User, 'id'>): Promise<boolean> => {
+    setLoading(true);
+    try {
+      const newUser = await mockAuthService.register(userData);
+      mockAuthService.saveUser(newUser);
+      setUser(newUser);
+      toast({
+        title: "Cadastro realizado",
+        description: `Bem-vindo(a), ${newUser.name}!`,
+      });
+      return true;
+    } catch (error) {
+      console.error('Registration error:', error);
+      toast({
+        title: "Erro no cadastro",
+        description: "Não foi possível criar sua conta. Tente novamente.",
+        variant: "destructive"
+      });
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const logout = async (): Promise<void> => {
     setLoading(true);
@@ -116,7 +141,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   return (
-    <AuthContext.Provider value={{ user, loading, login, logout, updateProfile }}>
+    <AuthContext.Provider value={{ user, loading, login, register, logout, updateProfile }}>
       {children}
     </AuthContext.Provider>
   );

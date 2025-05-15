@@ -17,6 +17,8 @@ import Financeiro from "./pages/Financeiro";
 import NovoRegistroFinanceiro from "./pages/NovoRegistroFinanceiro";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
+import AppointmentView from "./pages/AppointmentView";
+import Register from "./pages/Register";
 
 const queryClient = new QueryClient();
 
@@ -29,6 +31,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
             <Route path="/" element={<Navigate to="/dashboard" replace />} />
             
             <Route element={<PrivateRoute />}>
@@ -36,7 +39,7 @@ const App = () => (
                 <Route path="/dashboard" element={<Dashboard />} />
                 <Route path="/agenda" element={<Agenda />} />
                 <Route path="/agenda/novo" element={<NovoAgendamento />} />
-                <Route path="/agenda/:id" element={<NotFound />} />
+                <Route path="/agenda/:id" element={<AppointmentView />} />
                 <Route path="/financeiro" element={<Financeiro />} />
                 <Route path="/financeiro/novo" element={<NovoRegistroFinanceiro />} />
                 <Route path="/financeiro/:id" element={<NotFound />} />

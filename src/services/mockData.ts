@@ -31,8 +31,9 @@ export interface Appointment {
   time: string;
   duration: number; // in minutes
   location: 'online' | 'in_person' | 'home_visit';
-  status: 'scheduled' | 'completed' | 'canceled' | 'no_show';
+  status: 'scheduled' | 'confirmed' | 'canceled' | 'no_show' | 'completed';
   notes?: string;
+  userId?: string; // To associate appointment with specific user
 }
 
 export interface FinancialRecord {
@@ -43,8 +44,10 @@ export interface FinancialRecord {
   type: 'income' | 'expense';
   category?: string;
   relatedAppointment?: string;
+  userId?: string; // To associate financial record with specific user
 }
 
+// Demo user data
 const users: User[] = [
   {
     id: '1',
@@ -59,6 +62,7 @@ const users: User[] = [
   }
 ];
 
+// Client data (shared for demo purposes)
 const clients: Client[] = [
   { id: '1', name: 'Maria Fernandes', phone: '5511988881111', email: 'maria@email.com', feedbackStatus: 'completed' },
   { id: '2', name: 'João Carlos', phone: '5511988882222', notes: 'Primeira consulta', feedbackStatus: 'pending' },
@@ -75,7 +79,12 @@ tomorrow.setDate(today.getDate() + 1);
 // Function to format date to ISO string but only the date part
 const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
-const appointments: Appointment[] = [
+// Storage for user-specific data
+const appointmentsByUser: { [userId: string]: Appointment[] } = {};
+const financialRecordsByUser: { [userId: string]: FinancialRecord[] } = {};
+
+// Initialize demo data for default user
+appointmentsByUser['1'] = [
   {
     id: '1',
     clientId: '1',
@@ -85,7 +94,8 @@ const appointments: Appointment[] = [
     time: '09:00',
     duration: 50,
     location: 'online',
-    status: 'scheduled'
+    status: 'scheduled',
+    userId: '1'
   },
   {
     id: '2',
@@ -96,7 +106,8 @@ const appointments: Appointment[] = [
     time: '11:00',
     duration: 90,
     location: 'in_person',
-    status: 'scheduled'
+    status: 'scheduled',
+    userId: '1'
   },
   {
     id: '3',
@@ -107,7 +118,8 @@ const appointments: Appointment[] = [
     time: '14:00',
     duration: 50,
     location: 'in_person',
-    status: 'scheduled'
+    status: 'scheduled',
+    userId: '1'
   },
   {
     id: '4',
@@ -118,7 +130,8 @@ const appointments: Appointment[] = [
     time: '16:00',
     duration: 50,
     location: 'home_visit',
-    status: 'scheduled'
+    status: 'scheduled',
+    userId: '1'
   },
   {
     id: '5',
@@ -129,19 +142,21 @@ const appointments: Appointment[] = [
     time: '15:30',
     duration: 50,
     location: 'online',
-    status: 'scheduled'
+    status: 'scheduled',
+    userId: '1'
   }
 ];
 
-// Mock financial records
-const financialRecords: FinancialRecord[] = [
+// Initialize demo financial records for default user
+financialRecordsByUser['1'] = [
   {
     id: '1',
     amount: 200,
     description: 'Consulta - Maria Fernandes',
     date: formatDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 5)),
     type: 'income',
-    relatedAppointment: '1'
+    relatedAppointment: '1',
+    userId: '1'
   },
   {
     id: '2',
@@ -149,7 +164,8 @@ const financialRecords: FinancialRecord[] = [
     description: 'Avaliação - João Carlos',
     date: formatDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 2)),
     type: 'income',
-    relatedAppointment: '2'
+    relatedAppointment: '2',
+    userId: '1'
   },
   {
     id: '3',
@@ -157,7 +173,8 @@ const financialRecords: FinancialRecord[] = [
     description: 'Material de escritório',
     date: formatDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 3)),
     type: 'expense',
-    category: 'Suprimentos'
+    category: 'Suprimentos',
+    userId: '1'
   },
   {
     id: '4',
@@ -165,7 +182,8 @@ const financialRecords: FinancialRecord[] = [
     description: 'Assinatura plataforma de agendamento',
     date: formatDate(new Date(today.getFullYear(), today.getMonth(), 1)),
     type: 'expense',
-    category: 'Serviços'
+    category: 'Serviços',
+    userId: '1'
   },
   {
     id: '5',
@@ -173,9 +191,15 @@ const financialRecords: FinancialRecord[] = [
     description: 'Consulta - Patrícia Lima',
     date: formatDate(new Date(today.getFullYear(), today.getMonth(), today.getDate() - 1)),
     type: 'income',
-    relatedAppointment: '5'
+    relatedAppointment: '5',
+    userId: '1'
   }
 ];
+
+// Generate a unique ID based on timestamp and random number
+const generateUniqueId = (prefix: string) => {
+  return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
+};
 
 // Service functions to interact with mock data
 export const mockAuthService = {
@@ -187,6 +211,31 @@ export const mockAuthService = {
       }, 800); // Simulating network delay
     });
   },
+  
+  register: (userData: Omit<User, 'id'>): Promise<User> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        const newUserId = generateUniqueId('user');
+        const newUser = {
+          ...userData,
+          id: newUserId
+        };
+        
+        // Add user to users array
+        users.push(newUser);
+        
+        // Initialize empty appointments and financial records for this user
+        appointmentsByUser[newUserId] = [];
+        financialRecordsByUser[newUserId] = [];
+        
+        // Save to localStorage for demo persistence
+        mockAuthService.saveUser(newUser);
+        
+        resolve(newUser);
+      }, 800);
+    });
+  },
+  
   getCurrentUser: (): Promise<User | null> => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -200,15 +249,18 @@ export const mockAuthService = {
       }, 300);
     });
   },
+  
   saveUser: (user: User): void => {
     localStorage.setItem('currentUser', JSON.stringify(user));
   },
+  
   logout: (): Promise<void> => {
     return new Promise((resolve) => {
       localStorage.removeItem('currentUser');
       setTimeout(resolve, 300);
     });
   },
+  
   updateProfile: (userData: Partial<User>): Promise<User> => {
     return new Promise((resolve) => {
       setTimeout(() => {
@@ -216,6 +268,13 @@ export const mockAuthService = {
         if (currentUserJson) {
           const currentUser = JSON.parse(currentUserJson) as User;
           const updatedUser = { ...currentUser, ...userData };
+          
+          // Update in the users array
+          const userIndex = users.findIndex(u => u.id === currentUser.id);
+          if (userIndex !== -1) {
+            users[userIndex] = updatedUser;
+          }
+          
           localStorage.setItem('currentUser', JSON.stringify(updatedUser));
           resolve(updatedUser);
         } else {
@@ -230,44 +289,92 @@ export const mockAuthService = {
 };
 
 export const mockDataService = {
+  // Client methods
   getClients: (): Promise<Client[]> => {
     return new Promise((resolve) => {
       setTimeout(() => resolve([...clients]), 500);
     });
   },
 
-  getAppointments: (): Promise<Appointment[]> => {
+  // Appointment methods
+  getAppointments: (userId?: string): Promise<Appointment[]> => {
     return new Promise((resolve) => {
-      setTimeout(() => resolve([...appointments]), 500);
+      setTimeout(() => {
+        if (!userId) {
+          const currentUserJson = localStorage.getItem('currentUser');
+          if (currentUserJson) {
+            const currentUser = JSON.parse(currentUserJson) as User;
+            userId = currentUser.id;
+          } else {
+            userId = '1'; // Default to first user if none found
+          }
+        }
+        
+        const userAppointments = appointmentsByUser[userId] || [];
+        resolve([...userAppointments]);
+      }, 500);
     });
   },
 
-  getTodayAppointments: (): Promise<Appointment[]> => {
+  getTodayAppointments: (userId?: string): Promise<Appointment[]> => {
     return new Promise((resolve) => {
       const todayStr = formatDate(today);
       setTimeout(() => {
-        const todayApps = appointments.filter(app => app.date === todayStr);
+        if (!userId) {
+          const currentUserJson = localStorage.getItem('currentUser');
+          if (currentUserJson) {
+            const currentUser = JSON.parse(currentUserJson) as User;
+            userId = currentUser.id;
+          } else {
+            userId = '1'; // Default to first user if none found
+          }
+        }
+        
+        const userAppointments = appointmentsByUser[userId] || [];
+        const todayApps = userAppointments.filter(app => app.date === todayStr);
         resolve([...todayApps]);
       }, 500);
     });
   },
 
-  getAppointmentsByDate: (date: string): Promise<Appointment[]> => {
+  getAppointmentsByDate: (date: string, userId?: string): Promise<Appointment[]> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const filteredApps = appointments.filter(app => app.date === date);
+        if (!userId) {
+          const currentUserJson = localStorage.getItem('currentUser');
+          if (currentUserJson) {
+            const currentUser = JSON.parse(currentUserJson) as User;
+            userId = currentUser.id;
+          } else {
+            userId = '1'; // Default to first user if none found
+          }
+        }
+        
+        const userAppointments = appointmentsByUser[userId] || [];
+        const filteredApps = userAppointments.filter(app => app.date === date);
         resolve([...filteredApps]);
       }, 500);
     });
   },
 
-  getAppointmentsByWeek: (startDate: Date, endDate: Date): Promise<Appointment[]> => {
+  getAppointmentsByWeek: (startDate: Date, endDate: Date, userId?: string): Promise<Appointment[]> => {
     return new Promise((resolve) => {
       setTimeout(() => {
+        if (!userId) {
+          const currentUserJson = localStorage.getItem('currentUser');
+          if (currentUserJson) {
+            const currentUser = JSON.parse(currentUserJson) as User;
+            userId = currentUser.id;
+          } else {
+            userId = '1'; // Default to first user if none found
+          }
+        }
+        
         const start = formatDate(startDate);
         const end = formatDate(endDate);
         
-        const filteredApps = appointments.filter(app => {
+        const userAppointments = appointmentsByUser[userId] || [];
+        const filteredApps = userAppointments.filter(app => {
           return app.date >= start && app.date <= end;
         });
         
@@ -279,11 +386,25 @@ export const mockDataService = {
   addAppointment: (appointment: Omit<Appointment, 'id'>): Promise<Appointment> => {
     return new Promise((resolve) => {
       setTimeout(() => {
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
         const newAppointment = {
           ...appointment,
-          id: `app_${appointments.length + 1}`,
+          id: generateUniqueId('app'),
+          userId
         };
-        appointments.push(newAppointment);
+        
+        if (!appointmentsByUser[userId]) {
+          appointmentsByUser[userId] = [];
+        }
+        
+        appointmentsByUser[userId].push(newAppointment);
         resolve(newAppointment);
       }, 500);
     });
@@ -292,10 +413,23 @@ export const mockDataService = {
   updateAppointment: (id: string, data: Partial<Appointment>): Promise<Appointment> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const index = appointments.findIndex(app => app.id === id);
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        if (!appointmentsByUser[userId]) {
+          reject(new Error('No appointments found for this user'));
+          return;
+        }
+        
+        const index = appointmentsByUser[userId].findIndex(app => app.id === id);
         if (index !== -1) {
-          appointments[index] = { ...appointments[index], ...data };
-          resolve(appointments[index]);
+          appointmentsByUser[userId][index] = { ...appointmentsByUser[userId][index], ...data };
+          resolve(appointmentsByUser[userId][index]);
         } else {
           reject(new Error('Appointment not found'));
         }
@@ -306,9 +440,22 @@ export const mockDataService = {
   deleteAppointment: (id: string): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const index = appointments.findIndex(app => app.id === id);
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        if (!appointmentsByUser[userId]) {
+          resolve(false);
+          return;
+        }
+        
+        const index = appointmentsByUser[userId].findIndex(app => app.id === id);
         if (index !== -1) {
-          appointments.splice(index, 1);
+          appointmentsByUser[userId].splice(index, 1);
           resolve(true);
         } else {
           resolve(false);
@@ -316,17 +463,103 @@ export const mockDataService = {
       }, 500);
     });
   },
-
-  getFinancialRecords: (): Promise<FinancialRecord[]> => {
-    return new Promise((resolve) => {
-      setTimeout(() => resolve([...financialRecords]), 500);
+  
+  executeAppointment: (id: string, financialData?: { amount: number, description: string, type: 'income' | 'expense' }): Promise<{ appointment: Appointment, financialRecord?: FinancialRecord }> => {
+    return new Promise((resolve, reject) => {
+      setTimeout(() => {
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        if (!appointmentsByUser[userId]) {
+          reject(new Error('No appointments found for this user'));
+          return;
+        }
+        
+        // Update appointment status to completed
+        const index = appointmentsByUser[userId].findIndex(app => app.id === id);
+        if (index === -1) {
+          reject(new Error('Appointment not found'));
+          return;
+        }
+        
+        appointmentsByUser[userId][index] = { 
+          ...appointmentsByUser[userId][index], 
+          status: 'completed' 
+        };
+        
+        const updatedAppointment = appointmentsByUser[userId][index];
+        
+        // Create a financial record if data is provided
+        if (financialData) {
+          const newRecord: FinancialRecord = {
+            id: generateUniqueId('fin'),
+            amount: financialData.amount,
+            description: financialData.description,
+            date: formatDate(new Date()),
+            type: financialData.type,
+            relatedAppointment: id,
+            userId
+          };
+          
+          if (!financialRecordsByUser[userId]) {
+            financialRecordsByUser[userId] = [];
+          }
+          
+          financialRecordsByUser[userId].push(newRecord);
+          
+          resolve({
+            appointment: updatedAppointment,
+            financialRecord: newRecord
+          });
+        } else {
+          resolve({
+            appointment: updatedAppointment
+          });
+        }
+      }, 500);
     });
   },
 
-  getMonthlyFinancialSummary: (month: number, year: number): Promise<{ income: number, expenses: number, balance: number }> => {
+  // Financial record methods
+  getFinancialRecords: (userId?: string): Promise<FinancialRecord[]> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const records = financialRecords.filter(record => {
+        if (!userId) {
+          const currentUserJson = localStorage.getItem('currentUser');
+          if (currentUserJson) {
+            const currentUser = JSON.parse(currentUserJson) as User;
+            userId = currentUser.id;
+          } else {
+            userId = '1'; // Default to first user if none found
+          }
+        }
+        
+        const userRecords = financialRecordsByUser[userId] || [];
+        resolve([...userRecords]);
+      }, 500);
+    });
+  },
+
+  getMonthlyFinancialSummary: (month: number, year: number, userId?: string): Promise<{ income: number, expenses: number, balance: number }> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (!userId) {
+          const currentUserJson = localStorage.getItem('currentUser');
+          if (currentUserJson) {
+            const currentUser = JSON.parse(currentUserJson) as User;
+            userId = currentUser.id;
+          } else {
+            userId = '1'; // Default to first user if none found
+          }
+        }
+        
+        const userRecords = financialRecordsByUser[userId] || [];
+        const records = userRecords.filter(record => {
           const recordDate = new Date(record.date);
           return recordDate.getMonth() === month && recordDate.getFullYear() === year;
         });
@@ -351,11 +584,25 @@ export const mockDataService = {
   addFinancialRecord: (record: Omit<FinancialRecord, 'id'>): Promise<FinancialRecord> => {
     return new Promise((resolve) => {
       setTimeout(() => {
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
         const newRecord = {
           ...record,
-          id: `fin_${financialRecords.length + 1}`,
+          id: generateUniqueId('fin'),
+          userId
         };
-        financialRecords.push(newRecord);
+        
+        if (!financialRecordsByUser[userId]) {
+          financialRecordsByUser[userId] = [];
+        }
+        
+        financialRecordsByUser[userId].push(newRecord);
         resolve(newRecord);
       }, 500);
     });
@@ -364,10 +611,23 @@ export const mockDataService = {
   updateFinancialRecord: (id: string, data: Partial<FinancialRecord>): Promise<FinancialRecord> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const index = financialRecords.findIndex(record => record.id === id);
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        if (!financialRecordsByUser[userId]) {
+          reject(new Error('No financial records found for this user'));
+          return;
+        }
+        
+        const index = financialRecordsByUser[userId].findIndex(record => record.id === id);
         if (index !== -1) {
-          financialRecords[index] = { ...financialRecords[index], ...data };
-          resolve(financialRecords[index]);
+          financialRecordsByUser[userId][index] = { ...financialRecordsByUser[userId][index], ...data };
+          resolve(financialRecordsByUser[userId][index]);
         } else {
           reject(new Error('Financial record not found'));
         }
@@ -378,13 +638,49 @@ export const mockDataService = {
   deleteFinancialRecord: (id: string): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const index = financialRecords.findIndex(record => record.id === id);
+        const currentUserJson = localStorage.getItem('currentUser');
+        let userId = '1';
+        
+        if (currentUserJson) {
+          const currentUser = JSON.parse(currentUserJson) as User;
+          userId = currentUser.id;
+        }
+        
+        if (!financialRecordsByUser[userId]) {
+          resolve(false);
+          return;
+        }
+        
+        const index = financialRecordsByUser[userId].findIndex(record => record.id === id);
         if (index !== -1) {
-          financialRecords.splice(index, 1);
+          financialRecordsByUser[userId].splice(index, 1);
           resolve(true);
         } else {
           resolve(false);
         }
+      }, 500);
+    });
+  },
+  
+  getFinancialRecordsByAppointment: (appointmentId: string, userId?: string): Promise<FinancialRecord[]> => {
+    return new Promise((resolve) => {
+      setTimeout(() => {
+        if (!userId) {
+          const currentUserJson = localStorage.getItem('currentUser');
+          if (currentUserJson) {
+            const currentUser = JSON.parse(currentUserJson) as User;
+            userId = currentUser.id;
+          } else {
+            userId = '1';
+          }
+        }
+        
+        const userRecords = financialRecordsByUser[userId] || [];
+        const filteredRecords = userRecords.filter(
+          record => record.relatedAppointment === appointmentId
+        );
+        
+        resolve([...filteredRecords]);
       }, 500);
     });
   }
