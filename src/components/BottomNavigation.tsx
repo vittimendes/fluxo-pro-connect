@@ -5,12 +5,13 @@ import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import * as React from 'react';
 
-// Use LucideIcon directly from lucide-react
-import { LucideIcon } from 'lucide-react';
+// Import the specific type needed for Lucide icons
+import type { LucideIcon } from 'lucide-react';
 
 type NavItem = {
   name: string;
   path: string;
+  // Use the concrete type for the icon
   icon: LucideIcon;
 }
 
