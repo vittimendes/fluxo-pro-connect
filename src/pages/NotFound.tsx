@@ -2,10 +2,12 @@
 import { useLocation, useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { useEffect } from "react";
+import { useTranslation } from "react-i18next";
 
 const NotFound = () => {
   const location = useLocation();
   const navigate = useNavigate();
+  const { t } = useTranslation();
 
   useEffect(() => {
     console.error(
@@ -17,23 +19,23 @@ const NotFound = () => {
   return (
     <div className="min-h-screen flex items-center justify-center bg-gray-50 px-4">
       <div className="text-center max-w-md w-full">
-        <h1 className="text-4xl font-bold mb-4 text-primary">404</h1>
+        <h1 className="text-4xl font-bold mb-4 text-primary">{t('notFound.title')}</h1>
         <p className="text-xl text-gray-600 mb-8">
-          Oops! A página que você está procurando não existe.
+          {t('notFound.message')}
         </p>
         <div className="space-y-4">
           <Button 
             className="w-full" 
             onClick={() => navigate("/dashboard")}
           >
-            Voltar ao Dashboard
+            {t('notFound.back_dashboard')}
           </Button>
           <Button 
             variant="outline" 
             className="w-full" 
             onClick={() => navigate(-1)}
           >
-            Voltar à página anterior
+            {t('notFound.back_previous')}
           </Button>
         </div>
       </div>

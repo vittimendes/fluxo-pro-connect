@@ -10,8 +10,12 @@ import { Loader, UserPlus } from 'lucide-react';
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle, DialogTrigger } from '@/components/ui/dialog';
 import { useToast } from '@/hooks/use-toast';
 import { mockAuthService } from '@/services/mockData';
+import { useTranslation } from 'react-i18next';
+import LanguageSwitcher from '@/components/LanguageSwitcher';
 
 const Login = () => {
+  const { t } = useTranslation();
+  
   // Login form state
   const [email, setEmail] = useState('ana@exemplo.com');
   const [password, setPassword] = useState('123456');
@@ -37,21 +41,21 @@ const Login = () => {
       const success = await login(email, password);
       if (success) {
         toast({
-          title: "Login bem-sucedido",
-          description: "Você foi conectado com sucesso!",
+          title: t('login.login_success'),
+          description: t('login.login_success_message'),
         });
         navigate('/dashboard');
       } else {
         toast({
-          title: "Falha no login",
-          description: "E-mail ou senha incorretos. Tente novamente.",
+          title: t('login.login_error'),
+          description: t('login.login_error_message'),
           variant: "destructive",
         });
       }
     } catch (error) {
       toast({
-        title: "Erro no login",
-        description: "Ocorreu um erro durante o login. Tente novamente.",
+        title: t('login.login_unknown_error'),
+        description: t('login.login_unknown_error_message'),
         variant: "destructive",
       });
     } finally {
@@ -66,8 +70,8 @@ const Login = () => {
     try {
       if (!newUser.name || !newUser.email || !newUser.password || !newUser.profession) {
         toast({
-          title: "Erro no cadastro",
-          description: "Por favor, preencha todos os campos.",
+          title: t('register.register_error'),
+          description: t('register.register_error_empty'),
           variant: "destructive",
         });
         setIsRegistering(false);
@@ -84,15 +88,15 @@ const Login = () => {
         workHours: '',
         cancelPolicy: '',
         whatsappNumber: '',
-        defaultMessage: 'Olá! Tudo bem?',
+        defaultMessage: t('register.register_default_message', { defaultValue: 'Hello! How are you?' }),
       };
       
       // Save user to mock service
       mockAuthService.saveUser(userData);
       
       toast({
-        title: "Cadastro realizado",
-        description: "Sua conta foi criada com sucesso!",
+        title: t('register.register_success'),
+        description: t('register.register_success_message'),
       });
       
       // Close dialog and set login fields
@@ -109,8 +113,8 @@ const Login = () => {
       });
     } catch (error) {
       toast({
-        title: "Erro no cadastro",
-        description: "Não foi possível criar sua conta. Tente novamente.",
+        title: t('register.register_error'),
+        description: t('register.register_error_message'),
         variant: "destructive",
       });
     } finally {
@@ -127,17 +131,20 @@ const Login = () => {
     <div className="flex min-h-screen items-center justify-center bg-muted p-4">
       <Card className="w-full max-w-md">
         <CardHeader className="space-y-1 text-center">
+          <div className="flex justify-end">
+            <LanguageSwitcher />
+          </div>
           <CardTitle className="text-2xl font-bold tracking-tight text-primary">
-            ProAgenda
+            {t('login.title')}
           </CardTitle>
           <CardDescription>
-            Entre com suas credenciais para acessar seu painel
+            {t('login.subtitle')}
           </CardDescription>
         </CardHeader>
         <form onSubmit={handleLoginSubmit}>
           <CardContent className="space-y-4">
             <div className="space-y-2">
-              <Label htmlFor="email">E-mail</Label>
+              <Label htmlFor="email">{t('login.email')}</Label>
               <Input
                 id="email"
                 type="email"
@@ -149,9 +156,9 @@ const Login = () => {
             </div>
             <div className="space-y-2">
               <div className="flex items-center justify-between">
-                <Label htmlFor="password">Senha</Label>
+                <Label htmlFor="password">{t('login.password')}</Label>
                 <a href="#" className="text-sm text-primary hover:underline">
-                  Esqueceu a senha?
+                  {t('login.forgot_password')}
                 </a>
               </div>
               <Input
@@ -172,10 +179,10 @@ const Login = () => {
               {isLoading ? (
                 <>
                   <Loader className="mr-2 h-4 w-4 animate-spin" />
-                  Entrando...
+                  {t('login.signing_in')}
                 </>
               ) : (
-                "Entrar"
+                t('login.signin')
               )}
             </Button>
             
@@ -183,31 +190,31 @@ const Login = () => {
               <DialogTrigger asChild>
                 <Button variant="outline" className="w-full">
                   <UserPlus className="mr-2 h-4 w-4" />
-                  Criar Nova Conta
+                  {t('login.create_account')}
                 </Button>
               </DialogTrigger>
               <DialogContent>
                 <form onSubmit={handleRegisterSubmit}>
                   <DialogHeader>
-                    <DialogTitle>Criar nova conta</DialogTitle>
+                    <DialogTitle>{t('register.title')}</DialogTitle>
                     <DialogDescription>
-                      Preencha os dados abaixo para criar sua conta no ProAgenda.
+                      {t('register.subtitle')}
                     </DialogDescription>
                   </DialogHeader>
                   <div className="space-y-4 py-4">
                     <div className="space-y-2">
-                      <Label htmlFor="name">Nome completo</Label>
+                      <Label htmlFor="name">{t('register.full_name')}</Label>
                       <Input
                         id="name"
                         name="name"
                         value={newUser.name}
                         onChange={handleNewUserChange}
-                        placeholder="Seu nome completo"
+                        placeholder={t('register.full_name')}
                         required
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-email">E-mail</Label>
+                      <Label htmlFor="register-email">{t('register.email')}</Label>
                       <Input
                         id="register-email"
                         name="email"
@@ -219,7 +226,7 @@ const Login = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="register-password">Senha</Label>
+                      <Label htmlFor="register-password">{t('register.password')}</Label>
                       <Input
                         id="register-password"
                         name="password"
@@ -230,13 +237,13 @@ const Login = () => {
                       />
                     </div>
                     <div className="space-y-2">
-                      <Label htmlFor="profession">Profissão</Label>
+                      <Label htmlFor="profession">{t('register.profession')}</Label>
                       <Input
                         id="profession"
                         name="profession"
                         value={newUser.profession}
                         onChange={handleNewUserChange}
-                        placeholder="Ex: Psicólogo, Nutricionista"
+                        placeholder={t('register.profession_placeholder')}
                         required
                       />
                     </div>
@@ -246,10 +253,10 @@ const Login = () => {
                       {isRegistering ? (
                         <>
                           <Loader className="mr-2 h-4 w-4 animate-spin" />
-                          Cadastrando...
+                          {t('register.registering')}
                         </>
                       ) : (
-                        "Cadastrar"
+                        t('register.register')
                       )}
                     </Button>
                   </DialogFooter>

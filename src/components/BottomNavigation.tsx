@@ -2,29 +2,31 @@
 import { useLocation, Link } from 'react-router-dom';
 import { Calendar, Wallet, LayoutDashboard, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { useTranslation } from 'react-i18next';
 
 const BottomNavigation = () => {
   const location = useLocation();
   const currentPath = location.pathname;
+  const { t } = useTranslation();
   
   const navItems = [
     {
-      name: 'Agenda',
+      name: t('agenda.title'),
       path: '/agenda',
       icon: Calendar
     },
     {
-      name: 'Financeiro',
+      name: t('financial.title'),
       path: '/financeiro',
       icon: Wallet
     },
     {
-      name: 'Dashboard',
+      name: t('dashboard.title'),
       path: '/dashboard',
       icon: LayoutDashboard
     },
     {
-      name: 'Perfil',
+      name: t('profile.title'),
       path: '/perfil',
       icon: User
     },
