@@ -10,13 +10,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-// Define supported languages as string literals instead of a recursive type
+// Define languages using a simple object with string literals
 const LANGUAGES = {
   pt: 'Português',
   en: 'English'
-} as const;
+};
 
-type SupportedLanguage = keyof typeof LANGUAGES;
+// Define a type for supported languages
+type SupportedLanguage = 'pt' | 'en';
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
@@ -28,8 +29,8 @@ const LanguageSwitcher = () => {
   };
   
   // Get current language or default to 'en'
-  const currentLanguage = i18n.language as SupportedLanguage || 'en';
-  const displayName = LANGUAGES[currentLanguage as SupportedLanguage] || LANGUAGES.en;
+  const currentLanguage = (i18n.language || 'en') as SupportedLanguage;
+  const displayName = LANGUAGES[currentLanguage] || LANGUAGES.en;
   
   return (
     <DropdownMenu open={open} onOpenChange={setOpen}>

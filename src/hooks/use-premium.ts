@@ -1,13 +1,13 @@
 
 import { useAuth } from '@/contexts/AuthContext';
+import { useIsPro } from '@/lib/use-plan';
 
 export function usePremium() {
   const { user } = useAuth();
-  
-  const isPremium = user?.plan === 'pro';
+  const isPro = useIsPro();
   
   return {
-    isPremium,
+    isPremium: isPro,
     plan: user?.plan || 'free'
   };
 }

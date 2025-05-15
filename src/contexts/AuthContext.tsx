@@ -1,17 +1,17 @@
-
 import React, { createContext, useState, useContext, useEffect } from 'react';
-import { User, mockAuthService } from '../services/mockData';
+import { User } from '../types/user';
+import { mockAuthService } from '../services/mockData';
 import { useToast } from '@/hooks/use-toast';
 
 interface AuthContextType {
   user: User | null;
-  currentUser: User | null; // Add this property
+  currentUser: User | null;
   loading: boolean;
   login: (email: string, password: string) => Promise<boolean>;
   register: (userData: Omit<User, 'id'>) => Promise<boolean>;
   logout: () => Promise<void>;
   updateProfile: (userData: Partial<User>) => Promise<User>;
-  updateCurrentUser: (user: User) => void; // Add this method
+  updateCurrentUser: (user: User) => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -153,13 +153,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   return (
     <AuthContext.Provider value={{ 
       user, 
-      currentUser: user, // Add this property
+      currentUser: user,
       loading, 
       login, 
       register, 
       logout, 
       updateProfile,
-      updateCurrentUser // Add this method
+      updateCurrentUser
     }}>
       {children}
     </AuthContext.Provider>

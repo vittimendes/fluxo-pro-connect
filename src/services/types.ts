@@ -1,16 +1,7 @@
 
-export interface User {
-  id: string;
-  name: string;
-  email: string;
-  password: string;
-  profession?: string;
-  workHours?: string;
-  cancelPolicy?: string;
-  whatsappNumber?: string;
-  defaultMessage?: string;
-  plan?: 'free' | 'pro'; // Added plan property
-}
+import { User } from '../types/user';
+
+export { User };
 
 export interface Client {
   id: string;
@@ -40,7 +31,7 @@ export interface Appointment {
   location: 'online' | 'in_person' | 'home_visit' | string;
   status: 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show';
   userId: string;
-  notes?: string; // Added missing notes property
+  notes?: string;
 }
 
 export interface FinancialRecord {
@@ -52,8 +43,8 @@ export interface FinancialRecord {
   category?: string;
   userId: string;
   relatedAppointment?: string;
-  appointmentId?: string; // Added property
-  clientId?: string; // Added property
-  clientName?: string; // Added property
-  notes?: string; // Added property
+  appointmentId?: string;
+  clientId?: string;
+  clientName?: string;
+  notes?: string;
 }
