@@ -1,6 +1,6 @@
 
 import { useLocation, Link } from 'react-router-dom';
-import { Calendar, Wallet, LayoutDashboard, User, type LucideIcon } from 'lucide-react';
+import { Calendar, Wallet, LayoutDashboard, User } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { useTranslation } from 'react-i18next';
 import * as React from 'react';
@@ -9,7 +9,7 @@ import * as React from 'react';
 interface NavItem {
   name: string;
   path: string;
-  icon: LucideIcon;
+  icon: React.FC<React.SVGProps<SVGSVGElement>>;
 }
 
 const BottomNavigation = () => {
