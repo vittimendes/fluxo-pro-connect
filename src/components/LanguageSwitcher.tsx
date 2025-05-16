@@ -10,13 +10,13 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe, Check } from 'lucide-react';
 
-// Definição explícita das linguagens suportadas como literais de string
+// Define supported languages as string literals
 type LanguageCode = 'pt' | 'en';
 
 // Define language options
 const LANGUAGES = [
-  { code: 'pt' as LanguageCode, name: 'Português', flag: '🇧🇷' },
-  { code: 'en' as LanguageCode, name: 'English', flag: '🇺🇸' }
+  { code: 'pt' as const, name: 'Português', flag: '🇧🇷' },
+  { code: 'en' as const, name: 'English', flag: '🇺🇸' }
 ];
 
 const LanguageSwitcher = () => {
