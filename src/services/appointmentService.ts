@@ -1,6 +1,6 @@
 
 import { Appointment, FinancialRecord } from './types';
-import { appointmentsByUser, financialRecordsByUser } from './mockStore';
+import { appointmentsByUser, financialRecordsByUser } from './store';
 import { generateUniqueId, formatDate, getCurrentUserId } from './utils';
 
 export const appointmentService = {

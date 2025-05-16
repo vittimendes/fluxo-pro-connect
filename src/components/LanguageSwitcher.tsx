@@ -10,15 +10,8 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-// Define supported language codes as a string union type
-type LanguageCode = 'pt' | 'en';
-
-// Define language information
-const LANGUAGES: Array<{
-  code: LanguageCode;
-  name: string;
-  flag: string;
-}> = [
+// Define the languages directly with a simple array
+const LANGUAGES = [
   { code: 'pt', name: 'Português', flag: '🇧🇷' },
   { code: 'en', name: 'English', flag: '🇺🇸' }
 ];
@@ -28,7 +21,7 @@ const LanguageSwitcher = () => {
   const [open, setOpen] = useState(false);
   
   // Get current language with fallback
-  const getCurrentLanguage = (): LanguageCode => {
+  const getCurrentLanguage = () => {
     const current = i18n.language || 'pt-BR';
     
     // Handle pt-BR -> pt mapping
@@ -41,7 +34,7 @@ const LanguageSwitcher = () => {
   const currentLang = getCurrentLanguage();
   const currentLanguage = LANGUAGES.find(lang => lang.code === currentLang) || LANGUAGES[0];
   
-  const changeLanguage = (code: LanguageCode) => {
+  const changeLanguage = (code: string) => {
     i18n.changeLanguage(code);
     setOpen(false);
   };

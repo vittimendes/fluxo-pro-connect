@@ -1,6 +1,6 @@
 
 import { Client } from './types';
-import { clientsByUser } from './mockStore';
+import { clientsByUser } from './store';
 import { generateUniqueId, getCurrentUserId } from './utils';
 
 export const clientService = {

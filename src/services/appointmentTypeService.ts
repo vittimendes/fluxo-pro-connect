@@ -1,6 +1,6 @@
 
 import { AppointmentType } from './types';
-import { appointmentTypesByUser } from './mockStore';
+import { appointmentTypesByUser } from './store';
 import { generateUniqueId, getCurrentUserId } from './utils';
 
 export const appointmentTypeService = {

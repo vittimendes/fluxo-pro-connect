@@ -1,6 +1,6 @@
 
 import { User } from '../types/user';
-import { users } from './mockStore';
+import { users } from './store';
 import { generateUniqueId } from './utils';
 
 export const mockAuthService = {

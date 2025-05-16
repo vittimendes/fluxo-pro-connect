@@ -1,6 +1,6 @@
 
 import { Attachment } from './types';
-import { attachmentsByUser } from './mockStore';
+import { attachmentsByUser } from './store'; 
 import { generateUniqueId, getCurrentUserId, formatDate } from './utils';
 
 export const attachmentService = {

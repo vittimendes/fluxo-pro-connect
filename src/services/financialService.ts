@@ -1,6 +1,6 @@
 
 import { FinancialRecord } from './types';
-import { financialRecordsByUser } from './mockStore';
+import { financialRecordsByUser } from './store';
 import { generateUniqueId, getCurrentUserId } from './utils';
 
 export const financialService = {
