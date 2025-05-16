@@ -10,20 +10,20 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe, Check } from 'lucide-react';
 
-// Define supported languages as string literals
+// Define supported languages with literal string union type
 type LanguageCode = 'pt' | 'en';
 
-// Define language options with properly typed array
-const LANGUAGES: Array<{code: LanguageCode, name: string, flag: string}> = [
-  { code: 'pt', name: 'Português', flag: '🇧🇷' },
-  { code: 'en', name: 'English', flag: '🇺🇸' }
-];
+// Define language options with explicit typing
+const LANGUAGES = [
+  { code: 'pt' as LanguageCode, name: 'Português', flag: '🇧🇷' },
+  { code: 'en' as LanguageCode, name: 'English', flag: '🇺🇸' }
+] as const;
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   
-  // Simplified function with explicit return type
+  // Get current language with explicit return type
   const getCurrentLanguage = (): LanguageCode => {
     const current = i18n.language || '';
     
