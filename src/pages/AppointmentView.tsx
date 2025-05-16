@@ -144,21 +144,17 @@ const AppointmentView = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
+      <div className="flex items-center">
         <Button variant="outline" onClick={() => navigate('/agenda')}>
           <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
         </Button>
-        
-        <AppointmentStatusSelector
-          currentStatus={appointment.status}
-          onStatusChange={handleStatusChange}
-          isLoading={statusLoading}
-        />
       </div>
 
       <AppointmentDetails 
         appointment={appointment} 
         onExecuteClick={() => setExecuteDialogOpen(true)}
+        onStatusChange={handleStatusChange}
+        statusLoading={statusLoading}
       />
 
       <AppointmentFinancialRecords records={relatedRecords} />

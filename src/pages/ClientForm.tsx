@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { mockDataService, Client } from '@/services/mockData';
@@ -7,18 +8,24 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { ChevronLeft, Loader } from 'lucide-react';
+import { ChevronLeft, Loader, Calendar } from 'lucide-react';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form, FormControl, FormDescription, FormField, FormItem, FormLabel, FormMessage } from '@/components/ui/form';
 import { getCurrentUserId } from '@/services/utils';
+import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover';
+import { cn } from '@/lib/utils';
+import { format } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { Calendar as CalendarComponent } from '@/components/ui/calendar';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
   phone: z.string().min(8, { message: "Telefone inválido" }),
   email: z.string().email({ message: "Email inválido" }).optional().or(z.literal('')),
   notes: z.string().optional(),
+  birthdate: z.date().optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -37,6 +44,7 @@ const ClientForm = () => {
       phone: '',
       email: '',
       notes: '',
+      birthdate: undefined,
     },
   });
 
@@ -55,6 +63,7 @@ const ClientForm = () => {
             phone: client.phone,
             email: client.email || '',
             notes: client.notes || '',
+            birthdate: client.birthdate ? new Date(client.birthdate) : undefined,
           });
         } else {
           toast({
@@ -91,7 +100,8 @@ const ClientForm = () => {
           name: data.name,
           phone: data.phone,
           email: data.email || '',
-          notes: data.notes || ''
+          notes: data.notes || '',
+          birthdate: data.birthdate ? data.birthdate.toISOString().split('T')[0] : undefined,
         });
         toast({
           title: "Cliente atualizado",
@@ -104,6 +114,7 @@ const ClientForm = () => {
           phone: data.phone,
           email: data.email || '',
           notes: data.notes || '',
+          birthdate: data.birthdate ? data.birthdate.toISOString().split('T')[0] : undefined,
           feedbackStatus: 'not_sent', // Add required feedbackStatus field
           userId: getCurrentUserId() // Add required userId field
         });
@@ -196,6 +207,48 @@ const ClientForm = () => {
                     <FormControl>
                       <Input placeholder="email@exemplo.com" {...field} />
                     </FormControl>
+                    <FormMessage />
+                  </FormItem>
+                )}
+              />
+              
+              <FormField
+                control={form.control}
+                name="birthdate"
+                render={({ field }) => (
+                  <FormItem className="flex flex-col">
+                    <FormLabel>Data de Nascimento (opcional)</FormLabel>
+                    <Popover>
+                      <PopoverTrigger asChild>
+                        <FormControl>
+                          <Button
+                            variant={"outline"}
+                            className={cn(
+                              "w-full pl-3 text-left font-normal flex justify-between items-center",
+                              !field.value && "text-muted-foreground"
+                            )}
+                          >
+                            {field.value ? (
+                              format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                            ) : (
+                              <span>Selecione uma data</span>
+                            )}
+                            <Calendar className="h-4 w-4 opacity-50 ml-auto" />
+                          </Button>
+                        </FormControl>
+                      </PopoverTrigger>
+                      <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
+                        <CalendarComponent
+                          mode="single"
+                          selected={field.value}
+                          onSelect={field.onChange}
+                          disabled={(date) => date > new Date()}
+                          initialFocus
+                          className="p-3 pointer-events-auto"
+                          locale={ptBR}
+                        />
+                      </PopoverContent>
+                    </Popover>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -22,7 +22,7 @@ export const QuickActions: React.FC = () => {
         variant="outline"
       >
         <Plus className="h-5 w-5" />
-        <span>Nova Receita</span>
+        <span>Registro Financeiro</span>
       </Button>
     </div>
   );

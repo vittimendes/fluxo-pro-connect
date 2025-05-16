@@ -47,12 +47,16 @@ export const TodayAppointments: React.FC<TodayAppointmentsProps> = ({
     }
   };
 
+  const handleAppointmentClick = (id: string) => {
+    navigate(`/agenda/${id}`);
+  };
+
   return (
     <div className="space-y-3">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold flex items-center gap-2">
           <Calendar className="h-5 w-5" />
-          Agendamentos de Hoje
+          Próximos Agendamentos
         </h3>
         <Button
           variant="link"
@@ -71,19 +75,24 @@ export const TodayAppointments: React.FC<TodayAppointmentsProps> = ({
       ) : appointments.length > 0 ? (
         <div className="space-y-3">
           {appointments.map((appointment) => (
-            <AppointmentCard
+            <div 
               key={appointment.id}
-              appointment={appointment}
-              formatTime={formatTime}
-              getLocationIcon={getLocationIcon}
-              getLocationText={getLocationText}
-            />
+              onClick={() => handleAppointmentClick(appointment.id)}
+              className="cursor-pointer"
+            >
+              <AppointmentCard
+                appointment={appointment}
+                formatTime={formatTime}
+                getLocationIcon={getLocationIcon}
+                getLocationText={getLocationText}
+              />
+            </div>
           ))}
         </div>
       ) : (
         <Card>
           <CardContent className="p-6 text-center text-muted-foreground">
-            <p>Não há agendamentos para hoje.</p>
+            <p>Não há agendamentos pendentes.</p>
             <Button 
               variant="link" 
               onClick={() => navigate('/agenda/novo')}

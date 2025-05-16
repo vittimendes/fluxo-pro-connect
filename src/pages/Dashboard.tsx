@@ -28,34 +28,39 @@ const Dashboard = () => {
       try {
         // Get today's appointments
         const todayAppointments = await mockDataService.getTodayAppointments();
-        setAppointments(todayAppointments);
-
-        // Get financial summary based on selected period
-        if (selectedPeriod === 'current') {
-          const summary = await mockDataService.getMonthlyFinancialSummary(
-            currentDate.getMonth(),
-            currentDate.getFullYear()
-          );
-          setFinancialSummary(summary);
-        } else if (selectedPeriod === 'custom') {
-          const summary = await mockDataService.getMonthlyFinancialSummary(
-            selectedMonth,
-            selectedYear
-          );
-          setFinancialSummary(summary);
-        } else if (selectedPeriod === 'all') {
-          // This would fetch all-time summary in a real implementation
-          // For mock, we'll just double the current month's data
-          const summary = await mockDataService.getMonthlyFinancialSummary(
-            currentDate.getMonth(),
-            currentDate.getFullYear()
-          );
-          setFinancialSummary({
-            income: summary.income * 3,
-            expenses: summary.expenses * 3,
-            balance: summary.balance * 3
+        
+        // If no appointments for today, get future appointments
+        if (todayAppointments.length === 0) {
+          const allAppointments = await mockDataService.getAppointments();
+          // Filter future appointments
+          const tomorrow = new Date();
+          tomorrow.setDate(tomorrow.getDate() + 1);
+          tomorrow.setHours(0, 0, 0, 0);
+          
+          const futureAppointments = allAppointments.filter(app => {
+            const appointmentDate = new Date(`${app.date}T${app.time}`);
+            return appointmentDate >= tomorrow && app.status !== 'canceled' && app.status !== 'completed';
           });
+          
+          // Sort by date (ascending)
+          futureAppointments.sort((a, b) => {
+            const dateA = new Date(`${a.date}T${a.time}`);
+            const dateB = new Date(`${b.date}T${b.time}`);
+            return dateA.getTime() - dateB.getTime();
+          });
+          
+          // Show just the next few appointments
+          setAppointments(futureAppointments.slice(0, 3));
+        } else {
+          setAppointments(todayAppointments);
         }
+
+        // Get financial summary for current month
+        const summary = await mockDataService.getMonthlyFinancialSummary(
+          currentDate.getMonth(),
+          currentDate.getFullYear()
+        );
+        setFinancialSummary(summary);
       } catch (error) {
         console.error('Error fetching dashboard data:', error);
       } finally {

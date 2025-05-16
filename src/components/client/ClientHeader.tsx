@@ -1,6 +1,6 @@
 
 import { Client } from '@/services/mockData';
-import { User, Phone, Mail } from 'lucide-react';
+import { User, Phone, Mail, Calendar } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useNavigate } from 'react-router-dom';
@@ -11,6 +11,11 @@ interface ClientHeaderProps {
 
 const ClientHeader = ({ client }: ClientHeaderProps) => {
   const navigate = useNavigate();
+  
+  const formatBirthdate = (dateString?: string) => {
+    if (!dateString) return null;
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
   
   return (
     <Card>
@@ -31,6 +36,13 @@ const ClientHeader = ({ client }: ClientHeaderProps) => {
             <div className="flex items-center gap-2">
               <Mail className="h-4 w-4 text-muted-foreground" />
               <span>{client.email}</span>
+            </div>
+          )}
+          
+          {client.birthdate && (
+            <div className="flex items-center gap-2">
+              <Calendar className="h-4 w-4 text-muted-foreground" />
+              <span>Nascimento: {formatBirthdate(client.birthdate)}</span>
             </div>
           )}
         </div>

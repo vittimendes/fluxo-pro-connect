@@ -10,6 +10,7 @@ export interface Client {
   phone: string;
   email?: string;
   notes?: string;
+  birthdate?: string;
   feedbackStatus: 'not_sent' | 'pending' | 'completed';
   userId: string;
 }
