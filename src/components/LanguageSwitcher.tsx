@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -10,14 +9,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-// Define language code as a type to avoid deep type instantiation
-type LanguageCode = 'pt' | 'en';
-
-// Define languages using the specific type
-const LANGUAGES: Array<{code: LanguageCode, name: string, flag: string}> = [
+// Define language options with a simpler type approach
+const LANGUAGES = [
   { code: 'pt', name: 'Português', flag: '🇧🇷' },
   { code: 'en', name: 'English', flag: '🇺🇸' }
-];
+] as const;
+
+// Create a type from the actual values used
+type LanguageCode = typeof LANGUAGES[number]['code'];
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
