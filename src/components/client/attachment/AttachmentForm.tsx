@@ -28,9 +28,10 @@ export default function AttachmentForm({ clientId, appointments = [], onAttachme
   const { toast } = useToast();
   const [newAttachment, setNewAttachment] = useState<{
     file?: File;
-    appointmentId?: string;
+    appointmentId?: string | null;
     notes: string;
   }>({
+    appointmentId: null,
     notes: '',
   });
   const [isUploading, setIsUploading] = useState(false);
@@ -90,7 +91,7 @@ export default function AttachmentForm({ clientId, appointments = [], onAttachme
         size: file.size,
         url,
         clientId: clientId,
-        appointmentId: newAttachment.appointmentId,
+        appointmentId: newAttachment.appointmentId || undefined,
         notes: newAttachment.notes || undefined,
       });
       
@@ -98,7 +99,7 @@ export default function AttachmentForm({ clientId, appointments = [], onAttachme
       onAttachmentAdded(attachment);
       
       // Reset form
-      setNewAttachment({ notes: '' });
+      setNewAttachment({ appointmentId: null, notes: '' });
       
       toast({
         title: "Arquivo anexado com sucesso",
@@ -137,27 +138,27 @@ export default function AttachmentForm({ clientId, appointments = [], onAttachme
           </p>
         </div>
         
-        {appointments && appointments.length > 0 && (
+        {appointments && appointments.length > 0 ? (
           <div>
             <Label htmlFor="appointment">Atendimento relacionado (opcional)</Label>
             <Select
-              value={newAttachment.appointmentId}
-              onValueChange={value => setNewAttachment(prev => ({ ...prev, appointmentId: value }))}
+              value={newAttachment.appointmentId || undefined}
+              onValueChange={value => setNewAttachment(prev => ({ ...prev, appointmentId: value || null }))}
             >
               <SelectTrigger>
-                <SelectValue placeholder="Selecione um atendimento" />
+                <SelectValue placeholder="Selecionar atendimento (opcional)" />
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="">Nenhum atendimento</SelectItem>
                 {appointments.map(app => (
                   <SelectItem key={app.id} value={app.id}>
                     {app.date} - {app.type}
                   </SelectItem>
                 ))}
+                <SelectItem value="none">Nenhum atendimento específico</SelectItem>
               </SelectContent>
             </Select>
           </div>
-        )}
+        ) : null}
         
         <div>
           <Label htmlFor="notes">Observações (opcional)</Label>
