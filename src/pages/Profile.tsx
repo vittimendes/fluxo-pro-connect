@@ -1,17 +1,16 @@
+
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { mockAuthService } from '@/services/mockData';
 import { useAuth } from '@/contexts/AuthContext';
 import { useToast } from '@/hooks/use-toast';
-import { Button } from '@/components/ui/button';
-import { Input } from '@/components/ui/input';
-import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader, User, Mail, Phone, Briefcase, Clock, AlertTriangle } from 'lucide-react';
-import { Textarea } from '@/components/ui/textarea';
+import { Loader } from 'lucide-react';
 
-// Use LucideIcon instead of React.ElementType for icon types
-import { LucideIcon } from 'lucide-react';
+// Import the newly created components
+import ProfileHeader from '@/components/profile/ProfileHeader';
+import ProfileFormFields from '@/components/profile/ProfileFormFields';
+import ProfileFooter from '@/components/profile/ProfileFooter';
 
 const Profile = () => {
   const navigate = useNavigate();
@@ -97,132 +96,30 @@ const Profile = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold tracking-tight text-primary">
-          Meu Perfil
-        </h2>
-        {isEditing ? (
-          <div className="space-x-2">
-            <Button variant="outline" onClick={() => setIsEditing(false)}>
-              Cancelar
-            </Button>
-            <Button onClick={handleSaveProfile} disabled={loading}>
-              {loading ? (
-                <>
-                  <Loader className="mr-2 h-4 w-4 animate-spin" />
-                  Salvando...
-                </>
-              ) : "Salvar"}
-            </Button>
-          </div>
-        ) : (
-          <Button onClick={() => setIsEditing(true)}>
-            Editar Perfil
-          </Button>
-        )}
-      </div>
+      <ProfileHeader 
+        isEditing={isEditing} 
+        loading={loading}
+        onEdit={() => setIsEditing(true)}
+        onCancel={() => setIsEditing(false)}
+        onSave={handleSaveProfile}
+      />
 
       <Card>
         <CardHeader>
           <CardTitle>Informações Pessoais</CardTitle>
         </CardHeader>
-        <CardContent className="space-y-4">
-          <div className="flex items-center space-x-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="name">Nome</Label>
-          </div>
-          <Input
-            id="name"
-            name="name"
-            value={profileData.name}
+        <CardContent>
+          <ProfileFormFields 
+            profileData={profileData}
+            isEditing={isEditing}
             onChange={handleInputChange}
-            disabled={!isEditing}
-          />
-
-          <div className="flex items-center space-x-2">
-            <Mail className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="email">Email</Label>
-          </div>
-          <Input
-            id="email"
-            name="email"
-            type="email"
-            value={profileData.email}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-          />
-
-          <div className="flex items-center space-x-2">
-            <Briefcase className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="profession">Profissão</Label>
-          </div>
-          <Input
-            id="profession"
-            name="profession"
-            value={profileData.profession}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-          />
-
-          <div className="flex items-center space-x-2">
-            <Clock className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="workHours">Horário de Trabalho</Label>
-          </div>
-          <Input
-            id="workHours"
-            name="workHours"
-            value={profileData.workHours}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-          />
-
-          <div className="flex items-center space-x-2">
-            <AlertTriangle className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="cancelPolicy">Política de Cancelamento</Label>
-          </div>
-          <Textarea
-            id="cancelPolicy"
-            name="cancelPolicy"
-            value={profileData.cancelPolicy}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className="resize-none"
-          />
-
-          <div className="flex items-center space-x-2">
-            <Phone className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="whatsappNumber">Número do WhatsApp</Label>
-          </div>
-          <Input
-            id="whatsappNumber"
-            name="whatsappNumber"
-            value={profileData.whatsappNumber}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-          />
-
-          <div className="flex items-center space-x-2">
-            <User className="h-4 w-4 text-muted-foreground" />
-            <Label htmlFor="defaultMessage">Mensagem Padrão</Label>
-          </div>
-           <Textarea
-            id="defaultMessage"
-            name="defaultMessage"
-            value={profileData.defaultMessage}
-            onChange={handleInputChange}
-            disabled={!isEditing}
-            className="resize-none"
           />
         </CardContent>
         <CardFooter>
-          <Button variant="destructive" onClick={handleLogout} disabled={loading}>
-            {loading ? (
-              <>
-                <Loader className="mr-2 h-4 w-4 animate-spin" />
-                Saindo...
-              </>
-            ) : "Sair da Conta"}
-          </Button>
+          <ProfileFooter 
+            loading={loading}
+            onLogout={handleLogout}
+          />
         </CardFooter>
       </Card>
     </div>
