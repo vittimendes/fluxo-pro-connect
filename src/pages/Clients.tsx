@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { mockDataService, Client } from '@/services/mockData';
@@ -5,7 +6,7 @@ import { Input } from '@/components/ui/input';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { useToast } from '@/hooks/use-toast';
-import { Plus, Search, Trash2, Edit, Phone, Mail } from 'lucide-react';
+import { Plus, Search, Trash2, Edit, Phone, Mail, Cake } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -14,6 +15,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
 
 const Clients = () => {
   const [clients, setClients] = useState<Client[]>([]);
@@ -102,6 +105,16 @@ const Clients = () => {
     }
   };
 
+  const formatBirthdate = (dateStr?: string) => {
+    if (!dateStr) return '';
+    try {
+      const date = parseISO(dateStr);
+      return format(date, "dd/MM/yyyy", { locale: ptBR });
+    } catch (error) {
+      return dateStr;
+    }
+  };
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -148,6 +161,12 @@ const Clients = () => {
                         <div className="flex items-center text-muted-foreground">
                           <Mail className="h-3 w-3 mr-1" />
                           <span className="text-sm">{client.email}</span>
+                        </div>
+                      )}
+                      {client.birthdate && (
+                        <div className="flex items-center text-muted-foreground">
+                          <Cake className="h-3 w-3 mr-1" />
+                          <span className="text-sm">{formatBirthdate(client.birthdate)}</span>
                         </div>
                       )}
                       {client.notes && (

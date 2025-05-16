@@ -6,6 +6,9 @@ import { Button } from '@/components/ui/button';
 import { Calendar, MapPin } from 'lucide-react';
 import { Appointment } from '@/services/types';
 import { AppointmentCard } from './AppointmentCard';
+import { format, parseISO } from 'date-fns';
+import { ptBR } from 'date-fns/locale';
+import { getAppointmentStatusInfo } from '@/components/appointment/AppointmentStatusUtils';
 
 interface TodayAppointmentsProps {
   appointments: Appointment[];
@@ -47,6 +50,27 @@ export const TodayAppointments: React.FC<TodayAppointmentsProps> = ({
     }
   };
 
+  const formatAppointmentDate = (dateStr: string) => {
+    try {
+      const date = parseISO(dateStr);
+      const today = new Date();
+      today.setHours(0, 0, 0, 0);
+      
+      const tomorrow = new Date(today);
+      tomorrow.setDate(tomorrow.getDate() + 1);
+      
+      if (date.getTime() === today.getTime()) {
+        return 'Hoje';
+      } else if (date.getTime() === tomorrow.getTime()) {
+        return 'Amanhã';
+      } else {
+        return format(date, "dd/MM/yyyy", { locale: ptBR });
+      }
+    } catch (error) {
+      return dateStr;
+    }
+  };
+
   const handleAppointmentClick = (id: string) => {
     navigate(`/agenda/${id}`);
   };
@@ -80,12 +104,39 @@ export const TodayAppointments: React.FC<TodayAppointmentsProps> = ({
               onClick={() => handleAppointmentClick(appointment.id)}
               className="cursor-pointer"
             >
-              <AppointmentCard
-                appointment={appointment}
-                formatTime={formatTime}
-                getLocationIcon={getLocationIcon}
-                getLocationText={getLocationText}
-              />
+              <Card className="hover:shadow-md transition-shadow">
+                <CardContent className="p-4">
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="flex items-center mb-1">
+                        <span className="font-medium">{appointment.clientName}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-muted-foreground mb-1">
+                        <span>{formatAppointmentDate(appointment.date)} - {formatTime(appointment.time)}</span>
+                      </div>
+                      <div className="flex items-center text-sm text-muted-foreground">
+                        {getLocationIcon(appointment.location)}
+                        <span className="ml-1">{getLocationText(appointment.location)}</span>
+                      </div>
+                    </div>
+                    <div className="text-right flex flex-col items-end gap-1">
+                      <span className="bg-primary-muted text-primary text-xs px-2 py-1 rounded-full">
+                        {appointment.type}
+                      </span>
+                      {(() => {
+                        const statusInfo = getAppointmentStatusInfo(appointment.status);
+                        const StatusIcon = statusInfo.icon;
+                        return (
+                          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full text-xs ${statusInfo.styles}`}>
+                            <StatusIcon className="h-3 w-3" />
+                            <span>{statusInfo.label}</span>
+                          </div>
+                        );
+                      })()}
+                    </div>
+                  </div>
+                </CardContent>
+              </Card>
             </div>
           ))}
         </div>

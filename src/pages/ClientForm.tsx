@@ -19,13 +19,16 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Calendar as CalendarComponent } from '@/components/ui/calendar';
+import { ChevronDown } from 'lucide-react';
 
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
   phone: z.string().min(8, { message: "Telefone inválido" }),
   email: z.string().email({ message: "Email inválido" }).optional().or(z.literal('')),
   notes: z.string().optional(),
-  birthdate: z.date().optional(),
+  birthdate: z.date({
+    required_error: "Data de nascimento é obrigatória",
+  }),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -36,6 +39,8 @@ const ClientForm = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(id ? true : false);
+  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
+  const [selectingYear, setSelectingYear] = useState(false);
 
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
@@ -58,6 +63,12 @@ const ClientForm = () => {
         const client = clients.find(c => c.id === id);
         
         if (client) {
+          // If the client has a birthdate, set the selectedYear
+          if (client.birthdate) {
+            const birthdate = new Date(client.birthdate);
+            setSelectedYear(birthdate.getFullYear());
+          }
+          
           form.reset({
             name: client.name,
             phone: client.phone,
@@ -134,6 +145,31 @@ const ClientForm = () => {
     } finally {
       setLoading(false);
     }
+  };
+  
+  // Generate year options for the year selector
+  const generateYearOptions = () => {
+    const currentYear = new Date().getFullYear();
+    const startYear = currentYear - 100; // 100 years ago
+    const years = [];
+    
+    for (let year = currentYear; year >= startYear; year--) {
+      years.push(year);
+    }
+    
+    return years;
+  };
+  
+  // Handle year selection
+  const handleYearSelect = (year: number) => {
+    setSelectedYear(year);
+    setSelectingYear(false);
+    
+    // Update the calendar view to the selected year
+    const currentDate = form.getValues('birthdate') || new Date();
+    const newDate = new Date(currentDate);
+    newDate.setFullYear(year);
+    form.setValue('birthdate', newDate);
   };
 
   if (initialLoading) {
@@ -217,38 +253,80 @@ const ClientForm = () => {
                 name="birthdate"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <FormLabel>Data de Nascimento (opcional)</FormLabel>
-                    <Popover>
-                      <PopoverTrigger asChild>
-                        <FormControl>
-                          <Button
-                            variant={"outline"}
-                            className={cn(
-                              "w-full pl-3 text-left font-normal flex justify-between items-center",
-                              !field.value && "text-muted-foreground"
-                            )}
-                          >
-                            {field.value ? (
-                              format(field.value, "dd/MM/yyyy", { locale: ptBR })
-                            ) : (
-                              <span>Selecione uma data</span>
-                            )}
-                            <Calendar className="h-4 w-4 opacity-50 ml-auto" />
-                          </Button>
-                        </FormControl>
-                      </PopoverTrigger>
-                      <PopoverContent className="w-auto p-0 pointer-events-auto" align="start">
-                        <CalendarComponent
-                          mode="single"
-                          selected={field.value}
-                          onSelect={field.onChange}
-                          disabled={(date) => date > new Date()}
-                          initialFocus
-                          className="p-3 pointer-events-auto"
-                          locale={ptBR}
-                        />
-                      </PopoverContent>
-                    </Popover>
+                    <FormLabel>Data de Nascimento <span className="text-destructive">*</span></FormLabel>
+                    <div className="flex gap-2">
+                      <Popover>
+                        <PopoverTrigger asChild>
+                          <FormControl>
+                            <Button
+                              variant={"outline"}
+                              className={cn(
+                                "flex-1 pl-3 text-left font-normal flex justify-between items-center",
+                                !field.value && "text-muted-foreground"
+                              )}
+                            >
+                              {field.value ? (
+                                format(field.value, "dd/MM/yyyy", { locale: ptBR })
+                              ) : (
+                                <span>Selecione uma data</span>
+                              )}
+                              <Calendar className="h-4 w-4 opacity-50 ml-auto" />
+                            </Button>
+                          </FormControl>
+                        </PopoverTrigger>
+                        <PopoverContent className="w-auto p-0" align="start">
+                          <div className="flex items-center justify-between p-3 border-b">
+                            <div className="font-medium">Selecione a data</div>
+                            <Popover open={selectingYear} onOpenChange={setSelectingYear}>
+                              <PopoverTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="sm"
+                                  className="h-8 gap-1 text-xs font-normal"
+                                >
+                                  {selectedYear}
+                                  <ChevronDown className="h-3 w-3 opacity-50" />
+                                </Button>
+                              </PopoverTrigger>
+                              <PopoverContent className="w-auto p-0" align="start">
+                                <div className="h-64 overflow-y-auto p-2">
+                                  <div className="grid grid-cols-4 gap-1">
+                                    {generateYearOptions().map(year => (
+                                      <Button
+                                        key={year}
+                                        variant="ghost"
+                                        size="sm"
+                                        className={cn(
+                                          "h-8 text-xs",
+                                          year === selectedYear && "bg-primary text-primary-foreground"
+                                        )}
+                                        onClick={() => handleYearSelect(year)}
+                                      >
+                                        {year}
+                                      </Button>
+                                    ))}
+                                  </div>
+                                </div>
+                              </PopoverContent>
+                            </Popover>
+                          </div>
+                          <CalendarComponent
+                            mode="single"
+                            selected={field.value}
+                            onSelect={field.onChange}
+                            disabled={(date) => date > new Date()}
+                            defaultMonth={field.value || new Date(selectedYear, 0)}
+                            year={selectedYear}
+                            initialFocus
+                            className="p-3 pointer-events-auto"
+                            locale={ptBR}
+                          />
+                        </PopoverContent>
+                      </Popover>
+                    </div>
+                    <FormDescription>
+                      A data de nascimento é obrigatória para o cadastro do cliente
+                    </FormDescription>
                     <FormMessage />
                   </FormItem>
                 )}

@@ -2,13 +2,14 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
-import { Appointment, FinancialRecord, mockDataService } from '@/services/mockData';
+import { Appointment, FinancialRecord, AppointmentType, Client, mockDataService } from '@/services/mockData';
 import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
 import AppointmentDetails from '@/components/appointment/AppointmentDetails';
-import AppointmentStatusSelector from '@/components/appointment/AppointmentStatusSelector';
 import AppointmentFinancialRecords from '@/components/appointment/AppointmentFinancialRecords';
-import ExecuteAppointmentDialog from '@/components/appointment/ExecuteAppointmentDialog';
+import AppointmentForm from '@/components/appointment/AppointmentForm';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { format, parseISO } from 'date-fns';
 
 const AppointmentView = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,12 +17,23 @@ const AppointmentView = () => {
   const [loading, setLoading] = useState(true);
   const [statusLoading, setStatusLoading] = useState(false);
   const [relatedRecords, setRelatedRecords] = useState<FinancialRecord[]>([]);
-  const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
-  const [financialRecord, setFinancialRecord] = useState({
-    amount: 0,
-    description: '',
-    type: 'income' as 'income' | 'expense'
+  const [isEditing, setIsEditing] = useState(false);
+  const [clients, setClients] = useState<Client[]>([]);
+  const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>([]);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  
+  const [formData, setFormData] = useState({
+    clientId: '',
+    clientName: '',
+    type: '',
+    date: new Date(),
+    time: '',
+    duration: '',
+    location: '',
+    notes: '',
+    status: ''
   });
+  
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -35,8 +47,28 @@ const AppointmentView = () => {
         const appointments = await mockDataService.getAppointments();
         const foundAppointment = appointments.find(app => app.id === id);
         
+        // Fetch clients and appointment types for edit form
+        const clientsData = await mockDataService.getClients();
+        const typesData = await mockDataService.getAppointmentTypes();
+        
+        setClients(clientsData);
+        setAppointmentTypes(typesData);
+        
         if (foundAppointment) {
           setAppointment(foundAppointment);
+          
+          // Initialize form data
+          setFormData({
+            clientId: foundAppointment.clientId,
+            clientName: foundAppointment.clientName,
+            type: foundAppointment.type,
+            date: parseISO(foundAppointment.date),
+            time: foundAppointment.time,
+            duration: String(foundAppointment.duration),
+            location: foundAppointment.location,
+            notes: foundAppointment.notes || '',
+            status: foundAppointment.status
+          });
           
           // Get related financial records
           const records = await mockDataService.getFinancialRecordsByAppointment(id);
@@ -75,6 +107,10 @@ const AppointmentView = () => {
       );
       
       setAppointment(updatedAppointment);
+      setFormData(prev => ({
+        ...prev,
+        status: newStatus
+      }));
       
       toast({
         title: "Status atualizado",
@@ -92,32 +128,86 @@ const AppointmentView = () => {
     }
   };
   
-  const handleExecuteAppointment = async () => {
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+    const { name, value } = e.target;
+    setFormData(prev => ({ ...prev, [name]: value }));
+  };
+
+  const handleSelectChange = (name: string, value: string) => {
+    setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // If changing client, update clientName
+    if (name === 'clientId') {
+      const selectedClient = clients.find(client => client.id === value);
+      if (selectedClient) {
+        setFormData(prev => ({ ...prev, clientName: selectedClient.name }));
+      }
+    }
+  };
+
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setFormData(prev => ({ ...prev, date }));
+    }
+  };
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!appointment) return;
+    
+    setIsSubmitting(true);
+    try {
+      // Format date for API
+      const formattedDate = format(formData.date, 'yyyy-MM-dd');
+      
+      const updatedAppointment = await mockDataService.updateAppointment(appointment.id, {
+        clientId: formData.clientId,
+        clientName: formData.clientName,
+        type: formData.type,
+        date: formattedDate,
+        time: formData.time,
+        duration: parseInt(formData.duration),
+        location: formData.location as 'online' | 'in_person' | 'home_visit',
+        notes: formData.notes,
+        status: formData.status as Appointment['status']
+      });
+      
+      setAppointment(updatedAppointment);
+      setIsEditing(false);
+      
+      toast({
+        title: "Agendamento atualizado",
+        description: "As alterações foram salvas com sucesso."
+      });
+    } catch (error) {
+      console.error("Error updating appointment:", error);
+      toast({
+        title: "Erro",
+        description: "Não foi possível atualizar o agendamento.",
+        variant: "destructive"
+      });
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+  
+  const handleDeleteAppointment = async () => {
     if (!appointment) return;
     
     try {
-      // Only create a financial record if amount > 0
-      const result = financialRecord.amount > 0 
-        ? await mockDataService.executeAppointment(appointment.id, financialRecord)
-        : await mockDataService.executeAppointment(appointment.id);
-      
-      setAppointment(result.appointment);
-      
-      if (result.financialRecord) {
-        setRelatedRecords(prev => [...prev, result.financialRecord!]);
-      }
+      await mockDataService.deleteAppointment(appointment.id);
       
       toast({
-        title: "Atendimento executado",
-        description: "Atendimento marcado como concluído com sucesso.",
+        title: "Agendamento excluído",
+        description: "O agendamento foi removido com sucesso."
       });
       
-      setExecuteDialogOpen(false);
+      navigate('/agenda');
     } catch (error) {
-      console.error("Error executing appointment:", error);
+      console.error("Error deleting appointment:", error);
       toast({
         title: "Erro",
-        description: "Não foi possível executar o atendimento.",
+        description: "Não foi possível excluir o agendamento.",
         variant: "destructive"
       });
     }
@@ -144,30 +234,50 @@ const AppointmentView = () => {
 
   return (
     <div className="space-y-6">
-      <div className="flex items-center">
+      <div className="flex justify-between items-center">
         <Button variant="outline" onClick={() => navigate('/agenda')}>
           <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
         </Button>
+        
+        {!isEditing && (
+          <Button onClick={() => setIsEditing(true)}>
+            Editar
+          </Button>
+        )}
       </div>
 
-      <AppointmentDetails 
-        appointment={appointment} 
-        onExecuteClick={() => setExecuteDialogOpen(true)}
-        onStatusChange={handleStatusChange}
-        statusLoading={statusLoading}
-      />
+      <Tabs value={isEditing ? "edit" : "view"}>
+        <TabsContent value="view" className="space-y-6 mt-0">
+          <AppointmentDetails 
+            appointment={appointment}
+            onStatusChange={handleStatusChange}
+            statusLoading={statusLoading}
+            hasFinancialRecords={relatedRecords.length > 0}
+            onDeleteAppointment={handleDeleteAppointment}
+          />
 
-      <AppointmentFinancialRecords records={relatedRecords} />
-      
-      <ExecuteAppointmentDialog
-        open={executeDialogOpen}
-        onOpenChange={setExecuteDialogOpen}
-        onExecute={handleExecuteAppointment}
-        appointment={{
-          id: appointment.id,
-          clientName: appointment.clientName
-        }}
-      />
+          <AppointmentFinancialRecords records={relatedRecords} />
+        </TabsContent>
+        
+        <TabsContent value="edit" className="space-y-6 mt-0">
+          <AppointmentForm
+            clients={clients}
+            appointmentTypes={appointmentTypes}
+            formData={formData}
+            isSubmitting={isSubmitting}
+            onInputChange={handleInputChange}
+            onSelectChange={handleSelectChange}
+            onDateChange={handleDateChange}
+            onSubmit={handleSubmit}
+          />
+          
+          <div className="flex justify-end">
+            <Button variant="outline" onClick={() => setIsEditing(false)} className="mr-2">
+              Cancelar
+            </Button>
+          </div>
+        </TabsContent>
+      </Tabs>
     </div>
   );
 };

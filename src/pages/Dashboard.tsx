@@ -26,34 +26,28 @@ const Dashboard = () => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Get today's appointments
-        const todayAppointments = await mockDataService.getTodayAppointments();
+        // Get all appointments
+        const allAppointments = await mockDataService.getAppointments();
         
-        // If no appointments for today, get future appointments
-        if (todayAppointments.length === 0) {
-          const allAppointments = await mockDataService.getAppointments();
-          // Filter future appointments
-          const tomorrow = new Date();
-          tomorrow.setDate(tomorrow.getDate() + 1);
-          tomorrow.setHours(0, 0, 0, 0);
-          
-          const futureAppointments = allAppointments.filter(app => {
-            const appointmentDate = new Date(`${app.date}T${app.time}`);
-            return appointmentDate >= tomorrow && app.status !== 'canceled' && app.status !== 'completed';
-          });
-          
-          // Sort by date (ascending)
-          futureAppointments.sort((a, b) => {
-            const dateA = new Date(`${a.date}T${a.time}`);
-            const dateB = new Date(`${b.date}T${b.time}`);
-            return dateA.getTime() - dateB.getTime();
-          });
-          
-          // Show just the next few appointments
-          setAppointments(futureAppointments.slice(0, 3));
-        } else {
-          setAppointments(todayAppointments);
-        }
+        // Filter today's and future appointments
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        
+        const upcomingAppointments = allAppointments.filter(app => {
+          const appointmentDate = new Date(`${app.date}T00:00:00`);
+          return appointmentDate >= today && 
+                 (app.status === 'scheduled' || app.status === 'confirmed');
+        });
+        
+        // Sort by date and time (ascending)
+        upcomingAppointments.sort((a, b) => {
+          const dateA = new Date(`${a.date}T${a.time}`);
+          const dateB = new Date(`${b.date}T${b.time}`);
+          return dateA.getTime() - dateB.getTime();
+        });
+        
+        // Show up to 10 upcoming appointments
+        setAppointments(upcomingAppointments.slice(0, 10));
 
         // Get financial summary for current month
         const summary = await mockDataService.getMonthlyFinancialSummary(

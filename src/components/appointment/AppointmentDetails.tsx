@@ -5,22 +5,36 @@ import { Appointment } from "@/services/types";
 import { getAppointmentStatusInfo } from "./AppointmentStatusUtils";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
-import { CalendarClock, Clock, MapPin, User, FileText, CheckCircle } from "lucide-react";
+import { CalendarClock, Clock, MapPin, User, FileText, Trash2, AlertCircle } from "lucide-react";
 import AppointmentStatusSelector from "./AppointmentStatusSelector";
+import { useState } from "react";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 interface AppointmentDetailsProps {
   appointment: Appointment;
-  onExecuteClick: () => void;
   onStatusChange: (status: string) => void;
   statusLoading: boolean;
+  hasFinancialRecords: boolean;
+  onDeleteAppointment: () => void;
 }
 
 export default function AppointmentDetails({
   appointment,
-  onExecuteClick,
   onStatusChange,
-  statusLoading
+  statusLoading,
+  hasFinancialRecords,
+  onDeleteAppointment
 }: AppointmentDetailsProps) {
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
   
   const formatDate = (dateStr: string) => {
     try {
@@ -62,8 +76,6 @@ export default function AppointmentDetails({
     }
   };
 
-  const isStatusCompleted = appointment.status === "completed";
-
   return (
     <Card>
       <CardHeader className="pb-2">
@@ -80,12 +92,14 @@ export default function AppointmentDetails({
               isLoading={statusLoading}
             />
             
-            {!isStatusCompleted && (
-              <Button onClick={onExecuteClick} size="sm" className="ml-2">
-                <CheckCircle className="mr-1 h-4 w-4" />
-                <span className="hidden sm:inline-block">Concluir</span>
-              </Button>
-            )}
+            <Button 
+              variant="outline" 
+              size="sm"
+              className="ml-2 text-destructive hover:text-destructive hover:bg-destructive/10"
+              onClick={() => setDeleteDialogOpen(true)}
+            >
+              <Trash2 className="h-4 w-4" />
+            </Button>
           </div>
         </div>
       </CardHeader>
@@ -122,6 +136,41 @@ export default function AppointmentDetails({
           </div>
         )}
       </CardContent>
+
+      <AlertDialog open={deleteDialogOpen} onOpenChange={setDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir Agendamento?</AlertDialogTitle>
+            <AlertDialogDescription>
+              {hasFinancialRecords ? (
+                <div className="space-y-3">
+                  <div className="flex items-center text-destructive gap-2">
+                    <AlertCircle className="h-5 w-5" />
+                    <span className="font-medium">Não é possível excluir este agendamento.</span>
+                  </div>
+                  <p>
+                    Este agendamento possui registros financeiros vinculados e não pode ser excluído.
+                    Remova os registros financeiros primeiro para poder excluir este agendamento.
+                  </p>
+                </div>
+              ) : (
+                'Esta ação não pode ser desfeita. Tem certeza que deseja excluir este agendamento permanentemente?'
+              )}
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            {!hasFinancialRecords && (
+              <AlertDialogAction 
+                className="bg-destructive text-destructive-foreground" 
+                onClick={onDeleteAppointment}
+              >
+                Excluir
+              </AlertDialogAction>
+            )}
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </Card>
   );
 }
