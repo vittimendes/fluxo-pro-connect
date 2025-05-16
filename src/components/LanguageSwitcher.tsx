@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import { Button } from '@/components/ui/button';
@@ -9,14 +10,14 @@ import {
 } from '@/components/ui/dropdown-menu';
 import { Globe } from 'lucide-react';
 
-// Define language options with a simpler type approach
+// Define language options with explicitly typed array
 const LANGUAGES = [
   { code: 'pt', name: 'Português', flag: '🇧🇷' },
   { code: 'en', name: 'English', flag: '🇺🇸' }
-] as const;
+];
 
-// Create a type from the actual values used
-type LanguageCode = typeof LANGUAGES[number]['code'];
+// Define the language code type explicitly
+type LanguageCode = 'pt' | 'en';
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
@@ -56,7 +57,7 @@ const LanguageSwitcher = () => {
           <DropdownMenuItem 
             key={language.code}
             className={currentLang === language.code ? "bg-accent" : ""}
-            onClick={() => changeLanguage(language.code)}
+            onClick={() => changeLanguage(language.code as LanguageCode)}
           >
             <span className="mr-2">{language.flag}</span>
             {language.name}
