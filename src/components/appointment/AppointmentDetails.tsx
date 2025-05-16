@@ -2,7 +2,7 @@
 import { Card, CardContent, CardHeader } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Appointment } from "@/services/types";
-import { getAppointmentStatusColor, getAppointmentStatusIcon, getAppointmentStatusText } from "./AppointmentStatusUtils";
+import { getAppointmentStatusInfo } from "./AppointmentStatusUtils";
 import { format, parseISO } from "date-fns";
 import { ptBR } from "date-fns/locale";
 import { CalendarClock, Clock, MapPin, User, FileText, CheckCircle } from "lucide-react";
