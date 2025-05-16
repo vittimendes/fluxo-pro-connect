@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { mockDataService, Client } from '@/services/mockData';
@@ -316,7 +315,6 @@ const ClientForm = () => {
                             onSelect={field.onChange}
                             disabled={(date) => date > new Date()}
                             defaultMonth={field.value || new Date(selectedYear, 0)}
-                            year={selectedYear}
                             initialFocus
                             className="p-3 pointer-events-auto"
                             locale={ptBR}
