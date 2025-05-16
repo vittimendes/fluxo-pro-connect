@@ -1,4 +1,5 @@
 
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { FileIcon, ImageIcon, XIcon, FileTextIcon, FileSpreadsheetIcon } from 'lucide-react';
@@ -17,6 +18,8 @@ interface AttachmentCardProps {
 }
 
 export default function AttachmentCard({ attachment, onRemove }: AttachmentCardProps) {
+  const [imageError, setImageError] = useState(false);
+  
   const getFileIcon = (type: string) => {
     if (type.startsWith('image/')) return ImageIcon;
     if (type === 'application/pdf') return FileIcon;
@@ -34,20 +37,28 @@ export default function AttachmentCard({ attachment, onRemove }: AttachmentCardP
   const isImage = attachment.type.startsWith('image/');
   const FileIconComponent = getFileIcon(attachment.type);
 
+  const handleImageError = () => {
+    setImageError(true);
+  };
+
   return (
     <Card className="overflow-hidden">
       <div className="relative">
-        {isImage ? (
+        {isImage && !imageError ? (
           <div className="aspect-video bg-muted flex items-center justify-center overflow-hidden">
             <img 
               src={attachment.url} 
               alt={attachment.name} 
               className="object-cover h-full w-full"
+              onError={handleImageError}
             />
           </div>
         ) : (
-          <div className="aspect-video bg-muted flex items-center justify-center">
+          <div className="aspect-video bg-muted flex flex-col items-center justify-center">
             <FileIconComponent className="h-16 w-16 text-muted-foreground" />
+            {imageError && isImage && (
+              <p className="text-xs text-muted-foreground mt-2">Imagem indisponível</p>
+            )}
           </div>
         )}
         <Button 
