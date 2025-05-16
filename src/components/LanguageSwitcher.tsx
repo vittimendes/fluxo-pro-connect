@@ -13,23 +13,20 @@ import { Globe, Check } from 'lucide-react';
 // Define supported languages as string literals
 type LanguageCode = 'pt' | 'en';
 
-// Define language options
-const LANGUAGES = [
-  { code: 'pt' as const, name: 'Português', flag: '🇧🇷' },
-  { code: 'en' as const, name: 'English', flag: '🇺🇸' }
+// Define language options with properly typed array
+const LANGUAGES: Array<{code: LanguageCode, name: string, flag: string}> = [
+  { code: 'pt', name: 'Português', flag: '🇧🇷' },
+  { code: 'en', name: 'English', flag: '🇺🇸' }
 ];
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   
-  // Get current language with simplified fallback logic
+  // Simplified function with explicit return type
   const getCurrentLanguage = (): LanguageCode => {
-    const current = i18n.language;
+    const current = i18n.language || '';
     
-    if (!current) return 'pt';
-    
-    // Handle pt-BR -> pt mapping
     if (current.startsWith('pt')) return 'pt';
     if (current.startsWith('en')) return 'en';
     
