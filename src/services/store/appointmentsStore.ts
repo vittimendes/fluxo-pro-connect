@@ -1,7 +1,7 @@
 
 import { Appointment } from '../types';
 import { formatDate } from '../utils';
-import { today, tomorrow } from './dateUtils';
+import { today, tomorrow, nextWeek } from './dateUtils';
 
 // Storage for user-specific appointments data
 export const appointmentsByUser: { [userId: string]: Appointment[] } = {};
