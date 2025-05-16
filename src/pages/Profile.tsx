@@ -125,9 +125,6 @@ const Profile = () => {
       <Card>
         <CardHeader>
           <CardTitle>Informações Pessoais</CardTitle>
-          {/* <CardDescription>
-            Altere suas informações pessoais e configurações.
-          </CardDescription> */}
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex items-center space-x-2">

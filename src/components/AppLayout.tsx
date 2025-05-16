@@ -2,7 +2,6 @@
 import { Outlet } from 'react-router-dom';
 import BottomNavigation from './BottomNavigation';
 import SidebarNavigation from './SidebarNavigation';
-import LanguageSwitcher from './LanguageSwitcher';
 import { Home, Calendar, DollarSign, Users, User, Wrench } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
 
@@ -25,7 +24,7 @@ const AppLayout = () => {
       <div className="flex flex-col flex-1">
         <header className="bg-white border-b p-2">
           <div className="flex justify-end max-w-lg mx-auto">
-            <LanguageSwitcher />
+            {/* LanguageSwitcher removed */}
           </div>
         </header>
         <main className={`flex-1 pt-4 ${isMobile ? 'pb-20' : 'pb-4'} px-4 ${isMobile ? 'max-w-lg' : ''} mx-auto w-full`}>
