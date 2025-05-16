@@ -8,24 +8,26 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { Globe } from 'lucide-react';
+import { Globe, Check } from 'lucide-react';
+
+// Definição explícita das linguagens suportadas como literais de string
+type LanguageCode = 'pt' | 'en';
 
 // Define language options
 const LANGUAGES = [
-  { code: 'pt', name: 'Português', flag: '🇧🇷' },
-  { code: 'en', name: 'English', flag: '🇺🇸' }
+  { code: 'pt' as LanguageCode, name: 'Português', flag: '🇧🇷' },
+  { code: 'en' as LanguageCode, name: 'English', flag: '🇺🇸' }
 ];
-
-// Define the language code type explicitly
-type LanguageCode = 'pt' | 'en';
 
 const LanguageSwitcher = () => {
   const { i18n } = useTranslation();
   const [open, setOpen] = useState(false);
   
-  // Get current language with fallback
-  const getCurrentLanguage = () => {
-    const current = i18n.language || 'pt-BR';
+  // Get current language with simplified fallback logic
+  const getCurrentLanguage = (): LanguageCode => {
+    const current = i18n.language;
+    
+    if (!current) return 'pt';
     
     // Handle pt-BR -> pt mapping
     if (current.startsWith('pt')) return 'pt';
@@ -48,19 +50,24 @@ const LanguageSwitcher = () => {
         <Button variant="outline" size="sm" className="flex items-center gap-2">
           <Globe className="h-4 w-4" />
           <span className="hidden sm:inline">
-            {currentLanguage.name}
+            {currentLanguage.flag} {currentLanguage.name}
           </span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
+      <DropdownMenuContent align="end" className="w-40 bg-background">
         {LANGUAGES.map((language) => (
           <DropdownMenuItem 
             key={language.code}
-            className={currentLang === language.code ? "bg-accent" : ""}
-            onClick={() => changeLanguage(language.code as LanguageCode)}
+            onClick={() => changeLanguage(language.code)}
+            className="flex items-center justify-between cursor-pointer"
           >
-            <span className="mr-2">{language.flag}</span>
-            {language.name}
+            <div className="flex items-center gap-2">
+              <span>{language.flag}</span>
+              {language.name}
+            </div>
+            {currentLang === language.code && (
+              <Check className="h-4 w-4 text-primary" />
+            )}
           </DropdownMenuItem>
         ))}
       </DropdownMenuContent>
