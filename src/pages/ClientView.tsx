@@ -1,8 +1,7 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { Client, Appointment, FinancialRecord, mockDataService } from '@/services/mockData';
-import { Card, CardContent } from '@/components/ui/card';
+import { Client, Appointment, FinancialRecord } from '@/services/types';
+import { mockDataService } from '@/services/mockData';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';

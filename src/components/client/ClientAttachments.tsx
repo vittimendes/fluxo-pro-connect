@@ -1,5 +1,5 @@
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -10,7 +10,8 @@ import { usePremium } from '@/hooks/use-premium';
 import PremiumOverlay from '@/components/PremiumOverlay';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
-import { Attachment, mockDataService } from '@/services/mockData';
+import { Attachment } from '@/services/types';
+import { attachmentService } from '@/services/attachmentService';
 
 interface ClientAttachmentsProps {
   clientId: string;
@@ -40,11 +41,12 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
   });
   const [isUploading, setIsUploading] = useState(false);
   
+  // Load attachments when the component mounts or clientId changes
   useEffect(() => {
     const loadAttachments = async () => {
       setLoading(true);
       try {
-        const data = await mockDataService.getAttachmentsByClientId(clientId);
+        const data = await attachmentService.getAttachmentsByClientId(clientId);
         setAttachments(data);
       } catch (error) {
         console.error('Error loading attachments:', error);
@@ -91,7 +93,7 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
     setNewAttachment(prev => ({ ...prev, file }));
   };
   
-  const handleUpload = async () => {
+  const handleUpload = useCallback(async () => {
     if (!newAttachment.file) {
       toast({
         title: "Selecione um arquivo",
@@ -109,8 +111,8 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
       // Create a blob URL for the file (in a real app, this would be an upload to a storage service)
       const url = URL.createObjectURL(file);
       
-      // Add the attachment to the mock service
-      const attachment = await mockDataService.addAttachment({
+      // Add the attachment to the service
+      const attachment = await attachmentService.addAttachment({
         name: file.name,
         type: file.type,
         size: file.size,
@@ -144,11 +146,11 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
     } finally {
       setIsUploading(false);
     }
-  };
+  }, [clientId, newAttachment, toast]);
   
-  const handleRemove = async (id: string) => {
+  const handleRemove = useCallback(async (id: string) => {
     try {
-      const success = await mockDataService.deleteAttachment(id);
+      const success = await attachmentService.deleteAttachment(id);
       
       if (success) {
         setAttachments(prev => prev.filter(a => a.id !== id));
@@ -168,7 +170,7 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
         variant: "destructive"
       });
     }
-  };
+  }, [toast]);
   
   const formatFileSize = (bytes: number) => {
     if (bytes < 1024) return `${bytes} bytes`;
