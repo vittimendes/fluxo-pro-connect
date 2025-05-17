@@ -119,8 +119,10 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
       }
     };
 
+    const [open, setOpen] = useState(false);
+    
     return (
-      <DropdownMenu>
+      <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
           <Button 
             variant="outline" 
@@ -143,6 +145,7 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
                 e.stopPropagation();
                 // Use the correct type assertion for the status
                 handleStatusChange(status as 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show');
+                setOpen(false); // Fecha o dropdown
               }}
             >
               <span className={`flex items-center ${statusInfo.color.split(' ')[1]}`}>{statusInfo.icon}</span>
