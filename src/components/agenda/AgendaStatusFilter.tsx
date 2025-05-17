@@ -13,11 +13,12 @@ interface AgendaStatusFilterProps {
 
 export const AgendaStatusFilter = ({ statusFilter, setStatusFilter }: AgendaStatusFilterProps) => {
   return (
-    <div className="flex justify-between items-center">
-      <div className="flex items-center gap-2">
+    <div className="flex flex-col sm:flex-row gap-4 items-start sm:items-center sm:justify-between w-full">
+      {/* Filter section - full width on mobile */}
+      <div className="flex items-center gap-2 w-full sm:w-auto">
         <span className="text-sm font-medium">Filtrar por:</span>
         <Select value={statusFilter} onValueChange={setStatusFilter}>
-          <SelectTrigger className="w-[180px]">
+          <SelectTrigger className="w-full sm:w-[180px]">
             <SelectValue placeholder="Filtrar por status">
               {statusFilter === "all" ? (
                 <div className="flex items-center gap-2">
@@ -57,8 +58,8 @@ export const AgendaStatusFilter = ({ statusFilter, setStatusFilter }: AgendaStat
         </Select>
       </div>
 
-      {/* Premium Features Section */}
-      <div className="flex justify-end items-center gap-2">
+      {/* Premium Features Section - flex-wrap and full width on mobile */}
+      <div className="flex flex-wrap justify-start sm:justify-end items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger asChild>

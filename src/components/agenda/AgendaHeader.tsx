@@ -1,6 +1,6 @@
 
 import { Button } from '@/components/ui/button';
-import { CalendarIcon, ChevronLeft, ChevronRight, Plus } from 'lucide-react';
+import { CalendarIcon, ChevronLeft, ChevronRight, Plus, RefreshCw } from 'lucide-react';
 import { format, addDays } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useNavigate } from 'react-router-dom';
@@ -25,48 +25,49 @@ export const AgendaHeader = ({
   handleNext
 }: AgendaHeaderProps) => {
   const navigate = useNavigate();
+  
+  // Labels for each view type
+  const viewLabels: Record<'day' | 'week' | 'month', string> = {
+    'day': 'Dia',
+    'week': 'Semana',
+    'month': 'Mês'
+  };
+  
+  // Function to cycle through views: day -> week -> month -> day
+  const cycleView = () => {
+    const views: Array<'day' | 'week' | 'month'> = ['day', 'week', 'month'];
+    const currentIndex = views.indexOf(currentView);
+    const nextIndex = (currentIndex + 1) % views.length;
+    setView(views[nextIndex]);
+  };
 
   return (
     <>
       <div className="flex justify-between items-center">
-        <h2 className="text-2xl font-bold tracking-tight text-primary">Agenda</h2>
+        <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-primary">Agenda</h2>
         <Button onClick={() => navigate('/agenda/novo')} size="sm">
-          <Plus className="h-4 w-4 mr-1" /> Novo
+          <Plus className="h-4 w-4 mr-1" /> <span className="hidden sm:inline">Novo</span>
         </Button>
       </div>
 
-      <div className="flex justify-between items-center">
-        <div className="flex gap-2">
+      <div className="flex flex-col sm:flex-row gap-3 sm:gap-0 sm:justify-between items-start sm:items-center mt-3 sm:mt-2">
+        <div>
           <Button 
-            variant={currentView === 'day' ? "default" : "outline"} 
+            variant={currentView ? "default" : "outline"} 
             size="sm" 
-            onClick={() => setView('day')}
+            onClick={cycleView}
+            className="min-w-[100px] text-sm"
           >
-            <CalendarIcon className="h-4 w-4 mr-1" />
-            Dia
-          </Button>
-          <Button 
-            variant={currentView === 'week' ? "default" : "outline"} 
-            size="sm" 
-            onClick={() => setView('week')}
-          >
-            <CalendarIcon className="h-4 w-4 mr-1" />
-            Semana
-          </Button>
-          <Button 
-            variant={currentView === 'month' ? "default" : "outline"} 
-            size="sm" 
-            onClick={() => setView('month')}
-          >
-            <CalendarIcon className="h-4 w-4 mr-1" />
-            Mês
+            <RefreshCw className="h-3.5 w-3.5 mr-1.5" />
+            {viewLabels[currentView]}
           </Button>
         </div>
-        <div className="flex items-center space-x-2">
-          <Button variant="outline" size="icon" onClick={handlePrevious}>
+
+        <div className="flex items-center space-x-2 mt-2 sm:mt-0">
+          <Button variant="outline" size="icon" onClick={handlePrevious} className="h-8 w-8">
             <ChevronLeft className="h-4 w-4" />
           </Button>
-          <span className="text-sm font-medium">
+          <span className="text-xs sm:text-sm font-medium whitespace-nowrap">
             {currentView === 'day' ? (
               format(currentDate, "dd 'de' MMMM", { locale: ptBR })
             ) : currentView === 'week' ? (
@@ -79,7 +80,7 @@ export const AgendaHeader = ({
               format(monthStartDate, "MMMM 'de' yyyy", { locale: ptBR })
             )}
           </span>
-          <Button variant="outline" size="icon" onClick={handleNext}>
+          <Button variant="outline" size="icon" onClick={handleNext} className="h-8 w-8">
             <ChevronRight className="h-4 w-4" />
           </Button>
         </div>

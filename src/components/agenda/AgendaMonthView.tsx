@@ -2,6 +2,7 @@
 import { format, isSameDay } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Appointment } from '@/services/mockData';
+import { useState, useEffect } from 'react';
 
 interface MonthDay {
   date: Date;
@@ -97,5 +98,3 @@ export const AgendaMonthView = ({
     </div>
   );
 };
-
-import { useState, useEffect } from 'react';
