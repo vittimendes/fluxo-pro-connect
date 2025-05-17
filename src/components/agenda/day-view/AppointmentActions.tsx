@@ -23,7 +23,7 @@ export const AppointmentActions = ({
       <Button 
         variant="outline" 
         size="sm"
-        className="text-xs h-8 whitespace-nowrap"
+        className="text-xs h-8 whitespace-nowrap min-w-[120px]"
         onClick={(e) => onEditClick(e, appointment.id)}
       >
         Editar
@@ -32,7 +32,7 @@ export const AppointmentActions = ({
       <Button
         variant="ghost"
         size="sm"
-        className="text-xs h-8"
+        className="text-xs h-8 min-w-[120px] justify-start"
         onClick={(e) => {
           e.stopPropagation();
           sendWhatsAppReminder(appointment);
@@ -43,7 +43,7 @@ export const AppointmentActions = ({
       </Button>
       
       {/* Status Dropdown */}
-      <span onClick={(e) => e.stopPropagation()}>
+      <span onClick={(e) => e.stopPropagation()} className="min-w-[120px]">
         {renderStatusButton(appointment)}
       </span>
       
@@ -51,7 +51,7 @@ export const AppointmentActions = ({
       <Button
         variant="outline"
         size="sm"
-        className="text-xs h-8"
+        className="text-xs h-8 min-w-[120px] justify-start"
         onClick={(e) => {
           e.stopPropagation();
           navigateToFinancialRecord(appointment);

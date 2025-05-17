@@ -1,8 +1,7 @@
-
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Appointment } from '@/services/mockData';
-import { ReactNode } from 'react';
+import { ReactNode, useState } from 'react';
 import { 
   CheckCircle2, 
   XCircle, 
@@ -79,12 +78,46 @@ export const renderStatusBadge = (status: string) => {
   );
 };
 
-export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId: string, status: string) => Promise<void>) => 
-  (appointment: Appointment) => {
-    const currentStatus = appointment.status;
-    const config = statusConfig[currentStatus];
+export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId: string, status: string) => Promise<void>) => {
+  // Return a component function that uses React state to track the current status of each appointment
+  return (appointment: Appointment) => {
+    // Use the appointment status as the initial state
+    const [currentStatus, setCurrentStatus] = useState(appointment.status);
+    const [isLoading, setIsLoading] = useState(false);
     
+    // Get the configuration for the current status
+    const config = statusConfig[currentStatus];
     if (!config) return null;
+
+    const handleStatusChange = async (status: string) => {
+      if (status === currentStatus) return;
+      
+      // Update local state immediately for responsive UI
+      setIsLoading(true);
+      setCurrentStatus(status);
+      
+      try {
+        // Call the API to update the status
+        await updateAppointmentStatus(appointment.id, status);
+        
+        // Show success toast
+        toast({
+          title: "Status atualizado",
+          description: `Status alterado para ${statusConfig[status].label}`,
+        });
+      } catch (error) {
+        // Revert to previous status if there was an error
+        setCurrentStatus(appointment.status);
+        toast({
+          title: "Erro ao atualizar status",
+          description: "Não foi possível atualizar o status do agendamento.",
+          variant: "destructive"
+        });
+        console.error('Error updating appointment status:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
 
     return (
       <DropdownMenu>
@@ -92,10 +125,12 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
           <Button 
             variant="outline" 
             size="sm" 
-            className={`text-xs h-8 flex items-center gap-1 min-w-[120px] justify-between ${config.color} border`}
+            className={`text-xs h-8 min-w-[120px] flex items-center gap-1 justify-between truncate ${config.color} border`}
+            disabled={isLoading}
           >
             {config.icon}
-            <span>{config.label}</span>
+            <span className="truncate">{config.label}</span>
+            {isLoading && <span className="animate-spin">⟳</span>}
           </Button>
         </DropdownMenuTrigger>
         <DropdownMenuContent align="end" className="bg-background border shadow-md">
@@ -103,9 +138,10 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
             <DropdownMenuItem 
               key={status} 
               className={`flex items-center gap-2 ${currentStatus === status ? 'bg-accent' : ''}`}
-              onClick={() => {
-                // Chama a função de atualização de status passada como parâmetro
-                updateAppointmentStatus(appointment.id, status);
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                handleStatusChange(status);
               }}
             >
               <span className={`flex items-center ${statusInfo.color.split(' ')[1]}`}>{statusInfo.icon}</span>
@@ -116,6 +152,7 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
       </DropdownMenu>
     );
   };
+};
 
 // Generate week day headers
 export const generateWeekDays = (weekStartDate: Date) => {

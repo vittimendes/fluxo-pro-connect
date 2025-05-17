@@ -18,7 +18,7 @@ export function useAppointmentStatus(
         status: status as 'scheduled' | 'confirmed' | 'canceled' | 'no_show' | 'completed'
       });
       
-      // Update the local state to reflect the change
+      // Update the local appointments state
       const updatedAppointments = appointments.map(app => 
         app.id === appointmentId ? updatedAppointment : app
       );
@@ -26,13 +26,16 @@ export function useAppointmentStatus(
       // Update both internal state and parent state if provided
       setAppointments(updatedAppointments);
       if (setParentAppointments) {
-        setParentAppointments(updatedAppointments);
+        setParentAppointments(prevAppointments => 
+          prevAppointments.map(app => 
+            app.id === appointmentId ? updatedAppointment : app
+          )
+        );
       }
       
-      toast({
-        title: "Status atualizado",
-        description: `Status alterado para ${statusConfig[status].label}`,
-      });
+      // We removed the toast from here since it's now handled directly in the dropdown component
+      // for a more immediate visual feedback
+      
     } catch (error) {
       console.error('Error updating appointment status:', error);
       toast({

@@ -37,7 +37,7 @@ const Agenda = () => {
     monthStartDate,
     loading,
     filteredAppointments,
-    setFilteredAppointments, // Ensure this is destructured
+    setFilteredAppointments,
     statusFilter,
     setStatusFilter,
     handlePrevious,
@@ -46,6 +46,7 @@ const Agenda = () => {
     navigateToFinancialRecord
   } = useAgenda();
   
+  // Use the appointments status hook to manage appointment status updates
   const { updateAppointmentStatus } = useAppointmentStatus(
     filteredAppointments,
     setFilteredAppointments
@@ -78,7 +79,7 @@ const Agenda = () => {
     sendWhatsAppReminder(appointment, clients);
   };
 
-  // Create render status button function
+  // Create the render status button function using our updated method
   const renderStatusButton = createRenderStatusButton(updateAppointmentStatus);
 
   // Generate week days for week view
