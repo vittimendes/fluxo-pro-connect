@@ -1,11 +1,14 @@
 
 import React, { useState, useEffect } from 'react';
 import { AspectRatio } from '@/components/ui/aspect-ratio';
-import mockDashboard from '../../assets/mock-dashboard.png';
-import mockFinanceiro from '../../assets/mock-financeiro.png';
 
+// Use relative path from this file to access the assets
 const AppMockupCarousel = () => {
-  const appImages = [mockDashboard, mockFinanceiro];
+  // Define hardcoded image URLs for now since we can't access the uploaded files directly
+  const appImages = [
+    '/lovable-uploads/mock-dashboard.png', 
+    '/lovable-uploads/mock-financeiro.png'
+  ];
   const [currentImage, setCurrentImage] = useState(0);
 
   useEffect(() => {
