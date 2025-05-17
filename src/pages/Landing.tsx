@@ -1,7 +1,5 @@
-
 import React, { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { AspectRatio } from '@/components/ui/aspect-ratio';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
@@ -9,6 +7,7 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import { Calendar, DollarSign, Users, Smartphone, Lightbulb } from 'lucide-react';
 import { useIsMobile } from '@/hooks/use-mobile';
+import AppMockupCarousel from '@/components/landing/AppMockupCarousel';
 
 const Landing = () => {
   const isMobile = useIsMobile();
@@ -56,18 +55,7 @@ const Landing = () => {
             </div>
           </div>
           <div className="md:w-1/2">
-            <div className="max-w-[320px] mx-auto">
-              <AspectRatio ratio={9/16} className="bg-muted rounded-xl overflow-hidden border shadow-lg">
-                <div className="h-full w-full flex items-center justify-center bg-gradient-to-br from-[#2563EB]/10 to-[#2563EB]/30">
-                  <div className="text-center p-4">
-                    <div className="w-16 h-16 bg-[#2563EB] rounded-full mx-auto mb-4 flex items-center justify-center">
-                      <Calendar className="h-8 w-8 text-white" />
-                    </div>
-                    <p className="text-sm text-muted-foreground">Smartphone App Mockup</p>
-                  </div>
-                </div>
-              </AspectRatio>
-            </div>
+            <AppMockupCarousel />
           </div>
         </div>
       </section>
