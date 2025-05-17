@@ -1,4 +1,3 @@
-
 import { format, isSameDay } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 import { Appointment } from '@/services/mockData';
@@ -39,11 +38,11 @@ export const AgendaMonthView = ({
   }, [generateMonthDays]);
 
   return (
-    <div className="overflow-x-auto">
-      <div className="min-w-[700px] grid grid-cols-7 gap-1 text-xs">
+    <div className="overflow-x-auto -mx-4 sm:mx-0">
+      <div className="min-w-[320px] sm:min-w-[700px] grid grid-cols-7 gap-0.5 sm:gap-1 text-xs sm:text-sm">
         {/* Day headers */}
-        {['Dom', 'Seg', 'Ter', 'Qua', 'Qui', 'Sex', 'Sáb'].map((day, i) => (
-          <div key={`header-${i}`} className="text-center p-1 font-medium text-muted-foreground">
+        {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, i) => (
+          <div key={`header-${i}`} className="text-center p-0.5 sm:p-1 font-medium text-muted-foreground">
             {day}
           </div>
         ))}
@@ -53,7 +52,8 @@ export const AgendaMonthView = ({
           <div 
             key={`day-${index}`} 
             className={`
-              min-h-[80px] border p-1 ${day.isCurrentMonth ? 
+              min-h-[60px] sm:min-h-[80px] border p-0.5 sm:p-1 
+              ${day.isCurrentMonth ? 
                 (isSameDay(day.date, new Date()) ? 'bg-primary/10 border-primary' : 'bg-card') : 
                 'bg-muted/20 opacity-50'} 
               text-center cursor-pointer hover:bg-muted/10 overflow-hidden
@@ -64,12 +64,12 @@ export const AgendaMonthView = ({
             }}
           >
             <div className={`
-              text-right font-medium mb-1 
+              text-right text-xs sm:text-sm font-medium mb-0.5 sm:mb-1
               ${isSameDay(day.date, new Date()) ? 'text-primary' : ''}
             `}>
               {format(day.date, 'd')}
             </div>
-            <div className="overflow-y-auto max-h-[60px]">
+            <div className="overflow-y-auto max-h-[45px] sm:max-h-[60px]">
               {loading ? (
                 <div className="animate-pulse h-2 bg-muted rounded my-1"></div>
               ) : (

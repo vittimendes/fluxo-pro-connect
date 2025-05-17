@@ -58,7 +58,7 @@ export const AgendaStatusFilter = ({ statusFilter, setStatusFilter }: AgendaStat
         </Select>
       </div>
 
-      {/* Premium Features Section - flex-wrap and full width on mobile */}
+      {/* Premium Features Section - flex-wrap and full width on mobile
       <div className="flex flex-wrap justify-start sm:justify-end items-center gap-2 w-full sm:w-auto mt-2 sm:mt-0">
         <TooltipProvider>
           <Tooltip>
@@ -86,6 +86,7 @@ export const AgendaStatusFilter = ({ statusFilter, setStatusFilter }: AgendaStat
           </Tooltip>
         </TooltipProvider>
       </div>
+      */}
     </div>
   );
 };

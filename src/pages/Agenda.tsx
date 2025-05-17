@@ -1,7 +1,6 @@
-
 import { useEffect, useRef } from 'react';
 import { useState } from 'react';
-import { mockDataService, Client } from '@/services/mockData';
+import { mockDataService, Client, Appointment } from '@/services/mockData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAgenda } from '@/hooks/use-agenda';
 import { useAppointmentStatus } from '@/hooks/use-appointment-status';
@@ -70,7 +69,7 @@ const Agenda = () => {
   }, []);
 
   // Send WhatsApp reminder with client data
-  const handleSendWhatsAppReminder = (appointment: any) => {
+  const handleSendWhatsAppReminder = (appointment: Appointment) => {
     sendWhatsAppReminder(appointment, clients);
   };
 
@@ -119,6 +118,8 @@ const Agenda = () => {
           getAppointmentsForDay={(date) => getAppointmentsForDay(date, filteredAppointments)}
           formatTime={formatTime}
           renderStatusBadge={renderStatusBadge}
+          setCurrentDate={setCurrentDate} // adicione esta linha
+          setView={setView} // adicione esta linha
         />
       )}
 
