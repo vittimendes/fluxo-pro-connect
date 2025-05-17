@@ -38,8 +38,8 @@ export const AgendaMonthView = ({
   }, [generateMonthDays]);
 
   return (
-    <div className="overflow-x-auto -mx-4 sm:mx-0">
-      <div className="min-w-[320px] sm:min-w-[700px] grid grid-cols-7 gap-0.5 sm:gap-1 text-xs sm:text-sm">
+    <div className="w-full overflow-hidden">
+      <div className="grid grid-cols-7 gap-0.5 sm:gap-1 text-xs sm:text-sm">
         {/* Day headers */}
         {['D', 'S', 'T', 'Q', 'Q', 'S', 'S'].map((day, i) => (
           <div key={`header-${i}`} className="text-center p-0.5 sm:p-1 font-medium text-muted-foreground">
@@ -52,7 +52,7 @@ export const AgendaMonthView = ({
           <div 
             key={`day-${index}`} 
             className={`
-              min-h-[60px] sm:min-h-[80px] border p-0.5 sm:p-1 
+              aspect-square sm:aspect-auto sm:min-h-[100px] border p-0.5 sm:p-1 
               ${day.isCurrentMonth ? 
                 (isSameDay(day.date, new Date()) ? 'bg-primary/10 border-primary' : 'bg-card') : 
                 'bg-muted/20 opacity-50'} 
@@ -69,7 +69,7 @@ export const AgendaMonthView = ({
             `}>
               {format(day.date, 'd')}
             </div>
-            <div className="overflow-y-auto max-h-[45px] sm:max-h-[60px]">
+            <div className="overflow-y-auto max-h-[calc(100%-1.5rem)] sm:max-h-[80px]">
               {loading ? (
                 <div className="animate-pulse h-2 bg-muted rounded my-1"></div>
               ) : (
