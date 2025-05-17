@@ -1,7 +1,6 @@
 
 import { useEffect, useRef } from 'react';
 import { useState } from 'react';
-import { format } from 'date-fns';
 import { mockDataService, Client } from '@/services/mockData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAgenda } from '@/hooks/use-agenda';
@@ -20,7 +19,8 @@ import {
   renderStatusBadge,
   sendWhatsAppReminder,
   getAppointmentsForDay,
-  generateWeekDays
+  generateWeekDays,
+  generateMonthDays
 } from '@/components/agenda/AgendaUtils';
 import { createRenderStatusButton } from '@/components/agenda/AgendaUtils';
 
@@ -102,7 +102,7 @@ const Agenda = () => {
       {/* Month View */}
       {currentView === 'month' && (
         <AgendaMonthView
-          generateMonthDays={() => import('./components/agenda/AgendaUtils').then(m => m.generateMonthDays(monthStartDate))}
+          generateMonthDays={() => Promise.resolve(generateMonthDays(monthStartDate))}
           loading={loading}
           getAppointmentsForDay={(date) => getAppointmentsForDay(date, filteredAppointments)}
           formatTime={formatTime}

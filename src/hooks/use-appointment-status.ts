@@ -9,7 +9,7 @@ export function useAppointmentStatus() {
   const { toast } = useToast();
 
   // Update appointment status
-  const updateAppointmentStatus = async (appointmentId: string, status: string) => {
+  const updateAppointmentStatus = async (appointmentId: string, status: string): Promise<void> => {
     try {
       const updatedAppointment = await mockDataService.updateAppointment(appointmentId, {
         status: status as 'scheduled' | 'confirmed' | 'canceled' | 'no_show' | 'completed'
@@ -24,8 +24,6 @@ export function useAppointmentStatus() {
         title: "Status atualizado",
         description: `Status alterado para ${statusConfig[status].label}`,
       });
-      
-      return updatedAppointment;
     } catch (error) {
       console.error('Error updating appointment status:', error);
       toast({
