@@ -9,6 +9,9 @@ import {
   Clock8, 
   AlertCircle 
 } from 'lucide-react';
+import { format, addDays, parseISO, startOfWeek, startOfMonth, endOfMonth, getDaysInMonth, getDay } from 'date-fns';
+import { Client } from '@/services/mockData';
+import { toast } from "@/hooks/use-toast";
 
 export type StatusConfig = {
   label: string;
@@ -108,3 +111,76 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
       </DropdownMenu>
     );
   };
+
+// Generate week day headers
+export const generateWeekDays = (weekStartDate: Date) => {
+  return Array.from({ length: 7 }, (_, i) => addDays(weekStartDate, i));
+};
+
+// Generate month days grid
+export const generateMonthDays = (monthStartDate: Date) => {
+  const daysInMonth = getDaysInMonth(monthStartDate);
+  const monthStart = startOfMonth(monthStartDate);
+  const firstDayOfWeek = getDay(monthStart);
+  
+  // Generate array for the days grid (previous month, current month, next month)
+  const days = [];
+  
+  // Add days from previous month
+  const prevMonthDays = firstDayOfWeek;
+  for (let i = prevMonthDays - 1; i >= 0; i--) {
+    days.push({
+      date: addDays(monthStart, -i - 1),
+      isCurrentMonth: false
+    });
+  }
+  
+  // Add days from current month
+  for (let i = 0; i < daysInMonth; i++) {
+    days.push({
+      date: addDays(monthStart, i),
+      isCurrentMonth: true
+    });
+  }
+  
+  // Add days from next month (to complete grid)
+  const totalDays = 42; // 6 weeks grid
+  const nextMonthDays = totalDays - days.length;
+  for (let i = 0; i < nextMonthDays; i++) {
+    days.push({
+      date: addDays(addDays(monthStart, daysInMonth), i),
+      isCurrentMonth: false
+    });
+  }
+  
+  return days;
+};
+
+// Filter appointments for a specific day
+export const getAppointmentsForDay = (date: Date, filteredAppointments: Appointment[]) => {
+  const dateStr = format(date, 'yyyy-MM-dd');
+  return filteredAppointments.filter(app => app.date === dateStr);
+};
+
+// Get client phone number from the client list
+export const getClientPhone = (clientId: string, clients: Client[]): string => {
+  const client = clients.find(c => c.id === clientId);
+  return client?.phone || "5511999999999"; // Default fallback if not found
+};
+
+// Send WhatsApp reminder
+export const sendWhatsAppReminder = (appointment: Appointment, clients: Client[]) => {
+  const phone = getClientPhone(appointment.clientId, clients);
+  const formattedDate = format(parseISO(appointment.date), 'dd/MM/yyyy');
+  
+  const message = encodeURIComponent(
+    `Olá ${appointment.clientName}! Este é um lembrete para seu agendamento de ${appointment.type} em ${formattedDate} às ${formatTime(appointment.time)}.`
+  );
+  
+  window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
+  
+  toast({
+    title: "Lembrete enviado",
+    description: "Link do WhatsApp foi aberto com a mensagem personalizada.",
+  });
+};

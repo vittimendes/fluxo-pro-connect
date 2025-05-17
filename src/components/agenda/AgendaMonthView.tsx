@@ -9,7 +9,7 @@ interface MonthDay {
 }
 
 interface AgendaMonthViewProps {
-  generateMonthDays: () => MonthDay[];
+  generateMonthDays: () => Promise<MonthDay[]> | MonthDay[];
   loading: boolean;
   getAppointmentsForDay: (date: Date) => Appointment[];
   formatTime: (time: string) => string;
@@ -26,6 +26,16 @@ export const AgendaMonthView = ({
   setView
 }: AgendaMonthViewProps) => {
   const navigate = useNavigate();
+  const [monthDays, setMonthDays] = useState<MonthDay[]>([]);
+  
+  useEffect(() => {
+    const loadMonthDays = async () => {
+      const days = await generateMonthDays();
+      setMonthDays(days);
+    };
+    
+    loadMonthDays();
+  }, [generateMonthDays]);
 
   return (
     <div className="overflow-x-auto">
@@ -38,7 +48,7 @@ export const AgendaMonthView = ({
         ))}
         
         {/* Calendar days */}
-        {generateMonthDays().map((day, index) => (
+        {monthDays.map((day, index) => (
           <div 
             key={`day-${index}`} 
             className={`
@@ -87,3 +97,5 @@ export const AgendaMonthView = ({
     </div>
   );
 };
+
+import { useState, useEffect } from 'react';
