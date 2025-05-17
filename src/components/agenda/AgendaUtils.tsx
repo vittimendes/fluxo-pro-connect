@@ -81,15 +81,15 @@ export const renderStatusBadge = (status: string) => {
 export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId: string, status: string) => Promise<void>) => {
   // Return a component function that uses React state to track the current status of each appointment
   return (appointment: Appointment) => {
-    // Use the appointment status as the initial state
-    const [currentStatus, setCurrentStatus] = useState(appointment.status);
+    // Use the appointment status as the initial state with the correct type
+    const [currentStatus, setCurrentStatus] = useState<'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show'>(appointment.status);
     const [isLoading, setIsLoading] = useState(false);
     
     // Get the configuration for the current status
     const config = statusConfig[currentStatus];
     if (!config) return null;
 
-    const handleStatusChange = async (status: string) => {
+    const handleStatusChange = async (status: 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show') => {
       if (status === currentStatus) return;
       
       // Update local state immediately for responsive UI
@@ -141,7 +141,8 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                handleStatusChange(status);
+                // Use the correct type assertion for the status
+                handleStatusChange(status as 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show');
               }}
             >
               <span className={`flex items-center ${statusInfo.color.split(' ')[1]}`}>{statusInfo.icon}</span>
