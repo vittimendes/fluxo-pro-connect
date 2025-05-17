@@ -58,7 +58,7 @@ export const AppointmentActions = ({
         }}
       >
         <DollarSign className="h-3 w-3 mr-1" />
-        Registro Financeiro
+        Registrar
       </Button>
     </div>
   );
