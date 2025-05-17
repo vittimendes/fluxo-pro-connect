@@ -81,7 +81,9 @@ export const renderStatusBadge = (status: string) => {
 
 export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId: string, status: string) => Promise<void>) => 
   (appointment: Appointment) => {
-    const config = statusConfig[appointment.status];
+    const currentStatus = appointment.status;
+    const config = statusConfig[currentStatus];
+    
     if (!config) return null;
 
     return (
@@ -96,15 +98,18 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
             <span>{config.label}</span>
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end">
-          {Object.entries(statusConfig).map(([status, config]) => (
+        <DropdownMenuContent align="end" className="bg-background border shadow-md">
+          {Object.entries(statusConfig).map(([status, statusInfo]) => (
             <DropdownMenuItem 
               key={status} 
-              className="flex items-center gap-2"
-              onClick={() => updateAppointmentStatus(appointment.id, status)}
+              className={`flex items-center gap-2 ${currentStatus === status ? 'bg-accent' : ''}`}
+              onClick={() => {
+                // Chama a função de atualização de status passada como parâmetro
+                updateAppointmentStatus(appointment.id, status);
+              }}
             >
-              <span className={`flex items-center ${config.color.split(' ')[1]}`}>{config.icon}</span>
-              {config.label}
+              <span className={`flex items-center ${statusInfo.color.split(' ')[1]}`}>{statusInfo.icon}</span>
+              {statusInfo.label}
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
