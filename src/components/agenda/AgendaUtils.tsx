@@ -90,7 +90,7 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
           <Button 
             variant="outline" 
             size="sm" 
-            className={`text-xs h-8 flex items-center gap-1 ${config.color} border`}
+            className={`text-xs h-8 flex items-center gap-1 min-w-[120px] justify-between ${config.color} border`}
           >
             {config.icon}
             <span>{config.label}</span>

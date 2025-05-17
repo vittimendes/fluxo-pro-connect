@@ -4,8 +4,11 @@ import { mockDataService, Appointment } from '@/services/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { statusConfig } from '@/components/agenda/AgendaUtils';
 
-export function useAppointmentStatus() {
-  const [appointments, setAppointments] = useState<Appointment[]>([]);
+export function useAppointmentStatus(
+  initialAppointments: Appointment[] = [],
+  setParentAppointments?: React.Dispatch<React.SetStateAction<Appointment[]>>
+) {
+  const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const { toast } = useToast();
 
   // Update appointment status
@@ -16,9 +19,15 @@ export function useAppointmentStatus() {
       });
       
       // Update the local state to reflect the change
-      setAppointments(prev => 
-        prev.map(app => app.id === appointmentId ? updatedAppointment : app)
+      const updatedAppointments = appointments.map(app => 
+        app.id === appointmentId ? updatedAppointment : app
       );
+      
+      // Update both internal state and parent state if provided
+      setAppointments(updatedAppointments);
+      if (setParentAppointments) {
+        setParentAppointments(updatedAppointments);
+      }
       
       toast({
         title: "Status atualizado",

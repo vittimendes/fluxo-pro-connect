@@ -118,6 +118,7 @@ export function useAgenda() {
     monthStartDate,
     loading,
     filteredAppointments,
+    setFilteredAppointments,
     statusFilter,
     setStatusFilter,
     handlePrevious,

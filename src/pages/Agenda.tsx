@@ -1,3 +1,4 @@
+
 import { useEffect, useRef } from 'react';
 import { useState } from 'react';
 import { mockDataService, Client, Appointment } from '@/services/mockData';
@@ -36,6 +37,7 @@ const Agenda = () => {
     monthStartDate,
     loading,
     filteredAppointments,
+    setFilteredAppointments, // Ensure this is destructured
     statusFilter,
     setStatusFilter,
     handlePrevious,
@@ -44,7 +46,10 @@ const Agenda = () => {
     navigateToFinancialRecord
   } = useAgenda();
   
-  const { updateAppointmentStatus } = useAppointmentStatus();
+  const { updateAppointmentStatus } = useAppointmentStatus(
+    filteredAppointments,
+    setFilteredAppointments
+  );
 
   // Set default view to 'day' on mobile devices, but only once when the component mounts
   useEffect(() => {
@@ -118,8 +123,8 @@ const Agenda = () => {
           getAppointmentsForDay={(date) => getAppointmentsForDay(date, filteredAppointments)}
           formatTime={formatTime}
           renderStatusBadge={renderStatusBadge}
-          setCurrentDate={setCurrentDate} // adicione esta linha
-          setView={setView} // adicione esta linha
+          setCurrentDate={setCurrentDate}
+          setView={setView}
         />
       )}
 
