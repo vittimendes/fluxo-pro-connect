@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useEffect, useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { 
   addDays, 
@@ -12,6 +12,7 @@ import {
 } from 'date-fns';
 import { mockDataService, Appointment, Client } from '@/services/mockData';
 import { useToast } from '@/hooks/use-toast';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 // Import the refactored components
 import { AgendaHeader } from '@/components/agenda/AgendaHeader';
@@ -28,6 +29,8 @@ import {
 } from '@/components/agenda/AgendaUtils';
 
 const Agenda = () => {
+  const isMobile = useIsMobile();
+  const initialViewSet = useRef(false);
   const [currentDate, setCurrentDate] = useState(new Date());
   const [currentView, setCurrentView] = useState<'day' | 'week' | 'month'>('day');
   const [weekStartDate, setWeekStartDate] = useState<Date>(startOfWeek(currentDate, { weekStartsOn: 0 }));
@@ -39,6 +42,14 @@ const Agenda = () => {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const navigate = useNavigate();
   const { toast } = useToast();
+
+  // Set default view to 'day' on mobile devices, but only once when the component mounts
+  useEffect(() => {
+    if (isMobile && !initialViewSet.current) {
+      setCurrentView('day');
+      initialViewSet.current = true;
+    }
+  }, [isMobile]);
 
   useEffect(() => {
     const fetchData = async () => {

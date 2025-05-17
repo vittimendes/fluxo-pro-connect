@@ -77,30 +77,30 @@ export const ClientBirthdateField = ({
                   </Button>
                 </FormControl>
               </PopoverTrigger>
-              <PopoverContent className="w-auto p-0" align="start">
+              <PopoverContent className="w-auto p-0 z-50" align="start">
                 <div className="flex items-center justify-between p-3 border-b">
                   <div className="font-medium">Selecione a data</div>
                   <Popover open={selectingYear} onOpenChange={setSelectingYear}>
                     <PopoverTrigger asChild>
                       <Button
-                        variant="ghost"
+                        variant="outline"
                         size="sm"
-                        className="h-8 gap-1 text-xs font-normal"
+                        className="h-8 gap-1 text-xs font-medium px-4"
                       >
                         {selectedYear}
-                        <ChevronDown className="h-3 w-3 opacity-50" />
+                        <ChevronDown className="h-3 w-3 ml-1" />
                       </Button>
                     </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0" align="start">
-                      <div className="h-64 overflow-y-auto p-2">
-                        <div className="grid grid-cols-4 gap-1">
+                    <PopoverContent className="w-auto p-0 z-50" align="start">
+                      <div className="h-64 overflow-y-auto p-3">
+                        <div className="grid grid-cols-3 gap-2">
                           {generateYearOptions().map(year => (
                             <Button
                               key={year}
-                              variant="ghost"
+                              variant={year === selectedYear ? "default" : "outline"}
                               size="sm"
                               className={cn(
-                                "h-8 text-xs",
+                                "h-9 text-sm w-full",
                                 year === selectedYear && "bg-primary text-primary-foreground"
                               )}
                               onClick={() => handleYearSelect(year)}
@@ -115,6 +115,7 @@ export const ClientBirthdateField = ({
                 </div>
                 <Calendar
                   mode="single"
+                  captionLayout="dropdown"
                   selected={field.value}
                   onSelect={field.onChange}
                   disabled={(date) => date > new Date()}
