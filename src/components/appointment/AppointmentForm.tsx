@@ -2,12 +2,7 @@
 import React from 'react';
 import { Client, AppointmentType } from '@/services/types';
 import FormContainer from './FormContainer';
-import AppointmentClientField from './AppointmentClientField';
-import AppointmentTypeField from './AppointmentTypeField';
-import AppointmentDateTimeFields from './AppointmentDateTimeFields';
-import AppointmentDurationLocationFields from './AppointmentDurationLocationFields';
-import AppointmentStatusField from './AppointmentStatusField';
-import AppointmentNotesField from './AppointmentNotesField';
+import AppointmentFormFields from './AppointmentFormFields';
 import AppointmentFormActions from './AppointmentFormActions';
 
 interface AppointmentFormProps {
@@ -49,7 +44,7 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
         <AppointmentFormActions isSubmitting={isSubmitting} />
       }
     >
-      <AppointmentFields 
+      <AppointmentFormFields 
         clients={clients}
         appointmentTypes={appointmentTypes}
         formData={formData}
@@ -60,62 +55,5 @@ const AppointmentForm: React.FC<AppointmentFormProps> = ({
     </FormContainer>
   );
 };
-
-// Helper component to organize form fields
-interface AppointmentFieldsProps {
-  clients: Client[];
-  appointmentTypes: AppointmentType[];
-  formData: AppointmentFormProps['formData'];
-  onInputChange: AppointmentFormProps['onInputChange'];
-  onSelectChange: AppointmentFormProps['onSelectChange'];
-  onDateChange: AppointmentFormProps['onDateChange'];
-}
-
-const AppointmentFields: React.FC<AppointmentFieldsProps> = ({
-  clients,
-  appointmentTypes,
-  formData,
-  onInputChange,
-  onSelectChange,
-  onDateChange,
-}) => (
-  <>
-    <AppointmentClientField 
-      clients={clients} 
-      value={formData.clientId} 
-      onChange={(value) => onSelectChange('clientId', value)} 
-    />
-
-    <AppointmentTypeField 
-      appointmentTypes={appointmentTypes} 
-      value={formData.type} 
-      onChange={(value) => onSelectChange('type', value)} 
-    />
-
-    <AppointmentDateTimeFields 
-      date={formData.date} 
-      time={formData.time}
-      onDateChange={onDateChange}
-      onTimeChange={onInputChange}
-    />
-
-    <AppointmentDurationLocationFields
-      duration={formData.duration}
-      location={formData.location}
-      onDurationChange={onInputChange}
-      onLocationChange={(value) => onSelectChange('location', value)}
-    />
-
-    <AppointmentStatusField 
-      status={formData.status} 
-      onChange={(value) => onSelectChange('status', value)} 
-    />
-
-    <AppointmentNotesField 
-      notes={formData.notes} 
-      onChange={onInputChange} 
-    />
-  </>
-);
 
 export default AppointmentForm;
