@@ -5,16 +5,19 @@
 
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ChevronLeft } from 'lucide-react';
 import { Appointment, FinancialRecord, AppointmentType, Client, mockDataService } from '@/services/mockData';
-import { Button } from '@/components/ui/button';
 import { useToast } from '@/hooks/use-toast';
+import { Tabs, TabsContent } from "@/components/ui/tabs";
+
+// @section Custom components
 import AppointmentDetails from '@/components/appointment/AppointmentDetails';
 import AppointmentFinancialRecords from '@/components/appointment/AppointmentFinancialRecords';
 import AppointmentForm from '@/components/appointment/AppointmentForm';
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import AppointmentViewHeader from '@/components/appointment/AppointmentViewHeader';
+import AppointmentNotFound from '@/components/appointment/AppointmentNotFound';
 import { format, parseISO } from 'date-fns';
 
+// @component AppointmentView page component
 const AppointmentView = () => {
   // @section State management
   const { id } = useParams<{ id: string }>();
@@ -87,7 +90,6 @@ const AppointmentView = () => {
             description: "Atendimento não encontrado.",
             variant: "destructive"
           });
-          navigate('/agenda');
         }
       } catch (error) {
         // @event Handle error fetching appointment
@@ -140,13 +142,12 @@ const AppointmentView = () => {
     }
   };
   
-  // @function Handle form input changes
+  // @function Form input handling functions
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
-  // @function Handle select field changes
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
     
@@ -159,7 +160,6 @@ const AppointmentView = () => {
     }
   };
 
-  // @function Handle date field changes
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
       setFormData(prev => ({ ...prev, date }));
@@ -245,30 +245,13 @@ const AppointmentView = () => {
 
   // @component Appointment not found view
   if (!appointment) {
-    return (
-      <div className="flex flex-col items-center justify-center h-64 space-y-4">
-        <p className="text-muted-foreground">Atendimento não encontrado</p>
-        <Button onClick={() => navigate('/agenda')}>
-          <ChevronLeft className="h-4 w-4 mr-1" /> Voltar para Agenda
-        </Button>
-      </div>
-    );
+    return <AppointmentNotFound />;
   }
 
   return (
     <div className="space-y-6">
       {/* @component Navigation and action buttons */}
-      <div className="flex justify-between items-center">
-        <Button variant="outline" onClick={() => navigate('/agenda')}>
-          <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
-        </Button>
-        
-        {!isEditing && (
-          <Button onClick={() => setIsEditing(true)}>
-            Editar
-          </Button>
-        )}
-      </div>
+      <AppointmentViewHeader isEditing={isEditing} onEditClick={() => setIsEditing(true)} />
 
       {/* @section Appointment view/edit tabs */}
       <Tabs value={isEditing ? "edit" : "view"}>
