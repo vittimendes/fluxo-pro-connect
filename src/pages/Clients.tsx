@@ -1,4 +1,8 @@
 
+// @file Clients.tsx
+// Clients listing page that displays all clients, with search functionality
+// and options to view, edit, or delete individual clients.
+
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { mockDataService, Client } from '@/services/mockData';
@@ -19,6 +23,7 @@ import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
 const Clients = () => {
+  // @section State management
   const [clients, setClients] = useState<Client[]>([]);
   const [filteredClients, setFilteredClients] = useState<Client[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
@@ -27,14 +32,17 @@ const Clients = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // @effect Load all clients on component mount
   useEffect(() => {
     const fetchClients = async () => {
       setLoading(true);
       try {
+        // @api Fetch clients data
         const data = await mockDataService.getClients();
         setClients(data);
         setFilteredClients(data);
       } catch (error) {
+        // @event Handle data fetching error
         console.error('Error fetching clients:', error);
         toast({
           title: "Erro ao carregar clientes",
@@ -49,6 +57,7 @@ const Clients = () => {
     fetchClients();
   }, [toast]);
 
+  // @effect Filter clients based on search query
   useEffect(() => {
     if (searchQuery.trim() === '') {
       setFilteredClients(clients);
@@ -64,14 +73,17 @@ const Clients = () => {
     }
   }, [searchQuery, clients]);
 
+  // @function Handle search input change
   const handleSearch = (e: React.ChangeEvent<HTMLInputElement>) => {
     setSearchQuery(e.target.value);
   };
 
+  // @function Delete client after confirmation
   const confirmDelete = async () => {
     if (!clientToDelete) return;
     
     try {
+      // @api Delete client
       const success = await mockDataService.deleteClient(clientToDelete.id);
       if (success) {
         setClients(prev => prev.filter(c => c.id !== clientToDelete.id));
@@ -83,6 +95,7 @@ const Clients = () => {
         throw new Error('Failed to delete client');
       }
     } catch (error) {
+      // @event Handle client deletion error
       console.error('Error deleting client:', error);
       toast({
         title: "Erro ao excluir cliente",
@@ -94,6 +107,7 @@ const Clients = () => {
     }
   };
   
+  // @function Handle click on client card
   const handleCardClick = (client: Client, e: React.MouseEvent) => {
     // Check if the click was on a button inside the card
     const target = e.target as HTMLElement;
@@ -105,6 +119,7 @@ const Clients = () => {
     }
   };
 
+  // @utility Format birthdate for display
   const formatBirthdate = (dateStr?: string) => {
     if (!dateStr) return '';
     try {
@@ -117,6 +132,7 @@ const Clients = () => {
 
   return (
     <div className="space-y-6">
+      {/* @component Page header with title and add button */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold tracking-tight text-primary">Clientes</h2>
         <Button onClick={() => navigate('/clientes/novo')} size="sm">
@@ -124,6 +140,7 @@ const Clients = () => {
         </Button>
       </div>
 
+      {/* @component Search input */}
       <div className="relative">
         <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-muted-foreground" />
         <Input
@@ -134,12 +151,14 @@ const Clients = () => {
         />
       </div>
 
+      {/* @component Loading state */}
       {loading ? (
         <div className="flex justify-center items-center py-16">
           <div className="animate-spin rounded-full h-10 w-10 border-4 border-primary border-t-transparent"></div>
         </div>
       ) : (
         <div className="space-y-4">
+          {/* @component List of client cards */}
           {filteredClients.length > 0 ? (
             filteredClients.map(client => (
               <Card 
@@ -176,6 +195,7 @@ const Clients = () => {
                       )}
                     </div>
                     
+                    {/* @component Client card action buttons */}
                     <div className="flex space-x-2">
                       <Button 
                         variant="ghost" 
@@ -207,6 +227,7 @@ const Clients = () => {
         </div>
       )}
 
+      {/* @component Delete confirmation dialog */}
       <Dialog open={!!clientToDelete} onOpenChange={() => setClientToDelete(null)}>
         <DialogContent>
           <DialogHeader>

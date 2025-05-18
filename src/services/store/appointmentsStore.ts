@@ -1,12 +1,15 @@
 
+// @file appointmentsStore.ts
+// Mock appointments data storage with initial demo appointments.
+
 import { Appointment } from '../types';
 import { formatDate } from '../utils';
 import { today, tomorrow, nextWeek } from './dateUtils';
 
-// Storage for user-specific appointments data
+// @section User-specific appointments storage
 export const appointmentsByUser: { [userId: string]: Appointment[] } = {};
 
-// Initialize demo data for default user
+// @section Initialize demo data for default user
 appointmentsByUser['1'] = [
   {
     id: '1',
@@ -70,7 +73,7 @@ appointmentsByUser['1'] = [
   }
 ];
 
-// Initialize appointments for Vitor (Pro user)
+// @section Initialize appointments for Vitor (Pro user)
 appointmentsByUser['2'] = [
   {
     id: '6',

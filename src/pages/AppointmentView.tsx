@@ -1,4 +1,8 @@
 
+// @file AppointmentView.tsx
+// Appointment details page that displays comprehensive appointment information
+// with options to edit, change status, or delete the appointment.
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { ChevronLeft } from 'lucide-react';
@@ -12,6 +16,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { format, parseISO } from 'date-fns';
 
 const AppointmentView = () => {
+  // @section State management
   const { id } = useParams<{ id: string }>();
   const [appointment, setAppointment] = useState<Appointment | null>(null);
   const [loading, setLoading] = useState(true);
@@ -22,6 +27,7 @@ const AppointmentView = () => {
   const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // @section Form state
   const [formData, setFormData] = useState({
     clientId: '',
     clientName: '',
@@ -37,17 +43,18 @@ const AppointmentView = () => {
   const { toast } = useToast();
   const navigate = useNavigate();
 
+  // @effect Load appointment and related data
   useEffect(() => {
     const fetchAppointment = async () => {
       setLoading(true);
       try {
         if (!id) return;
         
-        // Get all appointments (the mock service filters by current user)
+        // @api Get appointment data
         const appointments = await mockDataService.getAppointments();
         const foundAppointment = appointments.find(app => app.id === id);
         
-        // Fetch clients and appointment types for edit form
+        // @api Fetch clients and appointment types for edit form
         const clientsData = await mockDataService.getClients();
         const typesData = await mockDataService.getAppointmentTypes();
         
@@ -57,7 +64,7 @@ const AppointmentView = () => {
         if (foundAppointment) {
           setAppointment(foundAppointment);
           
-          // Initialize form data
+          // @function Initialize form data with appointment values
           setFormData({
             clientId: foundAppointment.clientId,
             clientName: foundAppointment.clientName,
@@ -70,10 +77,11 @@ const AppointmentView = () => {
             status: foundAppointment.status
           });
           
-          // Get related financial records
+          // @api Get related financial records
           const records = await mockDataService.getFinancialRecordsByAppointment(id);
           setRelatedRecords(records);
         } else {
+          // @event Handle appointment not found
           toast({
             title: "Erro",
             description: "Atendimento não encontrado.",
@@ -82,6 +90,7 @@ const AppointmentView = () => {
           navigate('/agenda');
         }
       } catch (error) {
+        // @event Handle error fetching appointment
         console.error("Error fetching appointment:", error);
         toast({
           title: "Erro",
@@ -96,11 +105,13 @@ const AppointmentView = () => {
     fetchAppointment();
   }, [id, navigate, toast]);
 
+  // @function Update appointment status
   const handleStatusChange = async (newStatus: string) => {
     if (!appointment) return;
     
     setStatusLoading(true);
     try {
+      // @api Update appointment status
       const updatedAppointment = await mockDataService.updateAppointment(
         appointment.id, 
         { status: newStatus as Appointment['status'] }
@@ -117,6 +128,7 @@ const AppointmentView = () => {
         description: `Status alterado com sucesso.`,
       });
     } catch (error) {
+      // @event Handle status update error
       console.error("Error updating status:", error);
       toast({
         title: "Erro",
@@ -128,11 +140,13 @@ const AppointmentView = () => {
     }
   };
   
+  // @function Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // @function Handle select field changes
   const handleSelectChange = (name: string, value: string) => {
     setFormData(prev => ({ ...prev, [name]: value }));
     
@@ -145,12 +159,14 @@ const AppointmentView = () => {
     }
   };
 
+  // @function Handle date field changes
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
       setFormData(prev => ({ ...prev, date }));
     }
   };
 
+  // @function Submit form data
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!appointment) return;
@@ -160,6 +176,7 @@ const AppointmentView = () => {
       // Format date for API
       const formattedDate = format(formData.date, 'yyyy-MM-dd');
       
+      // @api Update appointment
       const updatedAppointment = await mockDataService.updateAppointment(appointment.id, {
         clientId: formData.clientId,
         clientName: formData.clientName,
@@ -180,6 +197,7 @@ const AppointmentView = () => {
         description: "As alterações foram salvas com sucesso."
       });
     } catch (error) {
+      // @event Handle update error
       console.error("Error updating appointment:", error);
       toast({
         title: "Erro",
@@ -191,10 +209,12 @@ const AppointmentView = () => {
     }
   };
   
+  // @function Delete appointment
   const handleDeleteAppointment = async () => {
     if (!appointment) return;
     
     try {
+      // @api Delete appointment
       await mockDataService.deleteAppointment(appointment.id);
       
       toast({
@@ -204,6 +224,7 @@ const AppointmentView = () => {
       
       navigate('/agenda');
     } catch (error) {
+      // @event Handle deletion error
       console.error("Error deleting appointment:", error);
       toast({
         title: "Erro",
@@ -213,6 +234,7 @@ const AppointmentView = () => {
     }
   };
 
+  // @component Loading spinner
   if (loading) {
     return (
       <div className="flex justify-center items-center h-64">
@@ -221,6 +243,7 @@ const AppointmentView = () => {
     );
   }
 
+  // @component Appointment not found view
   if (!appointment) {
     return (
       <div className="flex flex-col items-center justify-center h-64 space-y-4">
@@ -234,6 +257,7 @@ const AppointmentView = () => {
 
   return (
     <div className="space-y-6">
+      {/* @component Navigation and action buttons */}
       <div className="flex justify-between items-center">
         <Button variant="outline" onClick={() => navigate('/agenda')}>
           <ChevronLeft className="h-4 w-4 mr-1" /> Voltar
@@ -246,6 +270,7 @@ const AppointmentView = () => {
         )}
       </div>
 
+      {/* @section Appointment view/edit tabs */}
       <Tabs value={isEditing ? "edit" : "view"}>
         <TabsContent value="view" className="space-y-6 mt-0">
           <AppointmentDetails 

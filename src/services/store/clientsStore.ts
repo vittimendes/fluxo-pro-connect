@@ -1,7 +1,10 @@
 
+// @file clientsStore.ts
+// Mock client data storage for demonstration purposes.
+
 import { Client } from '../types';
 
-// Client data (shared for demo purposes)
+// @section Client mock data collection
 export const clients: Client[] = [
   { id: '1', name: 'Maria Fernandes', phone: '5511988881111', email: 'maria@email.com', feedbackStatus: 'completed', userId: '1' },
   { id: '2', name: 'João Carlos', phone: '5511988882222', notes: 'Primeira consulta', feedbackStatus: 'pending', userId: '1' },
@@ -13,9 +16,9 @@ export const clients: Client[] = [
   { id: '7', name: 'Amanda Santos', phone: '5511988887777', notes: 'Cliente recorrente', feedbackStatus: 'pending', userId: '2' }
 ];
 
-// Storage for user-specific clients data
+// @section User-specific client storage
 export const clientsByUser: { [userId: string]: Client[] } = {};
 
-// Initialize clients for both users
+// @function Initialize clients for both users
 clientsByUser['1'] = [...clients.filter(client => client.userId === '1')];
 clientsByUser['2'] = [...clients.filter(client => client.userId === '2')];

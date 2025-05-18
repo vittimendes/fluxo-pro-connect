@@ -1,3 +1,8 @@
+
+// @file ClientView.tsx
+// Client details page that displays comprehensive client information 
+// along with their appointment history, financial records, and attachments.
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Client, Appointment, FinancialRecord } from '@/services/types';
@@ -14,6 +19,7 @@ import FinancialRecordsList from '@/components/client/FinancialRecordsList';
 import ClientAttachments from '@/components/client/ClientAttachments';
 
 const ClientView = () => {
+  // @section State management
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { toast } = useToast();
@@ -22,15 +28,17 @@ const ClientView = () => {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [financialRecords, setFinancialRecords] = useState<FinancialRecord[]>([]);
 
+  // @effect Load client data and related information
   useEffect(() => {
     const fetchClientData = async () => {
       setLoading(true);
       try {
         if (!id) return;
         
-        // Fetch client data
+        // @api Fetch client data
         const clientData = await mockDataService.getClientById(id);
         if (!clientData) {
+          // @event Handle client not found
           toast({
             title: "Cliente não encontrado",
             description: "O cliente solicitado não foi encontrado.",
@@ -42,10 +50,10 @@ const ClientView = () => {
         
         setClient(clientData);
         
-        // Fetch client appointments
+        // @api Fetch client appointments
         const clientAppointments = await mockDataService.getAppointmentsByClientId(id);
         
-        // Sort appointments by date (newest first)
+        // @utility Sort appointments by date (newest first)
         const sortedAppointments = [...clientAppointments].sort((a, b) => {
           const dateA = new Date(`${a.date}T${a.time}`);
           const dateB = new Date(`${b.date}T${b.time}`);
@@ -54,10 +62,10 @@ const ClientView = () => {
         
         setAppointments(sortedAppointments);
         
-        // Fetch client financial records
+        // @api Fetch client financial records
         const clientRecords = await mockDataService.getFinancialRecordsByClientId(id);
         
-        // Sort financial records by date (newest first)
+        // @utility Sort financial records by date (newest first)
         const sortedRecords = [...clientRecords].sort((a, b) => {
           return new Date(b.date).getTime() - new Date(a.date).getTime();
         });
@@ -65,6 +73,7 @@ const ClientView = () => {
         setFinancialRecords(sortedRecords);
         
       } catch (error) {
+        // @event Handle data fetching error
         console.error('Error fetching client data:', error);
         toast({
           title: "Erro ao carregar dados",
@@ -79,6 +88,7 @@ const ClientView = () => {
     fetchClientData();
   }, [id, navigate, toast]);
 
+  // @component Loading spinner while data is being fetched
   if (loading) {
     return (
       <div className="flex justify-center items-center py-16">
@@ -87,6 +97,7 @@ const ClientView = () => {
     );
   }
 
+  // @component Client not found view
   if (!client) {
     return (
       <div className="text-center py-10">
@@ -100,6 +111,7 @@ const ClientView = () => {
 
   return (
     <div className="space-y-6">
+      {/* @component Back navigation button */}
       <Button 
         variant="ghost" 
         className="gap-2 pl-1"
@@ -109,10 +121,10 @@ const ClientView = () => {
         Voltar
       </Button>
 
-      {/* Client Information Card */}
+      {/* @component Client information header */}
       <ClientHeader client={client} />
 
-      {/* Client History */}
+      {/* @section Client tabs for different data views */}
       <Tabs defaultValue="appointments" className="w-full">
         <TabsList className="grid grid-cols-3 mb-4">
           <TabsTrigger value="appointments" className="flex items-center gap-1">

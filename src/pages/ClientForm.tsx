@@ -1,4 +1,8 @@
 
+// @file ClientForm.tsx
+// Form component for creating new clients or editing existing ones,
+// handling validation, data submission, and feedback to the user.
+
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { mockDataService } from '@/services/mockData';
@@ -15,6 +19,7 @@ import { ClientFormHeader } from '@/components/client/form/ClientFormHeader';
 import { ClientFormFields } from '@/components/client/form/ClientFormFields';
 import { ClientFormActions } from '@/components/client/form/ClientFormActions';
 
+// @section Form validation schema
 const formSchema = z.object({
   name: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
   phone: z.string().min(8, { message: "Telefone inválido" }),
@@ -28,14 +33,18 @@ const formSchema = z.object({
 type FormValues = z.infer<typeof formSchema>;
 
 const ClientForm = () => {
+  // @section Route and navigation setup
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  
+  // @section Form state management
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(id ? true : false);
   const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
   const [selectingYear, setSelectingYear] = useState(false);
 
+  // @section Form initialization with React Hook Form
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
@@ -47,12 +56,13 @@ const ClientForm = () => {
     },
   });
 
+  // @effect Load client data for editing
   useEffect(() => {
     const fetchClient = async () => {
       if (!id) return;
       
       try {
-        // Since we don't have a getClientById function, let's fetch all clients and find by id
+        // @api Fetch client data
         const clients = await mockDataService.getClients();
         const client = clients.find(c => c.id === id);
         
@@ -63,6 +73,7 @@ const ClientForm = () => {
             setSelectedYear(birthdate.getFullYear());
           }
           
+          // @function Reset form with client data
           form.reset({
             name: client.name,
             phone: client.phone,
@@ -71,6 +82,7 @@ const ClientForm = () => {
             birthdate: client.birthdate ? new Date(client.birthdate) : undefined,
           });
         } else {
+          // @event Handle client not found
           toast({
             title: "Cliente não encontrado",
             description: "O cliente solicitado não foi encontrado.",
@@ -79,6 +91,7 @@ const ClientForm = () => {
           navigate('/clientes');
         }
       } catch (error) {
+        // @event Handle error fetching client data
         console.error('Error fetching client:', error);
         toast({
           title: "Erro ao carregar cliente",
@@ -95,12 +108,13 @@ const ClientForm = () => {
     }
   }, [id, navigate, toast, form]);
 
+  // @function Handle form submission
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
     
     try {
       if (id) {
-        // Update existing client
+        // @api Update existing client
         await mockDataService.updateClient(id, {
           name: data.name,
           phone: data.phone,
@@ -113,7 +127,7 @@ const ClientForm = () => {
           description: "As informações do cliente foram atualizadas com sucesso.",
         });
       } else {
-        // Create new client - make sure required fields are present
+        // @api Create new client
         await mockDataService.addClient({
           name: data.name, 
           phone: data.phone,
@@ -130,6 +144,7 @@ const ClientForm = () => {
       }
       navigate('/clientes');
     } catch (error) {
+      // @event Handle submission error
       console.error('Error saving client:', error);
       toast({
         title: "Erro ao salvar",
@@ -141,6 +156,7 @@ const ClientForm = () => {
     }
   };
 
+  // @component Loading spinner while initial data is being fetched
   if (initialLoading) {
     return (
       <div className="flex justify-center items-center py-16">
