@@ -84,23 +84,6 @@ export default function AppointmentDetails({
             <h2 className="text-xl font-semibold">{appointment.type}</h2>
             <p className="text-muted-foreground">{appointment.clientName}</p>
           </div>
-          
-          <div className="flex items-center gap-2">
-            <AppointmentStatusSelector
-              currentStatus={appointment.status}
-              onStatusChange={onStatusChange}
-              isLoading={statusLoading}
-            />
-            
-            <Button 
-              variant="outline" 
-              size="sm"
-              className="ml-2 text-destructive hover:text-destructive hover:bg-destructive/10"
-              onClick={() => setDeleteDialogOpen(true)}
-            >
-              <Trash2 className="h-4 w-4" />
-            </Button>
-          </div>
         </div>
       </CardHeader>
 

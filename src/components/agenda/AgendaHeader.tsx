@@ -26,9 +26,9 @@ export const AgendaHeader = ({
   const navigate = useNavigate();
   
   const viewLabels: Record<'day' | 'week' | 'month', string> = {
-    day: 'Dia',
-    week: 'Semana',
-    month: 'Mês',
+    day: 'Diária',
+    week: 'Semanal',
+    month: 'Mensal',
   };
   
   const cycleView = () => {
@@ -45,15 +45,15 @@ export const AgendaHeader = ({
           Agenda
         </h2>
         <Button onClick={() => navigate('/agenda/novo')} size="sm">
-          <Plus className="h-4 w-4 mr-1" /> 
-          <span className="hidden sm:inline">Novo</span>
+          <Plus className="h-4 w-4 mr-1" />           
+          <span className="hidden sm:inline">Novo Agendamento</span>
         </Button>
       </div>
 
       <div className="flex flex-row gap-2 items-center mt-3">
         <div>
           <Button 
-            variant={currentView ? "default" : "outline"} 
+            variant={currentView ? "outline" : "ghost"} 
             size="sm" 
             onClick={cycleView}
             className="min-w-[80px] text-sm"

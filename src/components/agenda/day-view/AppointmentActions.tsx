@@ -4,7 +4,7 @@
 // including edit, WhatsApp message, status, and financial record buttons.
 
 import { Button } from '@/components/ui/button';
-import { DollarSign, MessageSquare } from 'lucide-react';
+import { DollarSign, MessageSquare, Eye } from 'lucide-react';
 import { Appointment } from '@/services/mockData';
 
 // @section Props interface
@@ -33,12 +33,13 @@ export const AppointmentActions = ({
         className="text-xs h-8 whitespace-nowrap min-w-[120px]"
         onClick={(e) => onEditClick(e, appointment.id)}
       >
-        Editar
+        <Eye className="h-3 w-3 mr-1" />
+        Detalhes
       </Button>
       
       {/* @event WhatsApp reminder button */}
       <Button
-        variant="ghost"
+        variant="outline"
         size="sm"
         className="text-xs h-8 min-w-[120px] justify-start"
         onClick={(e) => {

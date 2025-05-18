@@ -75,13 +75,8 @@ const AppointmentViewContent: React.FC<AppointmentViewContentProps> = ({
           onSelectChange={onSelectChange}
           onDateChange={onDateChange}
           onSubmit={onSubmit}
-        />
-        
-        <div className="flex justify-end">
-          <Button variant="outline" onClick={() => setIsEditing(false)} className="mr-2">
-            Cancelar
-          </Button>
-        </div>
+        />       
+
       </TabsContent>
     </Tabs>
   );
