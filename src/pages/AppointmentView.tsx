@@ -8,6 +8,7 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { Appointment, FinancialRecord, AppointmentType, Client, mockDataService } from '@/services/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { Tabs, TabsContent } from "@/components/ui/tabs";
+import { Button } from "@/components/ui/button"; // Add the Button import
 
 // @section Custom components
 import AppointmentDetails from '@/components/appointment/AppointmentDetails';
