@@ -1,3 +1,8 @@
+
+// @file AgendaUtils.tsx
+// Provides utility functions and components for the agenda views,
+// including status rendering, formatting, and appointment management.
+
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from '@/components/ui/dropdown-menu';
 import { Button } from '@/components/ui/button';
 import { Appointment } from '@/services/mockData';
@@ -12,12 +17,14 @@ import { format, addDays, parseISO, startOfWeek, startOfMonth, endOfMonth, getDa
 import { Client } from '@/services/mockData';
 import { toast } from "@/hooks/use-toast";
 
+// @section Type definitions and configuration
 export type StatusConfig = {
   label: string;
   icon: ReactNode;
   color: string;
 };
 
+// @section Visual configurations for appointment statuses
 export const statusConfig: Record<string, StatusConfig> = {
   scheduled: {
     label: 'Agendado',
@@ -46,13 +53,13 @@ export const statusConfig: Record<string, StatusConfig> = {
   },
 };
 
-// Format appointment time (9:00 -> 09:00)
+// @utility Format appointment time (9:00 -> 09:00)
 export const formatTime = (time: string): string => {
   const [hours, minutes] = time.split(':');
   return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
 };
 
-// Helper to get location text
+// @utility Get human-readable location text from location code
 export const getLocationText = (location: string): string => {
   switch (location) {
     case 'online':
@@ -66,6 +73,7 @@ export const getLocationText = (location: string): string => {
   }
 };
 
+// @component Renders a status badge with appropriate colors and icon
 export const renderStatusBadge = (status: string) => {
   const config = statusConfig[status];
   if (!config) return null;
@@ -78,10 +86,11 @@ export const renderStatusBadge = (status: string) => {
   );
 };
 
+// @component Factory function that creates a status button component with state management
 export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId: string, status: string) => Promise<void>) => {
-  // Return a component function that uses React state to track the current status of each appointment
+  // @function Returns a component with internal state for status management
   return (appointment: Appointment) => {
-    // Use the appointment status as the initial state with the correct type
+    // @section Component state
     const [currentStatus, setCurrentStatus] = useState<'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show'>(appointment.status);
     const [isLoading, setIsLoading] = useState(false);
     
@@ -89,6 +98,7 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
     const config = statusConfig[currentStatus];
     if (!config) return null;
 
+    // @event Handler for status change selections
     const handleStatusChange = async (status: 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show') => {
       if (status === currentStatus) return;
       
@@ -96,8 +106,8 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
       setIsLoading(true);
       setCurrentStatus(status);
       
+      // @api Update appointment status
       try {
-        // Call the API to update the status
         await updateAppointmentStatus(appointment.id, status);
         
         // Show success toast
@@ -121,6 +131,7 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
 
     const [open, setOpen] = useState(false);
     
+    // @component Status change dropdown
     return (
       <DropdownMenu open={open} onOpenChange={setOpen}>
         <DropdownMenuTrigger asChild>
@@ -158,12 +169,14 @@ export const createRenderStatusButton = (updateAppointmentStatus: (appointmentId
   };
 };
 
-// Generate week day headers
+// @section Date utilities for agenda views
+
+// @utility Generate week day headers
 export const generateWeekDays = (weekStartDate: Date) => {
   return Array.from({ length: 7 }, (_, i) => addDays(weekStartDate, i));
 };
 
-// Generate month days grid
+// @utility Generate month days grid for calendar view
 export const generateMonthDays = (monthStartDate: Date) => {
   const daysInMonth = getDaysInMonth(monthStartDate);
   const monthStart = startOfMonth(monthStartDate);
@@ -172,7 +185,7 @@ export const generateMonthDays = (monthStartDate: Date) => {
   // Generate array for the days grid (previous month, current month, next month)
   const days = [];
   
-  // Add days from previous month
+  // @section Add days from previous month
   const prevMonthDays = firstDayOfWeek;
   for (let i = prevMonthDays - 1; i >= 0; i--) {
     days.push({
@@ -181,7 +194,7 @@ export const generateMonthDays = (monthStartDate: Date) => {
     });
   }
   
-  // Add days from current month
+  // @section Add days from current month
   for (let i = 0; i < daysInMonth; i++) {
     days.push({
       date: addDays(monthStart, i),
@@ -189,7 +202,7 @@ export const generateMonthDays = (monthStartDate: Date) => {
     });
   }
   
-  // Add days from next month (to complete grid)
+  // @section Add days from next month (to complete grid)
   const totalDays = 42; // 6 weeks grid
   const nextMonthDays = totalDays - days.length;
   for (let i = 0; i < nextMonthDays; i++) {
@@ -202,29 +215,32 @@ export const generateMonthDays = (monthStartDate: Date) => {
   return days;
 };
 
-// Filter appointments for a specific day
+// @utility Filter appointments for a specific day
 export const getAppointmentsForDay = (date: Date, filteredAppointments: Appointment[]) => {
   const dateStr = format(date, 'yyyy-MM-dd');
   return filteredAppointments.filter(app => app.date === dateStr);
 };
 
-// Get client phone number from the client list
+// @utility Get client phone number from the client list
 export const getClientPhone = (clientId: string, clients: Client[]): string => {
   const client = clients.find(c => c.id === clientId);
   return client?.phone || "5511999999999"; // Default fallback if not found
 };
 
-// Send WhatsApp reminder
+// @function Send WhatsApp reminder to client
 export const sendWhatsAppReminder = (appointment: Appointment, clients: Client[]) => {
   const phone = getClientPhone(appointment.clientId, clients);
   const formattedDate = format(parseISO(appointment.date), 'dd/MM/yyyy');
   
+  // @section Construct and encode message
   const message = encodeURIComponent(
     `Olá ${appointment.clientName}! Este é um lembrete para seu agendamento de ${appointment.type} em ${formattedDate} às ${formatTime(appointment.time)}.`
   );
   
+  // @event Open WhatsApp with pre-filled message
   window.open(`https://wa.me/${phone}?text=${message}`, '_blank');
   
+  // @event Show confirmation toast
   toast({
     title: "Lembrete enviado",
     description: "Link do WhatsApp foi aberto com a mensagem personalizada.",

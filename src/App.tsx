@@ -1,4 +1,8 @@
 
+// @file App.tsx
+// Main application entry point that sets up routing, providers,
+// and the overall application structure.
+
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -8,7 +12,7 @@ import { AuthProvider } from "./contexts/AuthContext";
 import { PrivateRoute } from "./components/PrivateRoute";
 import AppLayout from "./components/AppLayout";
 
-// Pages
+// @section Import page components
 import Landing from "./pages/Landing";
 import Login from "./pages/Login";
 import Dashboard from "./pages/Dashboard";
@@ -26,21 +30,28 @@ import ClientForm from "./pages/ClientForm";
 import ClientView from "./pages/ClientView";
 import AppointmentTypes from "./pages/AppointmentTypes";
 
+// @section Initialize React Query client
 const queryClient = new QueryClient();
 
+// @component Main application component
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <BrowserRouter>
       <AuthProvider>
         <TooltipProvider>
+          {/* @component Global toast notifications */}
           <Toaster />
           <Sonner />
+          
+          {/* @section Application routes */}
           <Routes>
+            {/* @section Public routes */}
             <Route path="/" element={<Landing />} />
             <Route path="/login" element={<Login />} />
             <Route path="/register" element={<Register />} />
             <Route path="/home" element={<Navigate to="/dashboard" replace />} />
             
+            {/* @section Protected routes */}
             <Route element={<PrivateRoute />}>
               <Route element={<AppLayout />}>
                 <Route path="/dashboard" element={<Dashboard />} />
@@ -59,6 +70,7 @@ const App = () => (
               </Route>
             </Route>
             
+            {/* @section Fallback route */}
             <Route path="*" element={<NotFound />} />
           </Routes>
         </TooltipProvider>

@@ -1,4 +1,8 @@
 
+// @file AppointmentStatusUtils.tsx
+// Provides utilities for styling and displaying appointment statuses
+// consistently throughout the application.
+
 import { 
   CalendarCheck,
   CalendarX,
@@ -7,6 +11,7 @@ import {
   UserX
 } from 'lucide-react';
 
+// @section Available status options with labels and icons
 export const statusOptions = [
   { value: 'scheduled', label: 'Agendado', icon: Clock },
   { value: 'confirmed', label: 'Confirmado', icon: CalendarCheck },
@@ -15,6 +20,7 @@ export const statusOptions = [
   { value: 'completed', label: 'Concluído', icon: CheckCircle },
 ];
 
+// @utility Get CSS class names for a status
 export const getStatusStyles = (status: string) => {
   switch (status) {
     case 'scheduled':
@@ -32,6 +38,7 @@ export const getStatusStyles = (status: string) => {
   }
 };
 
+// @utility Get shadcn/ui badge variant for a status
 export const getStatusBadgeVariant = (status: string) => {
   switch (status) {
     case 'scheduled':
@@ -49,6 +56,7 @@ export const getStatusBadgeVariant = (status: string) => {
   }
 };
 
+// @function Get comprehensive status information
 export const getAppointmentStatusInfo = (status: string) => {
   const option = statusOptions.find(opt => opt.value === status) || statusOptions[0];
   return {

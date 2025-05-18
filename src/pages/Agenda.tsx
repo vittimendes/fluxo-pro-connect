@@ -1,4 +1,8 @@
 
+// @file Agenda.tsx
+// Main agenda page that manages appointment display and interactions
+// across different view modes (day, week, month).
+
 import { useEffect, useRef } from 'react';
 import { useState } from 'react';
 import { mockDataService, Client, Appointment } from '@/services/mockData';
@@ -6,7 +10,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 import { useAgenda } from '@/hooks/use-agenda';
 import { useAppointmentStatus } from '@/hooks/use-appointment-status';
 
-// Import shared utils and components
+// @section Import shared utils and components
 import { AgendaHeader } from '@/components/agenda/AgendaHeader';
 import { AgendaStatusFilter } from '@/components/agenda/AgendaStatusFilter';
 import { AgendaDayView } from '@/components/agenda/AgendaDayView';
@@ -25,10 +29,12 @@ import {
 import { createRenderStatusButton } from '@/components/agenda/AgendaUtils';
 
 const Agenda = () => {
+  // @section Hooks and state
   const isMobile = useIsMobile();
   const initialViewSet = useRef(false);
   const [clients, setClients] = useState<Client[]>([]);
   
+  // @section Agenda state and utilities from custom hook
   const {
     currentDate,
     setCurrentDate,
@@ -46,13 +52,13 @@ const Agenda = () => {
     navigateToFinancialRecord
   } = useAgenda();
   
-  // Use the appointments status hook to manage appointment status updates
+  // @section Appointment status management hook
   const { updateAppointmentStatus } = useAppointmentStatus(
     filteredAppointments,
     setFilteredAppointments
   );
 
-  // Set default view to 'day' on mobile devices, but only once when the component mounts
+  // @effect Set default view to 'day' on mobile devices
   useEffect(() => {
     if (isMobile && !initialViewSet.current) {
       setView('day');
@@ -60,8 +66,9 @@ const Agenda = () => {
     }
   }, [isMobile, setView]);
 
+  // @effect Fetch clients data for phone numbers
   useEffect(() => {
-    // Fetch clients for phone numbers
+    // @api Fetch clients for phone numbers
     const fetchClients = async () => {
       try {
         const clientsData = await mockDataService.getClients();
@@ -74,20 +81,20 @@ const Agenda = () => {
     fetchClients();
   }, []);
 
-  // Send WhatsApp reminder with client data
+  // @event Send WhatsApp reminder with client data
   const handleSendWhatsAppReminder = (appointment: Appointment) => {
     sendWhatsAppReminder(appointment, clients);
   };
 
-  // Create the render status button function using our updated method
+  // @function Create the status button component
   const renderStatusButton = createRenderStatusButton(updateAppointmentStatus);
 
-  // Generate week days for week view
+  // @section Generate week days for week view
   const weekDays = generateWeekDays(weekStartDate);
 
   return (
     <div className="space-y-6">
-      {/* Header with title and new button */}
+      {/* @component Header with title, date navigation and view switcher */}
       <AgendaHeader
         currentDate={currentDate}
         weekStartDate={weekStartDate}
@@ -98,13 +105,13 @@ const Agenda = () => {
         handleNext={handleNext}
       />
 
-      {/* Status Filter */}
+      {/* @component Status filter toggles */}
       <AgendaStatusFilter 
         statusFilter={statusFilter} 
         setStatusFilter={setStatusFilter}
       />
 
-      {/* Month View */}
+      {/* @component Conditional rendering based on current view */}
       {currentView === 'month' && (
         <AgendaMonthView
           generateMonthDays={() => Promise.resolve(generateMonthDays(monthStartDate))}
@@ -116,7 +123,6 @@ const Agenda = () => {
         />
       )}
 
-      {/* Week View */}
       {currentView === 'week' && (
         <AgendaWeekView
           weekDays={weekDays}
@@ -129,7 +135,6 @@ const Agenda = () => {
         />
       )}
 
-      {/* Day View */}
       {currentView === 'day' && (
         <AgendaDayView
           loading={loading}

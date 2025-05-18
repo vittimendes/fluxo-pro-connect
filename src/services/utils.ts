@@ -1,15 +1,17 @@
 
-// Helper functions used across the services
+// @file utils.ts
+// Core utility functions used across the application's services
+// for generating IDs, formatting dates, and user management.
 
-// Generate a unique ID based on timestamp and random number
+// @utility Generate a unique ID based on timestamp and random number
 export const generateUniqueId = (prefix: string) => {
   return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
 };
 
-// Format date to ISO string but only the date part
+// @utility Format date to ISO string but only the date part
 export const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
-// Get the current user ID from localStorage
+// @utility Get the current user ID from localStorage
 export const getCurrentUserId = (): string => {
   const currentUserJson = localStorage.getItem('currentUser');
   if (currentUserJson) {

@@ -1,4 +1,8 @@
 
+// @file Financeiro.tsx
+// Financial management page that displays income, expenses,
+// balances and transaction history.
+
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
@@ -10,6 +14,7 @@ import { FinancialPremiumFeatures } from '@/components/financial/FinancialPremiu
 import { FinancialTransactionTabs } from '@/components/financial/FinancialTransactionTabs';
 
 const Financeiro = () => {
+  // @section State management
   const [records, setRecords] = useState<FinancialRecord[]>([]);
   const [loading, setLoading] = useState(true);
   const [summary, setSummary] = useState({
@@ -20,21 +25,22 @@ const Financeiro = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
 
+  // @effect Load financial data
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Get financial records
+        // @api Get financial records
         const financialRecords = await mockDataService.getFinancialRecords();
         
-        // Sort records by date (newest first)
+        // @section Sort records by date (newest first)
         const sortedRecords = [...financialRecords].sort((a, b) => {
           return new Date(b.date).getTime() - new Date(a.date).getTime();
         });
         
         setRecords(sortedRecords);
 
-        // Get current month's summary
+        // @api Get current month's summary
         const currentDate = new Date();
         const monthlySummary = await mockDataService.getMonthlyFinancialSummary(
           currentDate.getMonth(),
@@ -42,12 +48,14 @@ const Financeiro = () => {
         );
         setSummary(monthlySummary);
         
+        // @event Show success toast
         toast({
           title: "Dados carregados",
           description: "Registros financeiros atualizados.",
         });
       } catch (error) {
         console.error('Error fetching financial data:', error);
+        // @event Show error toast
         toast({
           title: "Erro ao carregar dados financeiros",
           description: "Não foi possível carregar seus registros financeiros.",
@@ -63,6 +71,7 @@ const Financeiro = () => {
 
   return (
     <div className="space-y-6">
+      {/* @section Page header with title and new record button */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold tracking-tight text-primary">Financeiro</h2>
         <Button onClick={() => navigate('/financeiro/novo')}>
@@ -70,13 +79,13 @@ const Financeiro = () => {
         </Button>
       </div>
 
-      {/* Financial Summary */}
+      {/* @component Financial summary display */}
       <FinancialSummaryCard summary={summary} />
       
-      {/* Premium Features */}
+      {/* @component Premium features promotion */}
       <FinancialPremiumFeatures />
 
-      {/* Transactions List */}
+      {/* @component Transactions list with tabs */}
       <FinancialTransactionTabs 
         records={records}
         loading={loading}

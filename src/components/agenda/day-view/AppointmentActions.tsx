@@ -1,8 +1,13 @@
 
+// @file AppointmentActions.tsx
+// Renders the action buttons for each appointment in the day view,
+// including edit, WhatsApp message, status, and financial record buttons.
+
 import { Button } from '@/components/ui/button';
 import { DollarSign, MessageSquare } from 'lucide-react';
 import { Appointment } from '@/services/mockData';
 
+// @section Props interface
 interface AppointmentActionsProps {
   appointment: Appointment;
   sendWhatsAppReminder: (appointment: Appointment) => void;
@@ -11,6 +16,7 @@ interface AppointmentActionsProps {
   onEditClick: (e: React.MouseEvent, id: string) => void;
 }
 
+// @component Renders a column of action buttons for each appointment
 export const AppointmentActions = ({
   appointment,
   sendWhatsAppReminder,
@@ -20,6 +26,7 @@ export const AppointmentActions = ({
 }: AppointmentActionsProps) => {
   return (
     <div className="flex flex-col gap-2">
+      {/* @event Edit appointment button */}
       <Button 
         variant="outline" 
         size="sm"
@@ -29,6 +36,7 @@ export const AppointmentActions = ({
         Editar
       </Button>
       
+      {/* @event WhatsApp reminder button */}
       <Button
         variant="ghost"
         size="sm"
@@ -42,12 +50,12 @@ export const AppointmentActions = ({
         Lembrete
       </Button>
       
-      {/* Status Dropdown */}
+      {/* @component Status change dropdown */}
       <span onClick={(e) => e.stopPropagation()} className="min-w-[120px]">
         {renderStatusButton(appointment)}
       </span>
       
-      {/* Financial record button */}
+      {/* @event Financial record creation button */}
       <Button
         variant="outline"
         size="sm"

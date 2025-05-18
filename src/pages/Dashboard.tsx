@@ -1,4 +1,8 @@
 
+// @file Dashboard.tsx
+// Main dashboard page that displays a summary of user data,
+// including upcoming appointments and financial information.
+
 import { useEffect, useState } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
 import { Appointment, mockDataService } from '@/services/mockData';
@@ -8,6 +12,7 @@ import { FinancialSummary } from '@/components/dashboard/FinancialSummary';
 import { TodayAppointments } from '@/components/dashboard/TodayAppointments';
 
 const Dashboard = () => {
+  // @section User context and state
   const { user } = useAuth();
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -17,19 +22,21 @@ const Dashboard = () => {
     balance: 0
   });
   
+  // @section Period selection state
   const currentDate = new Date();
   const [selectedPeriod, setSelectedPeriod] = useState<'current' | 'custom' | 'all'>('current');
   const [selectedMonth, setSelectedMonth] = useState(currentDate.getMonth());
   const [selectedYear, setSelectedYear] = useState(currentDate.getFullYear());
   
+  // @effect Load dashboard data
   useEffect(() => {
     const fetchData = async () => {
       setIsLoading(true);
       try {
-        // Get all appointments
+        // @api Get all appointments
         const allAppointments = await mockDataService.getAppointments();
         
-        // Filter today's and future appointments
+        // @section Filter today's and future appointments
         const today = new Date();
         today.setHours(0, 0, 0, 0);
         
@@ -39,7 +46,7 @@ const Dashboard = () => {
                  (app.status === 'scheduled' || app.status === 'confirmed');
         });
         
-        // Sort by date and time (ascending)
+        // @section Sort appointments by date and time
         upcomingAppointments.sort((a, b) => {
           const dateA = new Date(`${a.date}T${a.time}`);
           const dateB = new Date(`${b.date}T${b.time}`);
@@ -49,7 +56,7 @@ const Dashboard = () => {
         // Show up to 10 upcoming appointments
         setAppointments(upcomingAppointments.slice(0, 10));
 
-        // Get financial summary for current month
+        // @api Get financial summary for current month
         const summary = await mockDataService.getMonthlyFinancialSummary(
           currentDate.getMonth(),
           currentDate.getFullYear()
@@ -65,7 +72,7 @@ const Dashboard = () => {
     fetchData();
   }, [selectedPeriod, selectedMonth, selectedYear]);
 
-  // Format appointment time for display (9:00 -> 09:00)
+  // @utility Format appointment time for display (9:00 -> 09:00)
   const formatTime = (time: string): string => {
     const [hours, minutes] = time.split(':');
     return `${hours.padStart(2, '0')}:${minutes.padStart(2, '0')}`;
@@ -73,9 +80,13 @@ const Dashboard = () => {
 
   return (
     <div className="space-y-6 pb-8">
+      {/* @component User welcome header */}
       <DashboardHeader user={user} />
+      
+      {/* @component Quick action buttons */}
       <QuickActions />
       
+      {/* @component Financial summary card */}
       <FinancialSummary 
         financialSummary={financialSummary}
         selectedPeriod={selectedPeriod}
@@ -86,6 +97,7 @@ const Dashboard = () => {
         setSelectedYear={setSelectedYear}
       />
 
+      {/* @component Today's appointments list */}
       <TodayAppointments 
         appointments={appointments}
         isLoading={isLoading}

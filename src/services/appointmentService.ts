@@ -1,5 +1,9 @@
 
-// Re-export all appointment services from the refactored modules
+// @file appointmentService.ts
+// Provides a unified service interface for appointment operations
+// by re-exporting functionality from modular appointment service files.
+
+// @section Import appointment getter functions
 import { 
   getAppointments,
   getTodayAppointments,
@@ -8,17 +12,19 @@ import {
   getAppointmentsByClientId
 } from './appointments/getAppointments';
 
+// @section Import appointment modification functions
 import {
   addAppointment,
   updateAppointment,
   deleteAppointment
 } from './appointments/modifyAppointments';
 
+// @section Import appointment execution function
 import { 
   executeAppointment 
 } from './appointments/executeAppointment';
 
-// Export all as a single service object
+// @api Export all functions as a unified service object
 export const appointmentService = {
   getAppointments,
   getTodayAppointments,

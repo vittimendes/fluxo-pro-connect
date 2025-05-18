@@ -1,9 +1,14 @@
 
+// @file types.ts
+// Core type definitions used throughout the application for
+// consistent data modeling.
+
 // Change the re-export to use 'export type'
 import type { User } from '../types/user';
 
 export type { User };
 
+// @section Client data model
 export interface Client {
   id: string;
   name: string;
@@ -15,6 +20,7 @@ export interface Client {
   userId: string;
 }
 
+// @section Appointment type definition
 export interface AppointmentType {
   id: string;
   name: string;
@@ -22,6 +28,7 @@ export interface AppointmentType {
   userId: string;
 }
 
+// @section Appointment data model
 export interface Appointment {
   id: string;
   clientId: string;
@@ -36,6 +43,7 @@ export interface Appointment {
   notes?: string;
 }
 
+// @section Financial record data model
 export interface FinancialRecord {
   id: string;
   amount: number;
@@ -51,6 +59,7 @@ export interface FinancialRecord {
   notes?: string;
 }
 
+// @section Attachment data model
 export interface Attachment {
   id: string;
   name: string;

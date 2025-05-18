@@ -1,10 +1,15 @@
 
+// @file AgendaDayView.tsx
+// Renders the day view of the agenda, displaying a list of appointments
+// for the selected day with all their details and actions.
+
 import { Appointment } from '@/services/mockData';
 import { StatusConfig } from './AgendaUtils';
 import { LoadingSpinner } from './day-view/LoadingSpinner';
 import { EmptyAppointments } from './day-view/EmptyAppointments';
 import { AppointmentCard } from './day-view/AppointmentCard';
 
+// @section Props interface
 interface AgendaDayViewProps {
   loading: boolean;
   filteredAppointments: Appointment[];
@@ -18,6 +23,7 @@ interface AgendaDayViewProps {
   setStatusFilter: (status: string) => void;
 }
 
+// @component Renders the day view of the agenda
 export const AgendaDayView = ({
   loading,
   filteredAppointments,
@@ -29,6 +35,7 @@ export const AgendaDayView = ({
   navigateToFinancialRecord,
   setStatusFilter,
 }: AgendaDayViewProps) => {
+  // @section Conditional rendering based on state
   if (loading) {
     return <LoadingSpinner />;
   }
@@ -42,6 +49,7 @@ export const AgendaDayView = ({
     );
   }
   
+  // @component List of appointment cards
   return (
     <div className="space-y-3">
       {filteredAppointments.map(appointment => (
