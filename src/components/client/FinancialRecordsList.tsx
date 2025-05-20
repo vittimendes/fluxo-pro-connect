@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { FinancialRecord } from '@/services/types';
-import { Calendar, TrendingUp, TrendingDown } from 'lucide-react';
+import { Calendar, TrendingUp, TrendingDown, Tag } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { usePremium } from '@/hooks/use-premium';
@@ -67,6 +67,12 @@ export default function FinancialRecordsList({ financialRecords, clientId }: Fin
                       {format(parseISO(record.date), "dd 'de' MMMM", { locale: ptBR })}
                     </span>
                   </div>
+                  {record.category && (
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Tag className="h-3 w-3 mr-1" />
+                      <span>Categoria: {record.category}</span>
+                    </div>
+                  )}
                 </div>
                 
                 <span

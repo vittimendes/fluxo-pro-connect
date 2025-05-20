@@ -4,11 +4,21 @@ import { useParams, useNavigate } from 'react-router-dom';
 import { FinancialRecord, mockDataService } from '@/services/mockData';
 import { Card, CardContent, CardHeader, CardTitle, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, User, Tag, DollarSign, TrendingUp, TrendingDown } from 'lucide-react';
+import { ArrowLeft, Calendar, User, Tag, DollarSign, TrendingUp, TrendingDown, Edit, Trash2 } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { useToast } from '@/hooks/use-toast';
 import { Separator } from '@/components/ui/separator';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/components/ui/alert-dialog";
 
 const FinancialView = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,6 +26,7 @@ const FinancialView = () => {
   const { toast } = useToast();
   const [loading, setLoading] = useState(true);
   const [record, setRecord] = useState<FinancialRecord | null>(null);
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
 
   useEffect(() => {
     const fetchRecord = async () => {
@@ -48,6 +59,34 @@ const FinancialView = () => {
 
     fetchRecord();
   }, [id, navigate, toast]);
+
+  const handleDeleteRecord = async () => {
+    try {
+      if (!id) return;
+      
+      const success = await mockDataService.deleteFinancialRecord(id);
+      if (success) {
+        toast({
+          title: "Registro excluído com sucesso",
+          description: "O registro financeiro foi removido com sucesso."
+        });
+        navigate('/financeiro');
+      } else {
+        toast({
+          title: "Erro ao excluir",
+          description: "Não foi possível excluir o registro financeiro.",
+          variant: "destructive"
+        });
+      }
+    } catch (error) {
+      console.error('Error deleting financial record:', error);
+      toast({
+        title: "Erro ao excluir",
+        description: "Ocorreu um erro ao tentar excluir o registro.",
+        variant: "destructive"
+      });
+    }
+  };
 
   // Format amount to display as currency
   const formatCurrency = (amount: number) => {
@@ -89,13 +128,34 @@ const FinancialView = () => {
 
       <Card className={`border-l-4 ${record.type === 'income' ? 'border-l-green-500' : 'border-l-red-500'}`}>
         <CardHeader>
-          <div className="flex items-center gap-2">
-            {record.type === 'income' ? (
-              <TrendingUp className="h-5 w-5 text-green-500" />
-            ) : (
-              <TrendingDown className="h-5 w-5 text-red-500" />
-            )}
-            <CardTitle>{record.description}</CardTitle>
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              {record.type === 'income' ? (
+                <TrendingUp className="h-5 w-5 text-green-500" />
+              ) : (
+                <TrendingDown className="h-5 w-5 text-red-500" />
+              )}
+              <CardTitle>{record.description}</CardTitle>
+            </div>
+            <div className="flex gap-2">
+              <Button 
+                variant="outline" 
+                size="sm" 
+                onClick={() => navigate(`/financeiro/${id}/editar`)}
+              >
+                <Edit className="h-4 w-4 mr-1" />
+                Editar
+              </Button>
+              <Button 
+                variant="outline" 
+                size="sm" 
+                className="text-destructive hover:text-destructive"
+                onClick={() => setIsDeleteDialogOpen(true)}
+              >
+                <Trash2 className="h-4 w-4 mr-1" />
+                Excluir
+              </Button>
+            </div>
           </div>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -166,6 +226,23 @@ const FinancialView = () => {
           </Button>
         </CardFooter>
       </Card>
+
+      <AlertDialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Excluir registro financeiro</AlertDialogTitle>
+            <AlertDialogDescription>
+              Tem certeza que deseja excluir este registro financeiro? Esta ação não pode ser desfeita.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancelar</AlertDialogCancel>
+            <AlertDialogAction onClick={handleDeleteRecord} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+              Excluir
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 };

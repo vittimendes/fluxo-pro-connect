@@ -1,7 +1,7 @@
 
 import { FinancialRecord } from '@/services/types';
 import { format, parseISO } from 'date-fns';
-import { Banknote, Plus } from 'lucide-react';
+import { Banknote, Plus, Tag } from 'lucide-react';
 import { Card, CardContent } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { useNavigate } from 'react-router-dom';
@@ -55,6 +55,12 @@ export default function AppointmentFinancialRecords({ records, appointmentId }: 
                   <div className="text-sm text-muted-foreground">
                     {format(parseISO(record.date), "dd/MM/yyyy")}
                   </div>
+                  {record.category && (
+                    <div className="flex items-center text-sm text-muted-foreground">
+                      <Tag className="h-3 w-3 mr-1" />
+                      <span>Categoria: {record.category}</span>
+                    </div>
+                  )}
                 </div>
                 <div className={`font-semibold ${record.type === 'income' ? 'text-green-600' : 'text-red-600'}`}>
                   {formatCurrency(Math.abs(record.amount))}

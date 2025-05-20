@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { FinancialRecord } from '@/services/types';
 import { format, parseISO } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
-import { Plus, TrendingUp, TrendingDown, Calendar } from 'lucide-react';
+import { Plus, TrendingUp, TrendingDown, Calendar, Tag } from 'lucide-react';
 
 interface FinancialTransactionsListProps {
   records: FinancialRecord[];
@@ -69,6 +69,12 @@ export const FinancialTransactionsList = ({ records, loading }: FinancialTransac
               {format(parseISO(record.date), "dd 'de' MMMM", { locale: ptBR })}
             </span>
           </div>
+          {record.category && (
+            <div className="flex items-center text-sm text-muted-foreground">
+              <Tag className="h-3 w-3 mr-1" />
+              <span>Categoria: {record.category}</span>
+            </div>
+          )}
         </div>
         <span
           className={`font-semibold ${
