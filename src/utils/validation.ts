@@ -26,6 +26,18 @@ export const clientSchema = z.object({
   birthdate: z.date().optional(),
 });
 
+// Create a schema for appointment form data
+export const appointmentSchema = z.object({
+  clientId: z.string().min(1, "O cliente é obrigatório"),
+  type: z.string().min(1, "O tipo de agendamento é obrigatório"),
+  date: z.date(),
+  time: z.string().min(1, "O horário é obrigatório"),
+  duration: z.string().or(z.number()),
+  location: z.string().min(1, "A localização é obrigatória"),
+  status: z.string().min(1, "O status é obrigatório"),
+  notes: z.string().optional(),
+});
+
 // Generic validation function
 export function validate<T>(schema: z.Schema<T>, data: any): ValidationResult<T> {
   try {

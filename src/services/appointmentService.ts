@@ -1,38 +1,33 @@
 
 // @file appointmentService.ts
 // Provides a unified service interface for appointment operations
-// by re-exporting functionality from modular appointment service files.
+// by using the repository pattern for appointment management.
 
-// @section Import appointment getter functions
-import { 
-  getAppointments,
-  getTodayAppointments,
-  getAppointmentsByDate,
-  getAppointmentsByWeek,
-  getAppointmentsByClientId
-} from './appointments/getAppointments';
-
-// @section Import appointment modification functions
-import {
-  addAppointment,
-  updateAppointment,
-  deleteAppointment
-} from './appointments/modifyAppointments';
-
-// @section Import appointment execution function
-import { 
-  executeAppointment 
-} from './appointments/executeAppointment';
+import { appointmentRepository } from '@/repositories/appointmentRepository';
 
 // @api Export all functions as a unified service object
 export const appointmentService = {
-  getAppointments,
-  getTodayAppointments,
-  getAppointmentsByDate,
-  getAppointmentsByWeek,
-  getAppointmentsByClientId,
-  addAppointment,
-  updateAppointment,
-  deleteAppointment,
-  executeAppointment
+  // Get appointment functions
+  getAppointments: () => appointmentRepository.getAll(),
+  getTodayAppointments: (date: Date) => appointmentRepository.getByDate(date),
+  getAppointmentsByDate: (date: Date) => appointmentRepository.getByDate(date),
+  getAppointmentsByWeek: (startDate: Date, endDate: Date) => 
+    appointmentRepository.getByDateRange(startDate, endDate),
+  getAppointmentsByClientId: (clientId: string) => 
+    appointmentRepository.getByClientId(clientId),
+  
+  // Modify appointment functions  
+  addAppointment: (appointment: any) => appointmentRepository.create(appointment),
+  updateAppointment: (id: string, updates: any) => appointmentRepository.update(id, updates),
+  deleteAppointment: (id: string) => appointmentRepository.delete(id),
+  
+  // Execute appointment function
+  executeAppointment: async (id: string, status: string, notes?: string) => {
+    try {
+      return await appointmentRepository.update(id, { status, notes });
+    } catch (error) {
+      console.error("Error executing appointment:", error);
+      throw error;
+    }
+  }
 };

@@ -15,12 +15,13 @@ export interface ClientFormData {
 // Appointment form data
 export interface AppointmentFormData {
   clientId: string;
+  clientName?: string;
   type: string;
   date: Date;
   time: string;
-  duration: number;
+  duration: number | string;
   location: 'online' | 'in_person' | 'home_visit' | string;
-  status: 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show';
+  status: 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show' | string;
   notes?: string;
 }
 

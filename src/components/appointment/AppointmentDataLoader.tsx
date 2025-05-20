@@ -1,118 +1,88 @@
 
-// @file AppointmentDataLoader.tsx
-// Component to load and provide appointment form data
+import React, { useState, useEffect } from 'react';
+import { useClientRepository } from '@/hooks/use-client-repository';
+import { appointmentTypeService } from '@/services/appointmentTypeService';
+import { AppointmentType, Client } from '@/services/types';
+import { AppointmentFormData } from '@/types/forms';
 
-import { useState, useEffect } from 'react';
-import { useToast } from '@/hooks/use-toast';
-import { mockDataService, Client, AppointmentType } from '@/services/mockData';
-
-// @types Component props
 interface AppointmentDataLoaderProps {
   children: (props: {
     clients: Client[];
     appointmentTypes: AppointmentType[];
     loading: boolean;
-    formData: {
-      clientId: string;
-      clientName: string;
-      type: string;
-      date: Date;
-      time: string;
-      duration: string;
-      location: string;
-      notes: string;
-      status: string;
-    };
-    setFormData: React.Dispatch<React.SetStateAction<{
-      clientId: string;
-      clientName: string;
-      type: string;
-      date: Date;
-      time: string;
-      duration: string;
-      location: string;
-      notes: string;
-      status: string;
-    }>>;
-    isSubmitting: boolean;
-    setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
+    formData: AppointmentFormData;
     handleInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
     handleSelectChange: (name: string, value: string) => void;
     handleDateChange: (date: Date | undefined) => void;
   }) => React.ReactNode;
 }
 
-// @component Appointment data loader
 export const AppointmentDataLoader: React.FC<AppointmentDataLoaderProps> = ({ children }) => {
-  const { toast } = useToast();
-  const [loading, setLoading] = useState(true);
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  
-  // @state Form data
-  const [clients, setClients] = useState<Client[]>([]);
+  // State management for clients and appointment types
+  const { clients, loading: clientsLoading } = useClientRepository();
   const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>([]);
-  const [formData, setFormData] = useState({
+  const [typesLoading, setTypesLoading] = useState(true);
+  
+  // Initialize form data with default values
+  const [formData, setFormData] = useState<AppointmentFormData>({
     clientId: '',
     clientName: '',
     type: '',
     date: new Date(),
     time: '09:00',
-    duration: '50',
-    location: 'in_person',
-    notes: '',
+    duration: 50,
+    location: 'online',
     status: 'scheduled',
+    notes: ''
   });
 
-  // @effect Load clients and appointment types
+  // Load appointment types on component mount
   useEffect(() => {
-    const fetchData = async () => {
-      setLoading(true);
+    const fetchAppointmentTypes = async () => {
       try {
-        const [clientsData, typesData] = await Promise.all([
-          mockDataService.getClients(),
-          mockDataService.getAppointmentTypes()
-        ]);
-        
-        setClients(clientsData);
-        setAppointmentTypes(typesData);
+        const types = await appointmentTypeService.getAppointmentTypes();
+        setAppointmentTypes(types);
       } catch (error) {
-        console.error('Error fetching data:', error);
-        toast({
-          title: "Erro ao carregar dados",
-          description: "Não foi possível carregar os dados necessários.",
-          variant: "destructive",
-        });
+        console.error('Error fetching appointment types:', error);
       } finally {
-        setLoading(false);
+        setTypesLoading(false);
       }
     };
 
-    fetchData();
-  }, [toast]);
+    fetchAppointmentTypes();
+  }, []);
 
-  // @handler Form input handlers
+  // Handle form input changes
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
     setFormData(prev => ({ ...prev, [name]: value }));
   };
 
+  // Handle form select changes
   const handleSelectChange = (name: string, value: string) => {
-    setFormData(prev => ({ ...prev, [name]: value }));
-
-    // If selecting a client, also update the clientName
-    if (name === 'clientId') {
-      const selectedClient = clients.find(client => client.id === value);
-      if (selectedClient) {
-        setFormData(prev => ({ ...prev, clientName: selectedClient.name }));
+    setFormData(prev => {
+      // If client is selected, update clientName as well
+      if (name === 'clientId') {
+        const selectedClient = clients.find(client => client.id === value);
+        return {
+          ...prev,
+          [name]: value,
+          clientName: selectedClient?.name || ''
+        };
       }
+      return { ...prev, [name]: value };
+    });
+  };
+
+  // Handle date picker changes
+  const handleDateChange = (date: Date | undefined) => {
+    if (date) {
+      setFormData(prev => ({ ...prev, date }));
     }
   };
 
-  const handleDateChange = (date: Date | undefined) => {
-    if (date) setFormData(prev => ({ ...prev, date }));
-  };
+  const loading = clientsLoading || typesLoading;
 
-  // @render Provide data to children
   return (
     <>
       {children({
@@ -120,12 +90,9 @@ export const AppointmentDataLoader: React.FC<AppointmentDataLoaderProps> = ({ ch
         appointmentTypes,
         loading,
         formData,
-        setFormData,
-        isSubmitting,
-        setIsSubmitting,
         handleInputChange,
         handleSelectChange,
-        handleDateChange,
+        handleDateChange
       })}
     </>
   );

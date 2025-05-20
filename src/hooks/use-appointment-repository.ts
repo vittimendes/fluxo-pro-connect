@@ -1,0 +1,250 @@
+
+import { useState, useEffect, ReactNode } from 'react';
+import { appointmentRepository } from '@/repositories/appointmentRepository';
+import { Appointment } from '@/services/types';
+import { AppointmentFormData } from '@/types/forms';
+import { useToast } from '@/hooks/use-toast';
+import { validate, appointmentSchema } from '@/utils/validation';
+import { getCurrentUserId } from '@/services/utils';
+
+export function useAppointmentRepository() {
+  const [appointments, setAppointments] = useState<Appointment[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  useEffect(() => {
+    loadAppointments();
+  }, []);
+
+  async function loadAppointments() {
+    setLoading(true);
+    try {
+      const data = await appointmentRepository.getAll();
+      setAppointments(data);
+    } catch (error) {
+      console.error('Error loading appointments:', error);
+      toast({
+        title: "Erro ao carregar dados",
+        description: "Não foi possível carregar os agendamentos.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function getAppointmentsByDate(date: Date) {
+    setLoading(true);
+    try {
+      const data = await appointmentRepository.getByDate(date);
+      return data;
+    } catch (error) {
+      console.error('Error getting appointments by date:', error);
+      toast({
+        title: "Erro ao buscar agendamentos",
+        description: "Não foi possível buscar os agendamentos pela data.",
+        variant: "destructive",
+      });
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function getAppointmentsByDateRange(startDate: Date, endDate: Date) {
+    setLoading(true);
+    try {
+      const data = await appointmentRepository.getByDateRange(startDate, endDate);
+      return data;
+    } catch (error) {
+      console.error('Error getting appointments by date range:', error);
+      toast({
+        title: "Erro ao buscar agendamentos",
+        description: "Não foi possível buscar os agendamentos pelo período.",
+        variant: "destructive",
+      });
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  async function getAppointmentById(id: string) {
+    try {
+      return await appointmentRepository.getById(id);
+    } catch (error) {
+      console.error('Error getting appointment:', error);
+      toast({
+        title: "Erro ao carregar agendamento",
+        description: "Não foi possível carregar os dados do agendamento.",
+        variant: "destructive",
+      });
+      return null;
+    }
+  }
+
+  async function createAppointment(formData: AppointmentFormData) {
+    const validation = validate(appointmentSchema, formData);
+    if (!validation.success) {
+      if ('errors' in validation) {
+        Object.entries(validation.errors).forEach(([field, message]) => {
+          toast({
+            title: `Erro no campo ${field}`,
+            description: message as ReactNode,
+            variant: "destructive",
+          });
+        });
+      }
+      return false;
+    }
+
+    try {
+      // Get client name for the appointment
+      const clientName = formData.clientName || '';
+      
+      await appointmentRepository.create({
+        clientId: formData.clientId,
+        clientName: clientName,
+        type: formData.type,
+        date: formData.date.toISOString().split('T')[0],
+        time: formData.time,
+        duration: Number(formData.duration),
+        location: formData.location,
+        status: formData.status,
+        notes: formData.notes || '',
+        userId: getCurrentUserId(),
+      });
+
+      toast({
+        title: "Agendamento criado",
+        description: "O agendamento foi criado com sucesso!",
+      });
+
+      await loadAppointments(); // Refresh the list
+      return true;
+    } catch (error) {
+      console.error('Error creating appointment:', error);
+      toast({
+        title: "Erro ao criar agendamento",
+        description: "Não foi possível criar o agendamento. Tente novamente.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  }
+
+  async function updateAppointment(id: string, formData: AppointmentFormData) {
+    const validation = validate(appointmentSchema, formData);
+    if (!validation.success) {
+      if ('errors' in validation) {
+        Object.entries(validation.errors).forEach(([field, message]) => {
+          toast({
+            title: `Erro no campo ${field}`,
+            description: message as ReactNode,
+            variant: "destructive",
+          });
+        });
+      }
+      return false;
+    }
+
+    try {
+      // Get client name for the appointment
+      const clientName = formData.clientName || '';
+      
+      await appointmentRepository.update(id, {
+        clientId: formData.clientId,
+        clientName: clientName,
+        type: formData.type,
+        date: formData.date.toISOString().split('T')[0],
+        time: formData.time,
+        duration: Number(formData.duration),
+        location: formData.location,
+        status: formData.status,
+        notes: formData.notes || '',
+      });
+
+      toast({
+        title: "Agendamento atualizado",
+        description: "O agendamento foi atualizado com sucesso!",
+      });
+
+      await loadAppointments(); // Refresh the list
+      return true;
+    } catch (error) {
+      console.error('Error updating appointment:', error);
+      toast({
+        title: "Erro ao atualizar agendamento",
+        description: "Não foi possível atualizar o agendamento. Tente novamente.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  }
+
+  async function deleteAppointment(id: string) {
+    try {
+      const success = await appointmentRepository.delete(id);
+      
+      if (success) {
+        toast({
+          title: "Agendamento excluído",
+          description: "O agendamento foi excluído com sucesso!",
+        });
+        
+        await loadAppointments(); // Refresh the list
+      } else {
+        toast({
+          title: "Erro ao excluir agendamento",
+          description: "Não foi possível encontrar o agendamento para exclusão.",
+          variant: "destructive",
+        });
+      }
+      
+      return success;
+    } catch (error) {
+      console.error('Error deleting appointment:', error);
+      toast({
+        title: "Erro ao excluir agendamento",
+        description: "Não foi possível excluir o agendamento. Tente novamente.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  }
+
+  async function updateAppointmentStatus(id: string, status: string) {
+    try {
+      await appointmentRepository.update(id, { status });
+      
+      toast({
+        title: "Status atualizado",
+        description: "O status do agendamento foi atualizado com sucesso!",
+      });
+      
+      await loadAppointments(); // Refresh the list
+      return true;
+    } catch (error) {
+      console.error('Error updating appointment status:', error);
+      toast({
+        title: "Erro ao atualizar status",
+        description: "Não foi possível atualizar o status do agendamento.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  }
+
+  return {
+    appointments,
+    loading,
+    getAppointmentsByDate,
+    getAppointmentsByDateRange,
+    getAppointmentById,
+    createAppointment,
+    updateAppointment,
+    deleteAppointment,
+    updateAppointmentStatus,
+    loadAppointments
+  };
+}
