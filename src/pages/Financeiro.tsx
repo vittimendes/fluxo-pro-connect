@@ -30,6 +30,9 @@ const Financeiro = () => {
   const [selectedClientId, setSelectedClientId] = useState<string | null>(null);
   const [selectedPeriod, setSelectedPeriod] = useState<'current' | 'custom' | 'all'>('current');
   const [dateRange, setDateRange] = useState<DateRange | undefined>(); 
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
+  const [availableCategories, setAvailableCategories] = useState<string[]>([]);
+  
   const navigate = useNavigate();
   const { toast } = useToast();
 
@@ -48,8 +51,17 @@ const Financeiro = () => {
         
         setRecords(sortedRecords);
         
+        // Extract unique categories
+        const categories = new Set<string>();
+        sortedRecords.forEach(record => {
+          if (record.category) {
+            categories.add(record.category);
+          }
+        });
+        setAvailableCategories(Array.from(categories));
+        
         // Apply initial filters
-        filterRecords(sortedRecords, selectedClientId, selectedPeriod, dateRange);
+        filterRecords(sortedRecords, selectedClientId, selectedCategory, selectedPeriod, dateRange);
         
         // @event Show success toast
         toast({
@@ -72,18 +84,30 @@ const Financeiro = () => {
     fetchData();
   }, [toast]);
 
-  // Filter records based on client and period
+  // Filter records based on client, category and period
   const filterRecords = (
     allRecords: FinancialRecord[],
     clientId: string | null,
+    category: string | null,
     period: 'current' | 'custom' | 'all',
     range: DateRange | undefined
   ) => {
     // First filter by client if selected
-    let filtered = allRecords;
+    let filtered = [...allRecords];
     
     if (clientId) {
-      filtered = filtered.filter(record => record.clientId === clientId);
+      if (clientId === 'no-client') {
+        // Filter records with no client associated
+        filtered = filtered.filter(record => !record.clientId);
+      } else {
+        // Filter records for a specific client
+        filtered = filtered.filter(record => record.clientId === clientId);
+      }
+    }
+    
+    // Then filter by category if selected
+    if (category) {
+      filtered = filtered.filter(record => record.category === category);
     }
     
     // Then filter by period
@@ -131,19 +155,25 @@ const Financeiro = () => {
   // Handle client filter change
   const handleClientChange = (clientId: string | null) => {
     setSelectedClientId(clientId);
-    filterRecords(records, clientId, selectedPeriod, dateRange);
+    filterRecords(records, clientId, selectedCategory, selectedPeriod, dateRange);
+  };
+  
+  // Handle category filter change
+  const handleCategoryChange = (category: string | null) => {
+    setSelectedCategory(category);
+    filterRecords(records, selectedClientId, category, selectedPeriod, dateRange);
   };
   
   // Handle period filter change
   const handlePeriodChange = (period: 'current' | 'custom' | 'all') => {
     setSelectedPeriod(period);
-    filterRecords(records, selectedClientId, period, dateRange);
+    filterRecords(records, selectedClientId, selectedCategory, period, dateRange);
   };
   
   // Handle date range change
   const handleDateRangeChange = (range: DateRange | undefined) => {
     setDateRange(range);
-    filterRecords(records, selectedClientId, selectedPeriod, range);
+    filterRecords(records, selectedClientId, selectedCategory, selectedPeriod, range);
   };
 
   return (
@@ -168,6 +198,9 @@ const Financeiro = () => {
         onClientChange={handleClientChange}
         onPeriodChange={handlePeriodChange}
         onDateRangeChange={handleDateRangeChange}
+        selectedCategory={selectedCategory}
+        onCategoryChange={handleCategoryChange}
+        availableCategories={availableCategories}
       />
       
       {/* @component Premium features promotion */}
