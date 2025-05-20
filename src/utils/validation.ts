@@ -26,15 +26,24 @@ export const clientSchema = z.object({
   birthdate: z.date().optional(),
 });
 
-// Create a schema for appointment form data
+// Create a schema for appointment form data with more specific status type
 export const appointmentSchema = z.object({
   clientId: z.string().min(1, "O cliente é obrigatório"),
+  clientName: z.string().min(1, "O nome do cliente é obrigatório"),
   type: z.string().min(1, "O tipo de agendamento é obrigatório"),
   date: z.date(),
   time: z.string().min(1, "O horário é obrigatório"),
   duration: z.string().or(z.number()),
   location: z.string().min(1, "A localização é obrigatória"),
-  status: z.string().min(1, "O status é obrigatório"),
+  status: z.enum([
+    'scheduled', 
+    'confirmed', 
+    'completed', 
+    'canceled', 
+    'no_show'
+  ], { 
+    errorMap: () => ({ message: "O status é obrigatório e deve ser válido" })
+  }),
   notes: z.string().optional(),
 });
 

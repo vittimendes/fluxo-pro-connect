@@ -5,6 +5,9 @@
 
 import { appointmentRepository } from '@/repositories/appointmentRepository';
 
+// Define type for status
+type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show';
+
 // @api Export all functions as a unified service object
 export const appointmentService = {
   // Get appointment functions
@@ -24,7 +27,10 @@ export const appointmentService = {
   // Execute appointment function
   executeAppointment: async (id: string, status: string, notes?: string) => {
     try {
-      return await appointmentRepository.update(id, { status, notes });
+      return await appointmentRepository.update(id, { 
+        status: status as AppointmentStatus, // Cast to specific type
+        notes 
+      });
     } catch (error) {
       console.error("Error executing appointment:", error);
       throw error;

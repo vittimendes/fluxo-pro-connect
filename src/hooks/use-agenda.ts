@@ -1,10 +1,12 @@
+
 import { useState, useEffect } from 'react';
 import { 
   format, 
   startOfWeek,
   startOfMonth, 
   endOfMonth, 
-  addDays 
+  addDays, 
+  parseISO
 } from 'date-fns';
 import { mockDataService, Appointment } from '@/services/mockData';
 import { useToast } from '@/hooks/use-toast';
@@ -28,7 +30,8 @@ export function useAgenda() {
       try {
         if (currentView === 'day') {
           const formattedDate = format(currentDate, 'yyyy-MM-dd');
-          const data = await mockDataService.getAppointmentsByDate(formattedDate);
+          // Convert string date to Date object before passing
+          const data = await mockDataService.getAppointmentsByDate(new Date(formattedDate));
           setAppointments(data);
         } else if (currentView === 'week') {
           const endDate = addDays(weekStartDate, 6);

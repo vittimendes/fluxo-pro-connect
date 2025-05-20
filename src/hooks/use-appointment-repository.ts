@@ -7,6 +7,9 @@ import { useToast } from '@/hooks/use-toast';
 import { validate, appointmentSchema } from '@/utils/validation';
 import { getCurrentUserId } from '@/services/utils';
 
+// Type for valid appointment status values
+type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show';
+
 export function useAppointmentRepository() {
   const [appointments, setAppointments] = useState<Appointment[]>([]);
   const [loading, setLoading] = useState(true);
@@ -100,7 +103,7 @@ export function useAppointmentRepository() {
 
     try {
       // Get client name for the appointment
-      const clientName = formData.clientName || '';
+      const clientName = formData.clientName;
       
       await appointmentRepository.create({
         clientId: formData.clientId,
@@ -110,7 +113,7 @@ export function useAppointmentRepository() {
         time: formData.time,
         duration: Number(formData.duration),
         location: formData.location,
-        status: formData.status,
+        status: formData.status as AppointmentStatus, // Cast to specific type
         notes: formData.notes || '',
         userId: getCurrentUserId(),
       });
@@ -150,7 +153,7 @@ export function useAppointmentRepository() {
 
     try {
       // Get client name for the appointment
-      const clientName = formData.clientName || '';
+      const clientName = formData.clientName;
       
       await appointmentRepository.update(id, {
         clientId: formData.clientId,
@@ -160,7 +163,7 @@ export function useAppointmentRepository() {
         time: formData.time,
         duration: Number(formData.duration),
         location: formData.location,
-        status: formData.status,
+        status: formData.status as AppointmentStatus, // Cast to specific type
         notes: formData.notes || '',
       });
 
@@ -215,7 +218,9 @@ export function useAppointmentRepository() {
 
   async function updateAppointmentStatus(id: string, status: string) {
     try {
-      await appointmentRepository.update(id, { status });
+      await appointmentRepository.update(id, { 
+        status: status as AppointmentStatus // Cast to specific type
+      });
       
       toast({
         title: "Status atualizado",

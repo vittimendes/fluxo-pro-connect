@@ -7,6 +7,7 @@ import AppointmentForm from '@/components/appointment/AppointmentForm';
 import LoadingAppointmentForm from '@/components/appointment/LoadingAppointmentForm';
 import { AppointmentDataLoader } from '@/components/appointment/AppointmentDataLoader';
 import { AppointmentSubmitHandler } from '@/components/appointment/AppointmentSubmitHandler';
+import { AppointmentFormData } from '@/types/forms';
 
 const NovoAgendamento = () => {
   return (
@@ -27,7 +28,9 @@ const NovoAgendamento = () => {
             {loading ? (
               <LoadingAppointmentForm />
             ) : (
-              <AppointmentSubmitHandler formData={formData}>
+              <AppointmentSubmitHandler 
+                formData={formData as AppointmentFormData} // Cast to the proper type
+              >
                 {({ isSubmitting, handleSubmit }) => (
                   <AppointmentForm
                     clients={clients}
