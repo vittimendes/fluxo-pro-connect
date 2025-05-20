@@ -1,6 +1,5 @@
-
 import { useState, useEffect } from 'react';
-import { Calendar, ChevronDown, User, CalendarIcon } from 'lucide-react';
+import { Calendar as CalendarIcon, ChevronDown, User, Lock } from 'lucide-react';
 import { 
   Select,
   SelectContent,
@@ -13,12 +12,11 @@ import { Client } from '@/services/types';
 import { clientService } from '@/services/clientService';
 import { usePremium } from '@/hooks/use-premium';
 import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
-import { CalendarComponent } from '../ui/calendar';
+import { Calendar } from '../ui/calendar';
 import { DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
-import { Lock } from 'lucide-react';
 
 interface FinancialFiltersProps {
   selectedClientId: string | null;
@@ -100,7 +98,7 @@ export const FinancialFilters = ({
             <PopoverTrigger asChild>
               <Button variant="outline" className="w-full h-10 justify-between">
                 <div className="flex items-center gap-2">
-                  <Calendar className="h-4 w-4" />
+                  <CalendarIcon className="h-4 w-4" />
                   {selectedPeriod === 'current' && "Mês Atual"}
                   {selectedPeriod === 'custom' && "Período"}
                   {selectedPeriod === 'all' && "Total Geral"}
@@ -123,7 +121,7 @@ export const FinancialFilters = ({
                 
                 {selectedPeriod === 'custom' && (
                   <div className="mt-2">
-                    <CalendarComponent
+                    <Calendar
                       initialFocus
                       mode="range"
                       defaultMonth={dateRange?.from}
@@ -156,7 +154,7 @@ export const FinancialFilters = ({
                   <Button variant="outline" className="w-full h-10 justify-between cursor-not-allowed opacity-80">
                     <div className="flex items-center gap-2">
                       <Lock className="h-3 w-3" />
-                      <Calendar className="h-4 w-4" />
+                      <CalendarIcon className="h-4 w-4" />
                       Mês Atual
                     </div>
                     <ChevronDown className="h-3 w-3 opacity-50" />
