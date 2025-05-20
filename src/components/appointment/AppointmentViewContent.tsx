@@ -62,7 +62,10 @@ const AppointmentViewContent: React.FC<AppointmentViewContentProps> = ({
           onDeleteAppointment={onDeleteAppointment}
         />
 
-        <AppointmentFinancialRecords records={relatedRecords} />
+        <AppointmentFinancialRecords 
+          records={relatedRecords} 
+          appointmentId={appointment.id}
+        />
       </TabsContent>
       
       <TabsContent value="edit" className="space-y-6 mt-0">
@@ -76,7 +79,6 @@ const AppointmentViewContent: React.FC<AppointmentViewContentProps> = ({
           onDateChange={onDateChange}
           onSubmit={onSubmit}
         />       
-
       </TabsContent>
     </Tabs>
   );
