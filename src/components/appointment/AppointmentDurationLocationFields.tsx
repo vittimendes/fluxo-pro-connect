@@ -4,7 +4,7 @@ import { Input } from '@/components/ui/input';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 
 interface AppointmentDurationLocationFieldsProps {
-  duration: string;
+  duration: string; // Keep this as string for input field
   location: string;
   onDurationChange: (event: React.ChangeEvent<HTMLInputElement>) => void;
   onLocationChange: (value: string) => void;

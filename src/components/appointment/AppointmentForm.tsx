@@ -14,7 +14,7 @@ interface AppointmentFormProps {
     type: string;
     date: Date;
     time: string;
-    duration: string;
+    duration: string | number; // Updated to accept both string and number
     location: string;
     notes: string;
     status: string;

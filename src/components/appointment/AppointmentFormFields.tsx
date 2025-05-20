@@ -17,7 +17,7 @@ interface AppointmentFormFieldsProps {
     type: string;
     date: Date;
     time: string;
-    duration: string;
+    duration: string | number; // Updated to accept both string and number
     location: string;
     notes: string;
     status: string;
@@ -56,7 +56,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
     />
 
     <AppointmentDurationLocationFields
-      duration={formData.duration}
+      duration={String(formData.duration)} // Convert to string for component consistency
       location={formData.location}
       onDurationChange={onInputChange}
       onLocationChange={(value) => onSelectChange('location', value)}
