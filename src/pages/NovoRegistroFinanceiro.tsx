@@ -1,7 +1,6 @@
 
 import { useNavigate, useLocation } from 'react-router-dom';
-import { FinancialRecordPageHeader } from '@/components/financial/FinancialRecordPageHeader';
-import { FinancialRecordForm } from '@/components/financial/form/FinancialForm';
+import { FinancialRecordPage } from '@/components/financial/record/FinancialRecordPage';
 import { useFinancialRecord } from '@/hooks/use-financial-record';
 import { FinancialRecordFormData } from '@/components/financial/form/useFinancialForm';
 
@@ -27,19 +26,18 @@ const NovoRegistroFinanceiro = () => {
         navigate('/financeiro');
       }
     }
+    return success;
   };
 
   return (
-    <div className="space-y-6">
-      <FinancialRecordPageHeader title="Novo Registro Financeiro" />
-      <FinancialRecordForm
-        clients={clients}
-        appointment={appointment}
-        appointmentId={appointmentId}
-        loading={loading}
-        onSubmit={handleSubmit}
-      />
-    </div>
+    <FinancialRecordPage
+      title="Novo Registro Financeiro"
+      clients={clients}
+      appointment={appointment}
+      appointmentId={appointmentId}
+      loading={loading}
+      onSubmit={handleSubmit}
+    />
   );
 };
 
