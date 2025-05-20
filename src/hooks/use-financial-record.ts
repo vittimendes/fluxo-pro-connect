@@ -1,9 +1,8 @@
-
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
 import { mockDataService, Client, Appointment } from '@/services/mockData';
 import { useToast } from '@/hooks/use-toast';
-import { FinancialRecordFormData } from '@/components/financial/form/useFinancialForm';
+import { FinancialRecordFormData } from '@/types/forms';
 
 export const useFinancialRecord = (appointmentId: string | null) => {
   const [clients, setClients] = useState<Client[]>([]);
