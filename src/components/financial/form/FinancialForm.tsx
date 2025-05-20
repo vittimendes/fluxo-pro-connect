@@ -13,7 +13,8 @@ import { FinancialDateField } from './FinancialDateField';
 import { FinancialCategoryField } from './FinancialCategoryField';
 import { FinancialFormActions } from './FinancialFormActions';
 import { LoadingSpinner } from './LoadingSpinner';
-import { useFinancialForm, FinancialRecordFormData } from './useFinancialForm';
+import { useFinancialForm } from './useFinancialForm';
+import { FinancialRecordFormData } from '@/types/forms';
 
 interface FinancialFormProps {
   clients: Client[];

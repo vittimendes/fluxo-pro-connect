@@ -1,10 +1,11 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FinancialRecord, mockDataService } from '@/services/mockData';
 import { FinancialRecordPage } from '@/components/financial/record/FinancialRecordPage';
 import { useFinancialRecord } from '@/hooks/use-financial-record';
 import { useToast } from '@/hooks/use-toast';
-import { FinancialRecordFormData } from '@/components/financial/form/useFinancialForm';
+import { FinancialRecordFormData } from '@/types/forms';
 
 const EditarRegistroFinanceiro = () => {
   const { id } = useParams<{ id: string }>();

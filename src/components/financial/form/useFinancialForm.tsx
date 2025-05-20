@@ -1,16 +1,10 @@
+
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Appointment } from '@/services/mockData';
+import { FinancialRecordFormData } from '@/types/forms';
 
-export interface FinancialRecordFormData {
-  amount: string;
-  description: string;
-  date: Date;
-  type: string;
-  category: string;
-  clientId: string;
-  relatedAppointment: string;
-}
+export { FinancialRecordFormData };
 
 export const useFinancialForm = (
   initialData: any | null,

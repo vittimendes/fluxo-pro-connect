@@ -3,7 +3,7 @@ import React from 'react';
 import { FinancialRecordPageHeader } from '@/components/financial/FinancialRecordPageHeader';
 import { FinancialRecordForm } from '@/components/financial/form/FinancialForm';
 import { Client, Appointment } from '@/services/mockData';
-import { FinancialRecordFormData } from '@/components/financial/form/useFinancialForm';
+import { FinancialRecordFormData } from '@/types/forms';
 
 interface FinancialRecordPageProps {
   title: string;
