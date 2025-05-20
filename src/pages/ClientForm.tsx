@@ -5,14 +5,13 @@
 
 import { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
-import { mockDataService } from '@/services/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useForm } from 'react-hook-form';
 import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form } from '@/components/ui/form';
-import { getCurrentUserId } from '@/services/utils';
+import { useClientRepository } from '@/hooks/use-client-repository';
 
 // Import refactored components
 import { ClientFormHeader } from '@/components/client/form/ClientFormHeader';
@@ -27,7 +26,7 @@ const formSchema = z.object({
   notes: z.string().optional(),
   birthdate: z.date({
     required_error: "Data de nascimento é obrigatória",
-  }),
+  }).optional(),
 });
 
 type FormValues = z.infer<typeof formSchema>;
@@ -37,6 +36,7 @@ const ClientForm = () => {
   const { id } = useParams();
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getClientById, createClient, updateClient } = useClientRepository();
   
   // @section Form state management
   const [loading, setLoading] = useState(false);
@@ -63,8 +63,7 @@ const ClientForm = () => {
       
       try {
         // @api Fetch client data
-        const clients = await mockDataService.getClients();
-        const client = clients.find(c => c.id === id);
+        const client = await getClientById(id);
         
         if (client) {
           // If the client has a birthdate, set the selectedYear
@@ -106,43 +105,50 @@ const ClientForm = () => {
     if (id) {
       fetchClient();
     }
-  }, [id, navigate, toast, form]);
+  }, [id, navigate, toast, form, getClientById]);
 
   // @function Handle form submission
   const onSubmit = async (data: FormValues) => {
     setLoading(true);
     
     try {
+      let success;
+      
       if (id) {
         // @api Update existing client
-        await mockDataService.updateClient(id, {
+        success = await updateClient(id, {
           name: data.name,
           phone: data.phone,
           email: data.email || '',
           notes: data.notes || '',
-          birthdate: data.birthdate ? data.birthdate.toISOString().split('T')[0] : undefined,
+          birthdate: data.birthdate,
         });
-        toast({
-          title: "Cliente atualizado",
-          description: "As informações do cliente foram atualizadas com sucesso.",
-        });
+        
+        if (success) {
+          toast({
+            title: "Cliente atualizado",
+            description: "As informações do cliente foram atualizadas com sucesso.",
+          });
+          navigate('/clientes');
+        }
       } else {
         // @api Create new client
-        await mockDataService.addClient({
-          name: data.name, 
+        success = await createClient({
+          name: data.name,
           phone: data.phone,
           email: data.email || '',
           notes: data.notes || '',
-          birthdate: data.birthdate ? data.birthdate.toISOString().split('T')[0] : undefined,
-          feedbackStatus: 'not_sent', // Add required feedbackStatus field
-          userId: getCurrentUserId() // Add required userId field
+          birthdate: data.birthdate,
         });
-        toast({
-          title: "Cliente cadastrado",
-          description: "O cliente foi cadastrado com sucesso.",
-        });
+        
+        if (success) {
+          toast({
+            title: "Cliente cadastrado",
+            description: "O cliente foi cadastrado com sucesso.",
+          });
+          navigate('/clientes');
+        }
       }
-      navigate('/clientes');
     } catch (error) {
       // @event Handle submission error
       console.error('Error saving client:', error);

@@ -1,57 +1,52 @@
 
-// Add to the existing validation.ts file or create it if it doesn't exist
 import { z } from 'zod';
-import { FinancialRecordFormData } from '@/types/forms';
 
-// Schema for financial record form validation
+// Define a type for the validation result with errors
+export type ValidationResult<T> = 
+  | { success: true; data: T }
+  | { success: false; errors: { [key: string]: string } };
+
+// Create a schema for financial record form data
 export const financialRecordSchema = z.object({
-  amount: z.string().min(1, "Valor é obrigatório"),
-  description: z.string().min(1, "Descrição é obrigatória"),
-  date: z.date({
-    required_error: "Data é obrigatória",
-    invalid_type_error: "Data inválida",
-  }),
-  type: z.enum(["income", "expense"], {
-    required_error: "Tipo é obrigatório",
-    invalid_type_error: "Tipo inválido",
-  }),
+  amount: z.string().min(1, "O valor é obrigatório"),
+  description: z.string().min(1, "A descrição é obrigatória"),
+  date: z.date(),
+  type: z.enum(["income", "expense"]),
   category: z.string().optional(),
   clientId: z.string().optional(),
   relatedAppointment: z.string().optional(),
 });
 
-// Type definitions for validation results
-export type ValidationSuccess<T> = {
-  success: true;
-  data: T;
-};
-
-export type ValidationError = {
-  success: false;
-  errors: { [key: string]: string };
-};
-
-export type ValidationResult<T> = ValidationSuccess<T> | ValidationError;
+// Create a schema for client form data
+export const clientSchema = z.object({
+  name: z.string().min(2, "O nome deve ter pelo menos 2 caracteres"),
+  phone: z.string().min(8, "O telefone deve ter pelo menos 8 caracteres"),
+  email: z.string().email("E-mail inválido").optional().or(z.literal('')),
+  notes: z.string().optional(),
+  birthdate: z.date().optional(),
+});
 
 // Generic validation function
-export function validate<T>(schema: z.ZodSchema<T>, data: unknown): ValidationResult<T> {
-  const result = schema.safeParse(data);
-  
-  if (result.success) {
-    return {
-      success: true,
-      data: result.data,
-    };
-  } else {
-    const formattedErrors: { [key: string]: string } = {};
-    result.error.errors.forEach((err) => {
-      const path = err.path.join(".");
-      formattedErrors[path] = err.message;
-    });
+export function validate<T>(schema: z.Schema<T>, data: any): ValidationResult<T> {
+  try {
+    const result = schema.parse(data);
+    return { success: true, data: result };
+  } catch (error) {
+    if (error instanceof z.ZodError) {
+      const errors: { [key: string]: string } = {};
+      
+      error.errors.forEach(err => {
+        if (err.path.length > 0) {
+          errors[err.path.join('.')] = err.message;
+        }
+      });
+      
+      return { success: false, errors };
+    }
     
-    return {
-      success: false,
-      errors: formattedErrors,
+    return { 
+      success: false, 
+      errors: { _general: 'Ocorreu um erro na validação' } 
     };
   }
 }
