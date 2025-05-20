@@ -1,64 +1,57 @@
 
+// Add to the existing validation.ts file or create it if it doesn't exist
 import { z } from 'zod';
+import { FinancialRecordFormData } from '@/types/forms';
 
-// Client validation schema
-export const clientSchema = z.object({
-  name: z.string().min(3, "O nome deve ter pelo menos 3 caracteres"),
-  email: z.string().email("Email inválido").or(z.string().length(0)),
-  phone: z.string().min(10, "Número de telefone inválido"),
-  birthdate: z.date().optional(),
-  notes: z.string().optional()
-});
-
-// Appointment validation schema
-export const appointmentSchema = z.object({
-  clientId: z.string().min(1, "Cliente é obrigatório"),
-  type: z.string().min(1, "Tipo de consulta é obrigatório"),
-  date: z.date(),
-  time: z.string().regex(/^([0-1]?[0-9]|2[0-3]):[0-5][0-9]$/, "Horário inválido"),
-  duration: z.number().min(1, "Duração inválida"),
-  location: z.union([
-    z.literal('online'),
-    z.literal('in_person'),
-    z.literal('home_visit'),
-    z.string()
-  ]),
-  status: z.union([
-    z.literal('scheduled'),
-    z.literal('confirmed'),
-    z.literal('completed'),
-    z.literal('canceled'),
-    z.literal('no_show')
-  ]),
-  notes: z.string().optional()
-});
-
-// Financial record validation schema
+// Schema for financial record form validation
 export const financialRecordSchema = z.object({
-  amount: z.string().regex(/^\d+(\.\d{1,2})?$/, "Valor inválido"),
-  description: z.string().min(3, "Descrição é obrigatória"),
-  date: z.date(),
-  type: z.union([z.literal("income"), z.literal("expense"), z.string()]),
+  amount: z.string().min(1, "Valor é obrigatório"),
+  description: z.string().min(1, "Descrição é obrigatória"),
+  date: z.date({
+    required_error: "Data é obrigatória",
+    invalid_type_error: "Data inválida",
+  }),
+  type: z.enum(["income", "expense"], {
+    required_error: "Tipo é obrigatório",
+    invalid_type_error: "Tipo inválido",
+  }),
   category: z.string().optional(),
   clientId: z.string().optional(),
-  relatedAppointment: z.string().optional()
+  relatedAppointment: z.string().optional(),
 });
 
-// Validate function
-export function validate<T>(schema: z.ZodSchema<T>, data: unknown): { success: true; data: T } | { success: false; errors: { [key: string]: string } } {
-  try {
-    const validData = schema.parse(data);
-    return { success: true, data: validData };
-  } catch (error) {
-    if (error instanceof z.ZodError) {
-      const formattedErrors: { [key: string]: string } = {};
-      error.errors.forEach((err) => {
-        if (err.path.length > 0) {
-          formattedErrors[err.path[0].toString()] = err.message;
-        }
-      });
-      return { success: false, errors: formattedErrors };
-    }
-    throw error;
+// Type definitions for validation results
+export type ValidationSuccess<T> = {
+  success: true;
+  data: T;
+};
+
+export type ValidationError = {
+  success: false;
+  errors: { [key: string]: string };
+};
+
+export type ValidationResult<T> = ValidationSuccess<T> | ValidationError;
+
+// Generic validation function
+export function validate<T>(schema: z.ZodSchema<T>, data: unknown): ValidationResult<T> {
+  const result = schema.safeParse(data);
+  
+  if (result.success) {
+    return {
+      success: true,
+      data: result.data,
+    };
+  } else {
+    const formattedErrors: { [key: string]: string } = {};
+    result.error.errors.forEach((err) => {
+      const path = err.path.join(".");
+      formattedErrors[path] = err.message;
+    });
+    
+    return {
+      success: false,
+      errors: formattedErrors,
+    };
   }
 }

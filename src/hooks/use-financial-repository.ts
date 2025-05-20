@@ -6,6 +6,8 @@ import { FinancialRecordFormData } from '@/types/forms';
 import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { validate, financialRecordSchema } from '@/utils/validation';
+import { ReactNode } from 'react';
+import { getCurrentUserId } from '@/services/utils';
 
 export function useFinancialRepository() {
   const [records, setRecords] = useState<FinancialRecord[]>([]);
@@ -50,13 +52,16 @@ export function useFinancialRepository() {
   async function createRecord(formData: FinancialRecordFormData) {
     const validation = validate(financialRecordSchema, formData);
     if (!validation.success) {
-      Object.entries(validation.errors).forEach(([field, message]) => {
-        toast({
-          title: `Erro no campo ${field}`,
-          description: message,
-          variant: "destructive",
+      // Safely access errors only when validation failed
+      if ('errors' in validation) {
+        Object.entries(validation.errors).forEach(([field, message]) => {
+          toast({
+            title: `Erro no campo ${field}`,
+            description: message as ReactNode,
+            variant: "destructive",
+          });
         });
-      });
+      }
       return false;
     }
 
@@ -75,6 +80,7 @@ export function useFinancialRepository() {
         category: formData.category,
         relatedAppointment: formData.relatedAppointment,
         clientId: formData.clientId,
+        userId: getCurrentUserId(), // Add userId field
       });
 
       toast({
@@ -98,13 +104,16 @@ export function useFinancialRepository() {
   async function updateRecord(id: string, formData: FinancialRecordFormData) {
     const validation = validate(financialRecordSchema, formData);
     if (!validation.success) {
-      Object.entries(validation.errors).forEach(([field, message]) => {
-        toast({
-          title: `Erro no campo ${field}`,
-          description: message,
-          variant: "destructive",
+      // Safely access errors only when validation failed
+      if ('errors' in validation) {
+        Object.entries(validation.errors).forEach(([field, message]) => {
+          toast({
+            title: `Erro no campo ${field}`,
+            description: message as ReactNode,
+            variant: "destructive",
+          });
         });
-      });
+      }
       return false;
     }
 

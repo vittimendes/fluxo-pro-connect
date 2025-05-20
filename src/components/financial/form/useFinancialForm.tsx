@@ -2,9 +2,9 @@
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Appointment } from '@/services/mockData';
-import { FinancialRecordFormData } from '@/types/forms';
+import type { FinancialRecordFormData } from '@/types/forms';
 
-export { FinancialRecordFormData };
+export type { FinancialRecordFormData };
 
 export const useFinancialForm = (
   initialData: any | null,
