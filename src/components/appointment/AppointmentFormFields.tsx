@@ -17,9 +17,9 @@ interface AppointmentFormFieldsProps {
     type: string;
     date: Date;
     time: string;
-    duration: string | number; // Updated to accept both string and number
+    duration: string | number;
     location: string;
-    notes: string;
+    notes?: string; // Make notes optional to match AppointmentFormData
     status: string;
   };
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -68,7 +68,7 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
     />
 
     <AppointmentNotesField 
-      notes={formData.notes} 
+      notes={formData.notes || ''} // Provide a default empty string if notes is undefined
       onChange={onInputChange} 
     />
   </>
