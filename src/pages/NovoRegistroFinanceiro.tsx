@@ -18,8 +18,13 @@ const NovoRegistroFinanceiro = () => {
   const handleSubmit = async (formData: any) => {
     const success = await submitFinancialRecord(formData);
     if (success) {
-      // Redirect back to financial page
-      navigate('/financeiro');
+      // Conditional redirect: if coming from appointment view, go back to it
+      if (appointmentId) {
+        navigate(`/agenda/${appointmentId}`);
+      } else {
+        // Original behavior: go to financial page
+        navigate('/financeiro');
+      }
     }
   };
 
