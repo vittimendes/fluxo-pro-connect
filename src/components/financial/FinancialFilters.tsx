@@ -15,6 +15,7 @@ interface FinancialFiltersProps {
   selectedCategory: string | null;
   onCategoryChange: (category: string | null) => void;
   availableCategories: string[];
+  onClearFilters: () => void;
 }
 
 export const FinancialFilters = ({
@@ -26,16 +27,10 @@ export const FinancialFilters = ({
   onDateRangeChange,
   selectedCategory,
   onCategoryChange,
-  availableCategories
+  availableCategories,
+  onClearFilters
 }: FinancialFiltersProps) => {
   const hasActiveFilters = selectedClientId || selectedCategory || selectedPeriod !== 'current';
-
-  const handleClearFilters = () => {
-    onClientChange(null);
-    onCategoryChange(null);
-    onPeriodChange('current');
-    onDateRangeChange(undefined);
-  };
 
   return (
     <div className="space-y-3">
@@ -72,7 +67,7 @@ export const FinancialFilters = ({
           <Button 
             variant="ghost" 
             size="sm"
-            onClick={handleClearFilters}
+            onClick={onClearFilters}
           >
             Limpar filtros
           </Button>
