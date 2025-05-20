@@ -13,8 +13,7 @@ import { FinancialDateField } from './FinancialDateField';
 import { FinancialCategoryField } from './FinancialCategoryField';
 import { FinancialFormActions } from './FinancialFormActions';
 import { LoadingSpinner } from './LoadingSpinner';
-import { useFinancialForm } from './useFinancialForm';
-import { FinancialRecordFormData } from '@/types/forms';
+import { useFinancialForm, FinancialRecordFormData } from '@/hooks/financial/use-financial-form';
 
 interface FinancialFormProps {
   clients: Client[];
@@ -105,3 +104,4 @@ export const FinancialRecordForm = ({
     </Card>
   );
 };
+
