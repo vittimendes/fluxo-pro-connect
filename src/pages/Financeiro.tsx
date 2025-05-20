@@ -8,7 +8,7 @@ import { FinancialPremiumFeatures } from '@/components/financial/FinancialPremiu
 import { FinancialTransactionTabs } from '@/components/financial/FinancialTransactionTabs';
 import { FinancialFilters } from '@/components/financial/FinancialFilters';
 import { FinancialHeader } from '@/components/financial/FinancialHeader';
-import { useFinancialData } from '@/hooks/use-financial-data';
+import { useFinancialData } from '@/hooks/financial/use-financial-data';
 
 const Financeiro = () => {
   // Use custom hook to manage financial data and filtering
