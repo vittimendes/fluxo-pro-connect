@@ -81,10 +81,46 @@ export const useFinancialRecord = (appointmentId: string | null) => {
     }
   };
 
+  const updateFinancialRecord = async (id: string, formData: FinancialRecordFormData) => {
+    try {
+      const amount = parseFloat(formData.amount);
+      const formattedDate = format(formData.date, 'yyyy-MM-dd');
+      
+      // For expenses, convert amount to negative value
+      const finalAmount = formData.type === 'expense' ? -Math.abs(amount) : amount;
+
+      await mockDataService.updateFinancialRecord(id, {
+        amount: finalAmount,
+        description: formData.description,
+        date: formattedDate,
+        type: formData.type as 'income' | 'expense',
+        category: formData.category || undefined,
+        relatedAppointment: formData.relatedAppointment || undefined,
+        clientId: formData.clientId || undefined,
+      });
+
+      toast({
+        title: "Registro atualizado",
+        description: "O registro financeiro foi atualizado com sucesso!",
+      });
+
+      return true;
+    } catch (error) {
+      console.error('Error updating financial record:', error);
+      toast({
+        title: "Erro ao atualizar registro",
+        description: "Não foi possível atualizar o registro financeiro. Tente novamente.",
+        variant: "destructive",
+      });
+      return false;
+    }
+  };
+
   return {
     clients,
     appointment,
     loading,
-    submitFinancialRecord
+    submitFinancialRecord,
+    updateFinancialRecord
   };
 };

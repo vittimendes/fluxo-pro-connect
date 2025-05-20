@@ -21,6 +21,7 @@ import NovoAgendamento from "./pages/NovoAgendamento";
 import Financeiro from "./pages/Financeiro";
 import FinancialView from "./pages/FinancialView";
 import NovoRegistroFinanceiro from "./pages/NovoRegistroFinanceiro";
+import EditarRegistroFinanceiro from "./pages/EditarRegistroFinanceiro";
 import Profile from "./pages/Profile";
 import NotFound from "./pages/NotFound";
 import AppointmentView from "./pages/AppointmentView";
@@ -61,6 +62,7 @@ const App = () => (
                 <Route path="/financeiro" element={<Financeiro />} />
                 <Route path="/financeiro/novo" element={<NovoRegistroFinanceiro />} />
                 <Route path="/financeiro/:id" element={<FinancialView />} />
+                <Route path="/financeiro/:id/editar" element={<EditarRegistroFinanceiro />} />
                 <Route path="/clientes" element={<Clients />} />
                 <Route path="/clientes/novo" element={<ClientForm />} />
                 <Route path="/clientes/:id" element={<ClientView />} />

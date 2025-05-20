@@ -19,6 +19,7 @@ interface FinancialRecordFormProps {
   appointment: Appointment | null;
   appointmentId: string | null;
   loading: boolean;
+  initialData?: any; // For edit mode
   onSubmit: (formData: FinancialRecordFormData) => Promise<void>;
 }
 
@@ -37,6 +38,7 @@ export const FinancialRecordForm = ({
   appointment, 
   appointmentId, 
   loading,
+  initialData,
   onSubmit
 }: FinancialRecordFormProps) => {
   const navigate = useNavigate();
@@ -55,7 +57,20 @@ export const FinancialRecordForm = ({
   });
 
   useEffect(() => {
-    if (appointment) {
+    // If we have initialData (edit mode), populate the form
+    if (initialData) {
+      setFormData({
+        amount: initialData.amount ? Math.abs(initialData.amount).toString() : '',
+        description: initialData.description || '',
+        date: initialData.date ? new Date(initialData.date) : new Date(),
+        type: initialData.type || 'income',
+        category: initialData.category || '',
+        clientId: initialData.clientId || '',
+        relatedAppointment: initialData.relatedAppointment || appointmentId || '',
+      });
+    }
+    // If we have an appointment but no initialData, use appointment data
+    else if (appointment) {
       setFormData(prev => ({ 
         ...prev, 
         clientId: appointment.clientId,
@@ -63,7 +78,7 @@ export const FinancialRecordForm = ({
         relatedAppointment: appointmentId || ''
       }));
     }
-  }, [appointment, appointmentId]);
+  }, [appointment, appointmentId, initialData]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -122,7 +137,8 @@ export const FinancialRecordForm = ({
       <form onSubmit={handleSubmit}>
         <CardHeader>
           <CardTitle>
-            {appointment ? `Registro para ${appointment.type} - ${appointment.clientName}` : "Informações do Registro"}
+            {initialData ? "Editar Registro Financeiro" : 
+              (appointment ? `Registro para ${appointment.type} - ${appointment.clientName}` : "Informações do Registro")}
           </CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
@@ -210,33 +226,33 @@ export const FinancialRecordForm = ({
             </Popover>
           </div>
 
-          {formData.type === 'expense' && (
-            <div className="space-y-2">
-              <Label htmlFor="category">Categoria (opcional)</Label>
-              <Select 
-                value={formData.category} 
-                onValueChange={(value) => handleSelectChange('category', value)}
-              >
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma categoria" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Suprimentos">Suprimentos</SelectItem>
-                  <SelectItem value="Serviços">Serviços</SelectItem>
-                  <SelectItem value="Aluguel">Aluguel</SelectItem>
-                  <SelectItem value="Marketing">Marketing</SelectItem>
-                  <SelectItem value="Impostos">Impostos</SelectItem>
-                  <SelectItem value="Outros">Outros</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          )}
+          {/* Category field - Now visible for both income and expense */}
+          <div className="space-y-2">
+            <Label htmlFor="category">Categoria (opcional)</Label>
+            <Select 
+              value={formData.category} 
+              onValueChange={(value) => handleSelectChange('category', value)}
+            >
+              <SelectTrigger>
+                <SelectValue placeholder="Selecione uma categoria" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="Serviços">Serviços</SelectItem>
+                <SelectItem value="Material">Material</SelectItem>
+                <SelectItem value="Suprimentos">Suprimentos</SelectItem>
+                <SelectItem value="Aluguel">Aluguel</SelectItem>
+                <SelectItem value="Marketing">Marketing</SelectItem>
+                <SelectItem value="Impostos">Impostos</SelectItem>
+                <SelectItem value="Outros">Outros</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button 
             variant="outline" 
             type="button" 
-            onClick={() => navigate('/financeiro')}
+            onClick={() => navigate(initialData ? `/financeiro/${initialData.id}` : '/financeiro')}
           >
             Cancelar
           </Button>
@@ -249,7 +265,7 @@ export const FinancialRecordForm = ({
                 <Loader className="mr-2 h-4 w-4 animate-spin" />
                 Salvando...
               </>
-            ) : "Salvar"}
+            ) : initialData ? "Atualizar" : "Salvar"}
           </Button>
         </CardFooter>
       </form>
