@@ -1,7 +1,6 @@
-
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FinancialRecordPageHeader } from '@/components/financial/FinancialRecordPageHeader';
-import { FinancialRecordForm } from '@/components/financial/FinancialRecordForm';
+import { FinancialRecordForm } from '@/components/financial/form/FinancialForm';
 import { useFinancialRecord } from '@/hooks/use-financial-record';
 
 const NovoRegistroFinanceiro = () => {

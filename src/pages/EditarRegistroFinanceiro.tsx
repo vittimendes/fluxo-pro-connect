@@ -1,9 +1,8 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FinancialRecord, mockDataService } from '@/services/mockData';
 import { FinancialRecordPageHeader } from '@/components/financial/FinancialRecordPageHeader';
-import { FinancialRecordForm } from '@/components/financial/FinancialRecordForm';
+import { FinancialRecordForm } from '@/components/financial/form/FinancialForm';
 import { useFinancialRecord } from '@/hooks/use-financial-record';
 import { useToast } from '@/hooks/use-toast';
 
