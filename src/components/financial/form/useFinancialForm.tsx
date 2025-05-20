@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { useToast } from '@/hooks/use-toast';
 import { Appointment } from '@/services/mockData';
@@ -89,7 +88,7 @@ export const useFinancialForm = (
 
   const handleSubmit = async (
     e: React.FormEvent, 
-    onSubmit: (formData: FinancialRecordFormData) => Promise<void>
+    onSubmit: (formData: FinancialRecordFormData) => Promise<boolean>
   ) => {
     e.preventDefault();
     setIsSubmitting(true);

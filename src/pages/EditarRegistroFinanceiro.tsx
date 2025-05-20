@@ -1,9 +1,7 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FinancialRecord, mockDataService } from '@/services/mockData';
-import { FinancialRecordPageHeader } from '@/components/financial/FinancialRecordPageHeader';
-import { FinancialRecordForm } from '@/components/financial/form/FinancialForm';
+import { FinancialRecordPage } from '@/components/financial/record/FinancialRecordPage';
 import { useFinancialRecord } from '@/hooks/use-financial-record';
 import { useToast } from '@/hooks/use-toast';
 import { FinancialRecordFormData } from '@/components/financial/form/useFinancialForm';
@@ -50,27 +48,26 @@ const EditarRegistroFinanceiro = () => {
   }, [id, navigate, toast]);
 
   const handleSubmit = async (formData: FinancialRecordFormData) => {
-    if (!id) return;
+    if (!id) return false;
     
     const success = await updateFinancialRecord(id, formData);
     if (success) {
       navigate(`/financeiro/${id}`);
     }
+    return success;
   };
 
   return (
     <div className="space-y-6">
-      <FinancialRecordPageHeader title="Editar Registro Financeiro" />
-      {!loading && record && (
-        <FinancialRecordForm
-          clients={clients}
-          appointment={null}
-          appointmentId={record.relatedAppointment || null}
-          loading={clientsLoading}
-          initialData={record}
-          onSubmit={handleSubmit}
-        />
-      )}
+      <FinancialRecordPage 
+        title="Editar Registro Financeiro"
+        clients={clients}
+        appointment={null}
+        appointmentId={record?.relatedAppointment || null}
+        loading={clientsLoading || loading}
+        initialData={record}
+        onSubmit={handleSubmit}
+      />
     </div>
   );
 };

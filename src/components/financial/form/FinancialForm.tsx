@@ -21,7 +21,7 @@ interface FinancialFormProps {
   appointmentId: string | null;
   loading: boolean;
   initialData?: any; // For edit mode
-  onSubmit: (formData: FinancialRecordFormData) => Promise<void>;
+  onSubmit: (formData: FinancialRecordFormData) => Promise<boolean>;
 }
 
 export const FinancialRecordForm = ({ 
