@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Calendar as CalendarIcon, ChevronDown, User, Lock } from 'lucide-react';
 import { 
@@ -11,12 +12,25 @@ import { Button } from '@/components/ui/button';
 import { Client } from '@/services/types';
 import { clientService } from '@/services/clientService';
 import { usePremium } from '@/hooks/use-premium';
-import { Popover, PopoverContent, PopoverTrigger } from '../ui/popover';
 import { Calendar } from '../ui/calendar';
 import { DateRange } from 'react-day-picker';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "../ui/tooltip";
+import { 
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogFooter,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface FinancialFiltersProps {
   selectedClientId: string | null;
@@ -38,6 +52,9 @@ export const FinancialFilters = ({
   const [clients, setClients] = useState<Client[]>([]);
   const [loading, setLoading] = useState(true);
   const { isPremium } = usePremium();
+  const [dialogOpen, setDialogOpen] = useState(false);
+  const [startDate, setStartDate] = useState<Date | undefined>(dateRange?.from);
+  const [endDate, setEndDate] = useState<Date | undefined>(dateRange?.to);
 
   useEffect(() => {
     const fetchClients = async () => {
@@ -54,18 +71,49 @@ export const FinancialFilters = ({
     fetchClients();
   }, []);
 
+  useEffect(() => {
+    // Update local state when dateRange prop changes
+    setStartDate(dateRange?.from);
+    setEndDate(dateRange?.to);
+  }, [dateRange]);
+
   const handleClientChange = (value: string) => {
     onClientChange(value === 'all' ? null : value);
   };
 
-  const handlePeriodChange = (value: string) => {
-    const period = value as 'current' | 'custom' | 'all';
-    onPeriodChange(period);
+  const handlePeriodSelection = (period: 'current' | 'custom' | 'all') => {
+    if (period === 'custom' && isPremium) {
+      setDialogOpen(true);
+      onPeriodChange(period);
+    } else {
+      onPeriodChange(period);
+    }
   };
-  
-  const handleRangeSelect = (range: DateRange | undefined) => {
-    onDateRangeChange(range);
+
+  const handleApplyDateRange = () => {
+    if (startDate && endDate) {
+      onDateRangeChange({ from: startDate, to: endDate });
+    }
+    setDialogOpen(false);
   };
+
+  const getPeriodDisplayText = () => {
+    switch (selectedPeriod) {
+      case 'current':
+        return "Mês Atual";
+      case 'custom':
+        if (dateRange?.from && dateRange?.to) {
+          return `${format(dateRange.from, "dd/MM/yyyy")} - ${format(dateRange.to, "dd/MM/yyyy")}`;
+        }
+        return "Período";
+      case 'all':
+        return "Total Geral";
+      default:
+        return "Selecione o período";
+    }
+  };
+
+  const isApplyButtonDisabled = !startDate || !endDate;
 
   return (
     <div className="flex flex-col sm:flex-row gap-3 mb-6">
@@ -94,58 +142,89 @@ export const FinancialFilters = ({
       
       <div className="w-full sm:w-1/2">
         {isPremium ? (
-          <Popover>
-            <PopoverTrigger asChild>
-              <Button variant="outline" className="w-full h-10 justify-between">
-                <div className="flex items-center gap-2">
-                  <CalendarIcon className="h-4 w-4" />
-                  {selectedPeriod === 'current' && "Mês Atual"}
-                  {selectedPeriod === 'custom' && "Período"}
-                  {selectedPeriod === 'all' && "Total Geral"}
-                </div>
-                <ChevronDown className="h-4 w-4 opacity-50" />
-              </Button>
-            </PopoverTrigger>
-            <PopoverContent className="w-auto p-0" align="end">
-              <div className="p-2">
-                <Select value={selectedPeriod} onValueChange={handlePeriodChange}>
-                  <SelectTrigger className="w-[180px] mb-2">
-                    <SelectValue placeholder="Selecione o período" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="current">Mês Atual</SelectItem>
-                    <SelectItem value="custom">Período</SelectItem>
-                    <SelectItem value="all">Total Geral</SelectItem>
-                  </SelectContent>
-                </Select>
-                
-                {selectedPeriod === 'custom' && (
-                  <div className="mt-2">
-                    <Calendar
-                      initialFocus
-                      mode="range"
-                      defaultMonth={dateRange?.from}
-                      selected={dateRange}
-                      onSelect={handleRangeSelect}
-                      numberOfMonths={2}
-                      locale={ptBR}
-                      className="pointer-events-auto"
-                    />
-                    <div className="p-2 text-center text-sm text-muted-foreground">
-                      {dateRange?.from && dateRange?.to ? (
-                        <p>
-                          {format(dateRange.from, "dd/MM/yyyy")} -{" "}
-                          {format(dateRange.to, "dd/MM/yyyy")}
+          <>
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button variant="outline" className="w-full h-10 justify-between">
+                  <div className="flex items-center gap-2">
+                    <CalendarIcon className="h-4 w-4" />
+                    {getPeriodDisplayText()}
+                  </div>
+                  <ChevronDown className="h-4 w-4 opacity-50" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent>
+                <DropdownMenuItem onClick={() => handlePeriodSelection('current')}>
+                  Mês Atual
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handlePeriodSelection('custom')}>
+                  Período
+                </DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handlePeriodSelection('all')}>
+                  Total Geral
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
+              <DialogContent className="sm:max-w-md">
+                <DialogHeader>
+                  <DialogTitle>Selecione o período</DialogTitle>
+                </DialogHeader>
+                <div className="grid gap-6 py-4">
+                  <div className="grid gap-4">
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Data Inicial</h4>
+                      <div className="border rounded-md p-1">
+                        <Calendar
+                          mode="single"
+                          selected={startDate}
+                          onSelect={setStartDate}
+                          initialFocus
+                          locale={ptBR}
+                          className="pointer-events-auto"
+                        />
+                      </div>
+                      {startDate && (
+                        <p className="text-sm text-muted-foreground text-center">
+                          {isValid(startDate) ? format(startDate, "dd/MM/yyyy") : "Data inválida"}
                         </p>
-                      ) : (
-                        <p>Selecione um período</p>
+                      )}
+                    </div>
+
+                    <div className="space-y-2">
+                      <h4 className="font-medium text-sm">Data Final</h4>
+                      <div className="border rounded-md p-1">
+                        <Calendar
+                          mode="single"
+                          selected={endDate}
+                          onSelect={setEndDate}
+                          locale={ptBR}
+                          className="pointer-events-auto"
+                        />
+                      </div>
+                      {endDate && (
+                        <p className="text-sm text-muted-foreground text-center">
+                          {isValid(endDate) ? format(endDate, "dd/MM/yyyy") : "Data inválida"}
+                        </p>
                       )}
                     </div>
                   </div>
-                )}
-              </div>
-            </PopoverContent>
-          </Popover>
+                </div>
+                <DialogFooter>
+                  <Button variant="outline" onClick={() => setDialogOpen(false)}>
+                    Cancelar
+                  </Button>
+                  <Button 
+                    onClick={handleApplyDateRange} 
+                    disabled={isApplyButtonDisabled}
+                  >
+                    Aplicar
+                  </Button>
+                </DialogFooter>
+              </DialogContent>
+            </Dialog>
+          </>
         ) : (
           <TooltipProvider>
             <Tooltip>
