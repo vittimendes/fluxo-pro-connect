@@ -1,7 +1,9 @@
+
 import { useNavigate, useLocation } from 'react-router-dom';
 import { FinancialRecordPageHeader } from '@/components/financial/FinancialRecordPageHeader';
 import { FinancialRecordForm } from '@/components/financial/form/FinancialForm';
 import { useFinancialRecord } from '@/hooks/use-financial-record';
+import { FinancialRecordFormData } from '@/components/financial/form/useFinancialForm';
 
 const NovoRegistroFinanceiro = () => {
   const navigate = useNavigate();
@@ -14,7 +16,7 @@ const NovoRegistroFinanceiro = () => {
   // Use our custom hook to handle data fetching and form submission
   const { clients, appointment, loading, submitFinancialRecord } = useFinancialRecord(appointmentId);
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: FinancialRecordFormData) => {
     const success = await submitFinancialRecord(formData);
     if (success) {
       // Conditional redirect: if coming from appointment view, go back to it

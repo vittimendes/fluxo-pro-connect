@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { FinancialRecord, mockDataService } from '@/services/mockData';
@@ -5,6 +6,7 @@ import { FinancialRecordPageHeader } from '@/components/financial/FinancialRecor
 import { FinancialRecordForm } from '@/components/financial/form/FinancialForm';
 import { useFinancialRecord } from '@/hooks/use-financial-record';
 import { useToast } from '@/hooks/use-toast';
+import { FinancialRecordFormData } from '@/components/financial/form/useFinancialForm';
 
 const EditarRegistroFinanceiro = () => {
   const { id } = useParams<{ id: string }>();
@@ -47,7 +49,7 @@ const EditarRegistroFinanceiro = () => {
     fetchRecord();
   }, [id, navigate, toast]);
 
-  const handleSubmit = async (formData: any) => {
+  const handleSubmit = async (formData: FinancialRecordFormData) => {
     if (!id) return;
     
     const success = await updateFinancialRecord(id, formData);
