@@ -24,7 +24,7 @@ interface AppointmentViewDataLoaderProps {
       clientId: string;
       clientName: string;
       type: string;
-      date: string; 
+      date: Date; 
       time: string;
       duration: string;
       location: string;
@@ -53,11 +53,12 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
   const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
+  // Initialize formData with a default date as a Date object
   const [formData, setFormData] = useState({
     clientId: '',
     clientName: '',
     type: '',
-    date: '', 
+    date: new Date(), 
     time: '',
     duration: '',
     location: '',
@@ -87,11 +88,14 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
         setClients(clientsData);
         if (foundAppointment) {
           setAppointment(foundAppointment);
+          // Convert string date to Date object
+          const dateObj = new Date(foundAppointment.date);
+          
           setFormData({
             clientId: foundAppointment.clientId,
             clientName: foundAppointment.clientName,
             type: foundAppointment.type,
-            date: foundAppointment.date, 
+            date: dateObj, 
             time: foundAppointment.time,
             duration: String(foundAppointment.duration),
             location: foundAppointment.location,
@@ -142,7 +146,7 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      setFormData(prev => ({ ...prev, date: date.toISOString().split('T')[0] }));
+      setFormData(prev => ({ ...prev, date }));
     }
   };
 

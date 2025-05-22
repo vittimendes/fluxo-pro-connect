@@ -1,3 +1,4 @@
+
 import { useState, useEffect, ReactNode, useCallback } from 'react';
 import { appointmentRepository } from '@/repositories/appointmentRepository';
 import { Appointment } from '@/services/types';
@@ -104,11 +105,16 @@ export function useAppointmentRepository() {
       // Get client name for the appointment
       const clientName = formData.clientName;
       
+      // Format the date correctly regardless of whether it's a Date or string
+      const formattedDate = typeof formData.date === 'string' 
+        ? formData.date 
+        : formData.date.toISOString().split('T')[0];
+      
       await appointmentRepository.create({
         clientId: formData.clientId,
         clientName: clientName,
         type: formData.type,
-        date: formData.date.toISOString().split('T')[0],
+        date: formattedDate,
         time: formData.time,
         duration: Number(formData.duration),
         location: formData.location,
@@ -154,11 +160,16 @@ export function useAppointmentRepository() {
       // Get client name for the appointment
       const clientName = formData.clientName;
       
+      // Format the date correctly regardless of whether it's a Date or string
+      const formattedDate = typeof formData.date === 'string' 
+        ? formData.date 
+        : formData.date.toISOString().split('T')[0];
+      
       await appointmentRepository.update(id, {
         clientId: formData.clientId,
         clientName: clientName,
         type: formData.type,
-        date: formData.date.toISOString().split('T')[0],
+        date: formattedDate,
         time: formData.time,
         duration: Number(formData.duration),
         location: formData.location,
