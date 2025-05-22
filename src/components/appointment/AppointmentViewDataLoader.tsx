@@ -24,7 +24,7 @@ interface AppointmentViewDataLoaderProps {
       clientId: string;
       clientName: string;
       type: string;
-      date: string; // Change from Date to string
+      date: string; 
       time: string;
       duration: string;
       location: string;
@@ -57,7 +57,7 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
     clientId: '',
     clientName: '',
     type: '',
-    date: '', // Change to string
+    date: '', 
     time: '',
     duration: '',
     location: '',
@@ -91,7 +91,7 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
             clientId: foundAppointment.clientId,
             clientName: foundAppointment.clientName,
             type: foundAppointment.type,
-            date: foundAppointment.date, // Already a string
+            date: foundAppointment.date, 
             time: foundAppointment.time,
             duration: String(foundAppointment.duration),
             location: foundAppointment.location,
@@ -208,7 +208,7 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
           clientId: formData.clientId,
           clientName: formData.clientName,
           type: formData.type,
-          date: formData.date, // Now a string
+          date: formData.date, 
           time: formData.time,
           duration: parseInt(formData.duration),
           location: formData.location as 'online' | 'in_person' | 'home_visit',

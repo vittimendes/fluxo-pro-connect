@@ -12,11 +12,11 @@ interface AppointmentFormProps {
     clientId: string;
     clientName: string;
     type: string;
-    date: Date;
+    date: Date | string; // Accept either Date or string
     time: string;
     duration: string | number;
     location: string;
-    notes?: string; // Make notes optional to match AppointmentFormData
+    notes?: string;
     status: string;
   };
   isSubmitting: boolean;
