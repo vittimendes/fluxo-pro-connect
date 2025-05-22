@@ -1,4 +1,3 @@
-
 // @file SidebarNavigation.tsx
 // Desktop sidebar navigation component that displays a vertical
 // menu with navigation links.
@@ -24,7 +23,7 @@ const SidebarNavigation: React.FC<SidebarNavigationProps> = ({ navItems }) => {
   return (
     <div className="w-60 bg-white border-r border-border h-screen sticky top-0">
       {/* @component App logo/title */}
-      <div className="p-4 border-b border-border">
+      <div className="p-4">
         <h2 className="text-xl font-bold text-primary">ProAgenda</h2>
       </div>
       

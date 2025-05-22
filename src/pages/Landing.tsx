@@ -29,7 +29,7 @@ const Landing = () => {
   return (
     <div className="min-h-screen flex flex-col">
       {/* Navigation */}
-      <header className="border-b py-4 px-6">
+      <header className="border-b py-4 md:py-6 px-4 sm:px-6 md:px-8">
         <div className="max-w-5xl mx-auto flex justify-between items-center">
           <h2 className="font-bold text-xl text-[#2563EB]">ProAgenda</h2>
           <Button asChild variant="outline" size="sm">
@@ -39,7 +39,7 @@ const Landing = () => {
       </header>
 
       {/* Hero Section */}
-      <section className="py-12 px-6 md:py-20">
+      <section className="py-10 sm:py-14 md:py-20 px-4 sm:px-6 md:px-8">
         <div className="max-w-5xl mx-auto flex flex-col md:flex-row md:items-center gap-8">
           <div className="md:w-1/2 space-y-6">
             <h1 className="text-3xl md:text-4xl font-bold leading-tight">
@@ -61,7 +61,7 @@ const Landing = () => {
       </section>
 
       {/* Benefits Section */}
-      <section className="py-12 px-6 bg-slate-50">
+      <section className="py-10 sm:py-14 md:py-20 px-4 sm:px-6 md:px-8 bg-slate-50">
         <div className="max-w-5xl mx-auto">
           <h2 className="text-2xl font-bold text-center mb-10">Por que escolher o ProAgenda?</h2>
           
@@ -201,7 +201,7 @@ const Landing = () => {
       </section>
 
       {/* Footer */}
-      <footer className="border-t py-8 px-6">
+      <footer className="py-8 px-6">
         <div className="max-w-5xl mx-auto text-center text-sm text-muted-foreground">
           <p>© {new Date().getFullYear()} ProAgenda. Todos os direitos reservados.</p>
         </div>

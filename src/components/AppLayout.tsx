@@ -1,4 +1,3 @@
-
 // @file AppLayout.tsx
 // Main layout component that provides the structure for the application,
 // including navigation and responsive design.
@@ -12,7 +11,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 // @component Main application layout with responsive navigation
 const AppLayout = () => {
   // @section Detect mobile devices for responsive layout
-  const isMobile = useIsMobile();
+  const { isMobile } = useIsMobile();
   
   // @section Navigation items shared between mobile and desktop
   const navItems = [
@@ -26,24 +25,23 @@ const AppLayout = () => {
 
   return (
     <div className="flex min-h-screen bg-gray-50">
-      {/* @component Desktop sidebar navigation */}
-      {!isMobile && <SidebarNavigation navItems={navItems} />}
-      
-      <div className="flex flex-col flex-1">
-        {/* @component Header bar */}
-        <header className="bg-white border-b p-2">
-          <div className="flex justify-end max-w-lg mx-auto">
-            {/* LanguageSwitcher removed */}
-          </div>
+      {/* Sidebar for desktop */}
+      {!isMobile && (
+        <aside className="hidden md:flex flex-col w-60 bg-white border-r border-border h-screen sticky top-0 z-20">
+          <SidebarNavigation navItems={navItems} />
+        </aside>
+      )}
+      {/* Main content area */}
+      <div className="flex flex-col flex-1 min-h-screen">
+        {/* Header bar */}
+        <header className="bg-white border-b border-border px-4 sm:px-6 md:px-8 lg:px-12 xl:px-20 py-4 md:py-6 flex items-center justify-between">
+          {/* You can add logo/user info here if desired */}
         </header>
-        
-        {/* @component Main content area with responsive padding */}
-        <main className={`flex-1 pt-4 ${isMobile ? 'pb-20' : 'pb-4'} px-4 ${isMobile ? 'max-w-lg' : ''} mx-auto w-full`}>
+        <main className="main-content flex-1 px-4 sm:px-6 md:px-8 lg:px-12 xl:px-20 py-6 w-full max-w-full md:max-w-3xl lg:max-w-5xl xl:max-w-7xl mx-auto">
           <Outlet />
         </main>
       </div>
-      
-      {/* @component Mobile bottom navigation */}
+      {/* Mobile bottom navigation */}
       {isMobile && <BottomNavigation navItems={navItems} />}
     </div>
   );
