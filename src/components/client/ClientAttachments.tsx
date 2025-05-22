@@ -1,13 +1,12 @@
-
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { usePremium } from '@/hooks/use-premium';
 import PremiumOverlay from '@/components/PremiumOverlay';
 import { useToast } from '@/hooks/use-toast';
 import { Attachment } from '@/services/types';
-import { attachmentService } from '@/services/attachmentService';
 import { Button } from '@/components/ui/button';
 import { Plus } from 'lucide-react';
+import { useAttachmentRepository } from '@/hooks/use-attachment-repository';
 
 // Import our components
 import AttachmentForm from './attachment/AttachmentForm';
@@ -21,67 +20,57 @@ interface ClientAttachmentsProps {
 export default function ClientAttachments({ clientId, appointments = [] }: ClientAttachmentsProps) {
   const { isPremium } = usePremium();
   const { toast } = useToast();
-  const [attachments, setAttachments] = useState<Attachment[]>([]);
-  const [loading, setLoading] = useState(true);
   const [showForm, setShowForm] = useState(false);
-  
+  const novoAnexoBtnRef = useRef<HTMLButtonElement>(null);
+  const attachmentsEndRef = useRef<HTMLDivElement>(null);
+  const {
+    attachments,
+    loading,
+    loadAttachments,
+    addAttachment,
+    removeAttachment,
+  } = useAttachmentRepository(clientId);
+
   // Load attachments when the component mounts or clientId changes
   useEffect(() => {
-    const loadAttachments = async () => {
-      setLoading(true);
-      try {
-        const data = await attachmentService.getAttachmentsByClientId(clientId);
-        setAttachments(data);
-      } catch (error) {
-        console.error('Error loading attachments:', error);
-        toast({
-          title: "Erro ao carregar anexos",
-          description: "Não foi possível carregar os anexos do cliente.",
-          variant: "destructive"
-        });
-      } finally {
-        setLoading(false);
-      }
-    };
-    
     loadAttachments();
-  }, [clientId, toast]);
-  
-  const handleAttachmentAdded = useCallback((attachment: Attachment) => {
-    setAttachments(prev => [...prev, attachment]);
-    setShowForm(false); // Hide form after successful upload
-  }, []);
-  
-  const handleRemoveAttachment = useCallback(async (id: string) => {
-    try {
-      const success = await attachmentService.deleteAttachment(id);
-      
-      if (success) {
-        setAttachments(prev => prev.filter(a => a.id !== id));
-        
-        toast({
-          title: "Anexo removido",
-          description: "O anexo foi removido com sucesso."
-        });
-      } else {
-        throw new Error("Failed to delete attachment");
-      }
-    } catch (error) {
-      console.error('Error removing attachment:', error);
-      toast({
-        title: "Erro ao remover anexo",
-        description: "Não foi possível remover o anexo. Tente novamente.",
-        variant: "destructive"
-      });
+  }, [clientId, loadAttachments]);
+
+  // Scroll to the end of the attachments list after adding
+  useEffect(() => {
+    if (attachmentsEndRef.current) {
+      attachmentsEndRef.current.scrollIntoView({ behavior: 'smooth' });
     }
-  }, [toast]);
-  
+  }, [attachments.length]);
+
+  const handleAttachmentAdded = useCallback(async (attachmentData) => {
+    await addAttachment(attachmentData);
+    setShowForm(false);
+    toast({
+      title: 'Arquivo anexado',
+      description: 'O arquivo foi anexado com sucesso.',
+    });
+    setTimeout(() => {
+      novoAnexoBtnRef.current?.focus();
+    }, 300);
+  }, [addAttachment, toast]);
+
+  const handleRemoveAttachment = useCallback(async (id: string) => {
+    await removeAttachment(id);
+    toast({
+      title: 'Anexo removido',
+      description: 'O anexo foi removido com sucesso.',
+    });
+  }, [removeAttachment, toast]);
+
   return (
     <div className="space-y-6 mt-6">
       <div className="flex justify-between items-center">
-        <h3 className="text-lg font-medium">Anexos do Cliente</h3>
+        <h3 className="text-lg font-medium" id="attachments-heading">Anexos do Cliente</h3>
         <PremiumOverlay tooltipContent="Upload de anexos disponível no Plano Pro. Saiba mais nas configurações.">
           <Button 
+            ref={novoAnexoBtnRef}
+            aria-label="Adicionar novo anexo"
             onClick={() => setShowForm(true)} 
             size="sm"
             className="gap-1"
@@ -92,16 +81,21 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
           </Button>
         </PremiumOverlay>
       </div>
-      
       {showForm && (
-        <Card>
+        <Card role="dialog" aria-modal="true" aria-labelledby="add-attachment-title">
           <CardHeader>
             <div className="flex justify-between items-center">
-              <CardTitle className="text-lg">Adicionar Anexo</CardTitle>
+              <CardTitle className="text-lg" id="add-attachment-title">Adicionar Anexo</CardTitle>
               <Button 
                 variant="ghost" 
                 size="sm" 
-                onClick={() => setShowForm(false)}
+                aria-label="Cancelar adição de anexo"
+                onClick={() => {
+                  setShowForm(false);
+                  setTimeout(() => {
+                    novoAnexoBtnRef.current?.focus();
+                  }, 100);
+                }}
               >
                 Cancelar
               </Button>
@@ -118,12 +112,24 @@ export default function ClientAttachments({ clientId, appointments = [] }: Clien
           </CardContent>
         </Card>
       )}
-      
-      <AttachmentList
-        loading={loading}
-        attachments={attachments}
-        onRemoveAttachment={handleRemoveAttachment}
-      />
+      {attachments.length === 0 && !loading ? (
+        <div className="text-center py-12 bg-muted/20 rounded-lg border border-dashed" aria-live="polite">
+          <span className="block text-2xl mb-2" role="img" aria-label="Nenhum anexo">📎</span>
+          <h3 className="mt-2 text-sm font-medium">Nenhum anexo</h3>
+          <p className="mt-1 text-sm text-muted-foreground">
+            Adicione um arquivo para este cliente usando o botão acima.
+          </p>
+        </div>
+      ) : (
+        <>
+          <AttachmentList
+            loading={loading}
+            attachments={attachments}
+            onRemoveAttachment={handleRemoveAttachment}
+          />
+          <div ref={attachmentsEndRef} tabIndex={-1} aria-hidden="true" />
+        </>
+      )}
     </div>
   );
 };

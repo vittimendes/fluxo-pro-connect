@@ -1,7 +1,7 @@
-
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { FinancialRecord, mockDataService } from '@/services/mockData';
+import { FinancialRecord } from '@/services/types';
+import { financialRepository } from '@/repositories/financialRepository';
 import { useToast } from '@/hooks/use-toast';
 
 export function useFinancialView(id: string | undefined) {
@@ -16,8 +16,7 @@ export function useFinancialView(id: string | undefined) {
       setLoading(true);
       try {
         if (!id) return;
-        
-        const financialRecord = await mockDataService.getFinancialRecordById(id);
+        const financialRecord = await financialRepository.getById(id);
         if (financialRecord) {
           setRecord(financialRecord);
         } else {
@@ -46,8 +45,7 @@ export function useFinancialView(id: string | undefined) {
   const handleDeleteRecord = async () => {
     try {
       if (!id) return;
-      
-      const success = await mockDataService.deleteFinancialRecord(id);
+      const success = await financialRepository.delete(id);
       if (success) {
         toast({
           title: "Registro excluído com sucesso",
@@ -65,7 +63,7 @@ export function useFinancialView(id: string | undefined) {
       console.error('Error deleting financial record:', error);
       toast({
         title: "Erro ao excluir",
-        description: "Ocorreu um erro ao tentar excluir o registro.",
+        description: "Ocorreu um erro ao tentar excluir o registro financeiro.",
         variant: "destructive"
       });
     }

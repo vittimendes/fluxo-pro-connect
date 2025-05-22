@@ -1,6 +1,6 @@
-
-import { useEffect, useState } from 'react';
-import { Calendar as CalendarIcon, ChevronDown } from 'lucide-react';
+// filepath: c:\Users\User\Meu Drive\lovable\apps\fluxo-pro-connect\src\components\client\form\ClientBirthdateField.tsx
+import { useState } from 'react';
+import { Calendar as CalendarIcon } from 'lucide-react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 import { FormField, FormItem, FormLabel, FormControl, FormDescription, FormMessage } from '@/components/ui/form';
@@ -9,46 +9,51 @@ import { Popover, PopoverContent, PopoverTrigger } from '@/components/ui/popover
 import { Calendar } from '@/components/ui/calendar';
 import { cn } from '@/lib/utils';
 import { UseFormReturn } from 'react-hook-form';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { ClientFormValues } from '@/lib/schemas/client-schema';
 
 interface ClientBirthdateFieldProps {
-  form: UseFormReturn<any>;
-  selectedYear: number;
-  setSelectedYear: (year: number) => void;
-  selectingYear: boolean;
-  setSelectingYear: (selecting: boolean) => void;
+  form: UseFormReturn<ClientFormValues>;
 }
 
 export const ClientBirthdateField = ({
-  form,
-  selectedYear,
-  setSelectedYear,
-  selectingYear,
-  setSelectingYear
+  form
 }: ClientBirthdateFieldProps) => {
-  // Generate year options for the year selector
-  const generateYearOptions = () => {
-    const currentYear = new Date().getFullYear();
-    const startYear = currentYear - 100; // 100 years ago
-    const years = [];
-    
-    for (let year = currentYear; year >= startYear; year--) {
-      years.push(year);
-    }
-    
-    return years;
-  };
+  const [open, setOpen] = useState(false);
+  const [month, setMonth] = useState<number>(new Date().getMonth());
+  const [year, setYear] = useState<number>(new Date().getFullYear());
   
-  // Handle year selection
-  const handleYearSelect = (year: number) => {
-    setSelectedYear(year);
-    setSelectingYear(false);
-    
-    // Update the calendar view to the selected year
-    const currentDate = form.getValues('birthdate') || new Date();
-    const newDate = new Date(currentDate);
-    newDate.setFullYear(year);
-    form.setValue('birthdate', newDate);
+  // Calculate minimum date (100 years ago) and maximum date (today)
+  const today = new Date();
+  const minDate = new Date();
+  minDate.setFullYear(today.getFullYear() - 100);
+
+  // Prepare month and year options
+  const months = Array.from({ length: 12 }, (_, i) => {
+    const date = new Date(2000, i, 1);
+    return {
+      value: i,
+      label: format(date, 'LLLL', { locale: ptBR }) // Get full month name in Portuguese
+    };
+  });
+
+  const currentYear = new Date().getFullYear();
+  const years = Array.from(
+    { length: 101 }, // 100 years in the past + current year
+    (_, i) => currentYear - i
+  );
+
+  // Handle month/year change to update the calendar view
+  const handleMonthChange = (value: string) => {
+    setMonth(parseInt(value));
   };
+
+  const handleYearChange = (value: string) => {
+    setYear(parseInt(value));
+  };
+
+  // Update calendar view when month/year changes
+  const calendarDate = new Date(year, month, 1);
 
   return (
     <FormField
@@ -56,15 +61,15 @@ export const ClientBirthdateField = ({
       name="birthdate"
       render={({ field }) => (
         <FormItem className="flex flex-col">
-          <FormLabel>Data de Nascimento <span className="text-destructive">*</span></FormLabel>
+          <FormLabel>Data de Nascimento</FormLabel>
           <div className="flex gap-2">
-            <Popover>
+            <Popover open={open} onOpenChange={setOpen}>
               <PopoverTrigger asChild>
                 <FormControl>
                   <Button
                     variant={"outline"}
                     className={cn(
-                      "flex-1 pl-3 text-left font-normal flex justify-between items-center",
+                      "w-full pl-3 text-left font-normal flex justify-between items-center",
                       !field.value && "text-muted-foreground"
                     )}
                   >
@@ -78,57 +83,67 @@ export const ClientBirthdateField = ({
                 </FormControl>
               </PopoverTrigger>
               <PopoverContent className="w-auto p-0 z-50" align="start">
-                <div className="flex items-center justify-between p-3 border-b">
-                  <div className="font-medium">Selecione a data</div>
-                  <Popover open={selectingYear} onOpenChange={setSelectingYear}>
-                    <PopoverTrigger asChild>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        className="h-8 gap-1 text-xs font-medium px-4"
-                      >
-                        {selectedYear}
-                        <ChevronDown className="h-3 w-3 ml-1" />
-                      </Button>
-                    </PopoverTrigger>
-                    <PopoverContent className="w-auto p-0 z-50" align="start">
-                      <div className="h-64 overflow-y-auto p-3">
-                        <div className="grid grid-cols-3 gap-2">
-                          {generateYearOptions().map(year => (
-                            <Button
-                              key={year}
-                              variant={year === selectedYear ? "default" : "outline"}
-                              size="sm"
-                              className={cn(
-                                "h-9 text-sm w-full",
-                                year === selectedYear && "bg-primary text-primary-foreground"
-                              )}
-                              onClick={() => handleYearSelect(year)}
-                            >
-                              {year}
-                            </Button>
-                          ))}
-                        </div>
-                      </div>
-                    </PopoverContent>
-                  </Popover>
+                <div className="p-3 border-b flex justify-between space-x-2">
+                  <Select 
+                    value={month.toString()} 
+                    onValueChange={handleMonthChange}
+                  >
+                    <SelectTrigger className="w-[140px]">
+                      <SelectValue placeholder="Mês" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {months.map((m) => (
+                        <SelectItem key={m.value} value={m.value.toString()}>
+                          {m.label}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                  
+                  <Select 
+                    value={year.toString()} 
+                    onValueChange={handleYearChange}
+                  >
+                    <SelectTrigger className="w-[100px]">
+                      <SelectValue placeholder="Ano" />
+                    </SelectTrigger>
+                    <SelectContent className="h-80">
+                      {years.map((y) => (
+                        <SelectItem key={y} value={y.toString()}>
+                          {y}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
                 </div>
                 <Calendar
                   mode="single"
-                  captionLayout="dropdown"
                   selected={field.value}
-                  onSelect={field.onChange}
-                  disabled={(date) => date > new Date()}
-                  defaultMonth={field.value || new Date(selectedYear, 0)}
+                  onSelect={(date) => {
+                    field.onChange(date);
+                    setOpen(false);
+                    
+                    // Update month and year state when a date is selected
+                    if (date) {
+                      setMonth(date.getMonth());
+                      setYear(date.getFullYear());
+                    }
+                  }}
+                  disabled={(date) => date > today || date < minDate}
+                  month={calendarDate}
+                  onMonthChange={(date) => {
+                    setMonth(date.getMonth());
+                    setYear(date.getFullYear());
+                  }}
                   initialFocus
-                  className="p-3 pointer-events-auto"
+                  className="p-3"
                   locale={ptBR}
                 />
               </PopoverContent>
             </Popover>
           </div>
           <FormDescription>
-            A data de nascimento é obrigatória para o cadastro do cliente
+            Selecione a data de nascimento do cliente
           </FormDescription>
           <FormMessage />
         </FormItem>

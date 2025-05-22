@@ -1,5 +1,4 @@
-
-import { useState, useEffect, ReactNode } from 'react';
+import { useState, useEffect, ReactNode, useCallback } from 'react';
 import { appointmentRepository } from '@/repositories/appointmentRepository';
 import { Appointment } from '@/services/types';
 import { AppointmentFormData } from '@/types/forms';
@@ -36,7 +35,7 @@ export function useAppointmentRepository() {
     }
   }
 
-  async function getAppointmentsByDate(date: Date) {
+  const getAppointmentsByDate = useCallback(async (date: Date) => {
     setLoading(true);
     try {
       const data = await appointmentRepository.getByDate(date);
@@ -52,9 +51,9 @@ export function useAppointmentRepository() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
 
-  async function getAppointmentsByDateRange(startDate: Date, endDate: Date) {
+  const getAppointmentsByDateRange = useCallback(async (startDate: Date, endDate: Date) => {
     setLoading(true);
     try {
       const data = await appointmentRepository.getByDateRange(startDate, endDate);
@@ -70,7 +69,7 @@ export function useAppointmentRepository() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
 
   async function getAppointmentById(id: string) {
     try {

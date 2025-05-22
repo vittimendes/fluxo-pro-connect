@@ -1,8 +1,8 @@
-
 import React from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Client, Appointment } from '@/services/mockData';
 import { Card, CardContent, CardFooter, CardHeader } from '@/components/ui/card';
+import { FinancialRecord } from '@/services/types';
 
 import { FinancialFormHeader } from './FinancialFormHeader';
 import { FinancialTypeField } from './FinancialTypeField';
@@ -20,7 +20,7 @@ interface FinancialFormProps {
   appointment: Appointment | null;
   appointmentId: string | null;
   loading: boolean;
-  initialData?: any; // For edit mode
+  initialData?: FinancialRecord; // Use correct type
   onSubmit: (formData: FinancialRecordFormData) => Promise<boolean>;
 }
 
@@ -53,44 +53,47 @@ export const FinancialRecordForm = ({
   }
 
   return (
-    <Card>
-      <form onSubmit={(e) => handleSubmit(e, onSubmit)}>
+    <Card aria-labelledby="financial-form-title">
+      <form onSubmit={(e) => handleSubmit(e, onSubmit)} aria-describedby="financial-form-errors">
         <CardHeader>
           <FinancialFormHeader initialData={initialData} appointment={appointment} />
         </CardHeader>
         <CardContent className="space-y-4">
+          <div id="financial-form-errors" aria-live="polite" className="text-destructive text-sm min-h-[1.5em]" />
           <FinancialTypeField 
             value={formData.type} 
             onValueChange={(value) => handleSelectChange('type', value)} 
+            disabled={isSubmitting}
           />
-          
           <FinancialAmountField 
             value={formData.amount} 
             onChange={handleAmountChange} 
+            disabled={isSubmitting}
           />
-          
           <FinancialDescriptionField 
             value={formData.description} 
             onChange={handleInputChange} 
+            disabled={isSubmitting}
           />
-          
           {/* Client selection - only show if not linked to appointment */}
           {!appointment && (
             <FinancialClientField
               clients={clients}
               value={formData.clientId}
               onValueChange={(value) => handleSelectChange('clientId', value)}
+              disabled={isSubmitting}
+              emptyStateText="Nenhum cliente cadastrado. Cadastre um cliente para registrar movimentações."
             />
           )}
-          
           <FinancialDateField 
             date={formData.date} 
             onDateChange={handleDateChange} 
+            disabled={isSubmitting}
           />
-          
           <FinancialCategoryField 
             value={formData.category} 
             onValueChange={(value) => handleSelectChange('category', value)} 
+            disabled={isSubmitting}
           />
         </CardContent>
         <CardFooter>

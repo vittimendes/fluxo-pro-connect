@@ -4,10 +4,9 @@ import { Input } from '@/components/ui/input';
 import { Textarea } from '@/components/ui/textarea';
 import { UseFormReturn } from 'react-hook-form';
 import { ClientBirthdateField } from './ClientBirthdateField';
-import { ClientFormValues } from '@/lib/schemas/client-schema';
 
 interface ClientFormFieldsProps {
-  form: UseFormReturn<ClientFormValues>;
+  form: UseFormReturn<any>;
 }
 
 export const ClientFormFields = ({

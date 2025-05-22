@@ -1,7 +1,7 @@
 
 import { Button } from '@/components/ui/button';
 import { ChevronLeft } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface ClientFormHeaderProps {
   isEditing: boolean;
@@ -9,6 +9,17 @@ interface ClientFormHeaderProps {
 
 export const ClientFormHeader = ({ isEditing }: ClientFormHeaderProps) => {
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const handleBack = () => {
+    // Se estiver editando, volta para a página de detalhes do cliente
+    if (isEditing && id) {
+      navigate(`/clientes/${id}`);
+    } else {
+      // Caso contrário, volta para a lista de clientes
+      navigate('/clientes');
+    }
+  };
 
   return (
     <div className="flex items-center">
@@ -16,7 +27,7 @@ export const ClientFormHeader = ({ isEditing }: ClientFormHeaderProps) => {
         variant="ghost" 
         size="sm" 
         className="mr-2" 
-        onClick={() => navigate('/clientes')}
+        onClick={handleBack}
       >
         <ChevronLeft className="h-4 w-4" />
       </Button>

@@ -1,11 +1,11 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { FinancialRecord, mockDataService } from '@/services/mockData';
+import { FinancialRecord } from '@/services/types';
 import { FinancialRecordPage } from '@/components/financial/record/FinancialRecordPage';
 import { useFinancialRecord } from '@/hooks/use-financial-record';
 import { useToast } from '@/hooks/use-toast';
 import { FinancialRecordFormData } from '@/types/forms';
+import { useFinancialRepository } from '@/hooks/use-financial-repository';
 
 const EditarRegistroFinanceiro = () => {
   const { id } = useParams<{ id: string }>();
@@ -16,13 +16,14 @@ const EditarRegistroFinanceiro = () => {
   
   // Use our custom hook to handle data fetching and form submission
   const { clients, loading: clientsLoading, updateFinancialRecord } = useFinancialRecord(null);
+  const { getRecordById } = useFinancialRepository();
 
   useEffect(() => {
     const fetchRecord = async () => {
       if (!id) return;
       
       try {
-        const financialRecord = await mockDataService.getFinancialRecordById(id);
+        const financialRecord = await getRecordById(id);
         if (financialRecord) {
           setRecord(financialRecord);
         } else {
@@ -46,7 +47,7 @@ const EditarRegistroFinanceiro = () => {
     };
 
     fetchRecord();
-  }, [id, navigate, toast]);
+  }, [id, navigate, toast, getRecordById]);
 
   const handleSubmit = async (formData: FinancialRecordFormData) => {
     if (!id) return false;

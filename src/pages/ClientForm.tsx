@@ -1,36 +1,24 @@
-
 // @file ClientForm.tsx
 // Form component for creating new clients or editing existing ones,
 // handling validation, data submission, and feedback to the user.
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { useForm } from 'react-hook-form';
-import { z } from 'zod';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { Form } from '@/components/ui/form';
 import { useClientRepository } from '@/hooks/use-client-repository';
+import { clientFormSchema, ClientFormValues } from '@/lib/schemas/client-schema.ts';
 
 // Import refactored components
 import { ClientFormHeader } from '@/components/client/form/ClientFormHeader';
 import { ClientFormFields } from '@/components/client/form/ClientFormFields';
 import { ClientFormActions } from '@/components/client/form/ClientFormActions';
 
-// @section Form validation schema
-const formSchema = z.object({
-  name: z.string().min(2, { message: "Nome deve ter pelo menos 2 caracteres" }),
-  phone: z.string().min(8, { message: "Telefone inválido" }),
-  email: z.string().email({ message: "Email inválido" }).optional().or(z.literal('')),
-  notes: z.string().optional(),
-  birthdate: z.date({
-    required_error: "Data de nascimento é obrigatória",
-  }).optional(),
-});
-
-type FormValues = z.infer<typeof formSchema>;
-
+// Form validation schema imported from /lib/schemas/client-schema.ts
+// Export the component as the default
 const ClientForm = () => {
   // @section Route and navigation setup
   const { id } = useParams();
@@ -41,12 +29,13 @@ const ClientForm = () => {
   // @section Form state management
   const [loading, setLoading] = useState(false);
   const [initialLoading, setInitialLoading] = useState(id ? true : false);
-  const [selectedYear, setSelectedYear] = useState<number>(new Date().getFullYear());
-  const [selectingYear, setSelectingYear] = useState(false);
+  
+  // Use ref to track if data has been loaded to prevent infinite loops
+  const dataLoaded = useRef(false);
 
   // @section Form initialization with React Hook Form
-  const form = useForm<FormValues>({
-    resolver: zodResolver(formSchema),
+  const form = useForm<ClientFormValues>({
+    resolver: zodResolver(clientFormSchema),
     defaultValues: {
       name: '',
       phone: '',
@@ -55,23 +44,23 @@ const ClientForm = () => {
       birthdate: undefined,
     },
   });
-
-  // @effect Load client data for editing
+  // @effect Load client data for editing - only run once when id changes
   useEffect(() => {
+    // Skip if no ID
+    if (!id) return;
+    
+    // Skip if already loaded this specific ID
+    const currentId = id;
+    if (dataLoaded.current) return;
+    
     const fetchClient = async () => {
-      if (!id) return;
+      setInitialLoading(true);
       
       try {
         // @api Fetch client data
-        const client = await getClientById(id);
+        const client = await getClientById(currentId);
         
         if (client) {
-          // If the client has a birthdate, set the selectedYear
-          if (client.birthdate) {
-            const birthdate = new Date(client.birthdate);
-            setSelectedYear(birthdate.getFullYear());
-          }
-          
           // @function Reset form with client data
           form.reset({
             name: client.name,
@@ -80,6 +69,9 @@ const ClientForm = () => {
             notes: client.notes || '',
             birthdate: client.birthdate ? new Date(client.birthdate) : undefined,
           });
+          
+          // Mark data as loaded to prevent further loading attempts
+          dataLoaded.current = true;
         } else {
           // @event Handle client not found
           toast({
@@ -102,13 +94,21 @@ const ClientForm = () => {
       }
     };
 
-    if (id) {
-      fetchClient();
-    }
-  }, [id, navigate, toast, form, getClientById]);
+    // Execute the fetch function only once
+    fetchClient();
+    
+    // Clean-up function to reset the dataLoaded ref when component unmounts
+    // or when id changes
+    return () => {
+      dataLoaded.current = false;
+    };
+    
+    // Only include id in dependencies - other dependencies will be handled manually
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [id]);
 
   // @function Handle form submission
-  const onSubmit = async (data: FormValues) => {
+  const onSubmit = async (data: ClientFormValues) => {
     setLoading(true);
     
     try {
@@ -129,7 +129,7 @@ const ClientForm = () => {
             title: "Cliente atualizado",
             description: "As informações do cliente foram atualizadas com sucesso.",
           });
-          navigate('/clientes');
+          navigate(`/clientes/${id}`); // Redirecionando para os detalhes do cliente
         }
       } else {
         // @api Create new client
@@ -182,16 +182,10 @@ const ClientForm = () => {
               <CardTitle>Informações do Cliente</CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <ClientFormFields 
-                form={form}
-                selectedYear={selectedYear}
-                setSelectedYear={setSelectedYear}
-                selectingYear={selectingYear}
-                setSelectingYear={setSelectingYear}
-              />
+              <ClientFormFields form={form} />
             </CardContent>
             <CardFooter className="flex justify-between">
-              <ClientFormActions loading={loading} />
+              <ClientFormActions loading={loading} isEditing={!!id} />
             </CardFooter>
           </form>
         </Form>

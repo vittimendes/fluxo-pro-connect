@@ -1,5 +1,5 @@
-
 import { useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { AppointmentFormData } from '@/types/forms';
 import { useAppointmentRepository } from '@/hooks/use-appointment-repository';
 
@@ -17,6 +17,7 @@ export const AppointmentSubmitHandler: React.FC<AppointmentSubmitHandlerProps> =
 }) => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const { createAppointment } = useAppointmentRepository();
+  const navigate = useNavigate();
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -26,8 +27,7 @@ export const AppointmentSubmitHandler: React.FC<AppointmentSubmitHandlerProps> =
       const success = await createAppointment(formData);
       
       if (success) {
-        // Navigate or reset form could be done here
-        console.log('Appointment created successfully');
+        navigate('/agenda'); // Redirect to agenda after successful creation
       }
     } catch (error) {
       console.error('Error submitting appointment:', error);

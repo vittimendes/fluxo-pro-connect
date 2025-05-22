@@ -1,4 +1,3 @@
-
 import { useState, useEffect } from 'react';
 import { 
   format, 
@@ -8,9 +7,10 @@ import {
   addDays, 
   parseISO
 } from 'date-fns';
-import { mockDataService, Appointment } from '@/services/mockData';
+import { useAppointmentRepository } from './use-appointment-repository';
 import { useToast } from '@/hooks/use-toast';
 import { useNavigate } from 'react-router-dom';
+import { Appointment } from '@/services/types';
 
 export function useAgenda() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -23,6 +23,7 @@ export function useAgenda() {
   const [statusFilter, setStatusFilter] = useState<string>("all");
   const navigate = useNavigate();
   const { toast } = useToast();
+  const { getAppointmentsByDate, getAppointmentsByDateRange, appointments: repoAppointments, loading: repoLoading } = useAppointmentRepository();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,17 +31,15 @@ export function useAgenda() {
       try {
         if (currentView === 'day') {
           const formattedDate = format(currentDate, 'yyyy-MM-dd');
-          // Convert string date to Date object before passing
-          const data = await mockDataService.getAppointmentsByDate(new Date(formattedDate));
+          const data = await getAppointmentsByDate(new Date(formattedDate));
           setAppointments(data);
         } else if (currentView === 'week') {
           const endDate = addDays(weekStartDate, 6);
-          const data = await mockDataService.getAppointmentsByWeek(weekStartDate, endDate);
+          const data = await getAppointmentsByDateRange(weekStartDate, endDate);
           setAppointments(data);
         } else if (currentView === 'month') {
           const endDate = endOfMonth(monthStartDate);
-          // For month view, we need to get appointments for the entire month
-          const data = await mockDataService.getAppointmentsByWeek(monthStartDate, endDate);
+          const data = await getAppointmentsByDateRange(monthStartDate, endDate);
           setAppointments(data);
         }
       } catch (error) {
@@ -56,7 +55,7 @@ export function useAgenda() {
     };
 
     fetchData();
-  }, [currentDate, weekStartDate, monthStartDate, currentView, toast]);
+  }, [currentDate, weekStartDate, monthStartDate, currentView, toast, getAppointmentsByDate, getAppointmentsByDateRange]);
 
   // Apply status filter when appointments or status filter changes
   useEffect(() => {

@@ -1,12 +1,12 @@
-
 // @file use-appointment-status.ts
 // Custom React hook for managing appointment status updates
 // with local state synchronization and API integration.
 
 import { useState } from 'react';
-import { mockDataService, Appointment } from '@/services/mockData';
+import { Appointment } from '@/services/mockData';
 import { useToast } from '@/hooks/use-toast';
 import { statusConfig } from '@/components/agenda/AgendaUtils';
+import { useAppointmentRepository } from './use-appointment-repository';
 
 // @function Custom hook for appointment status management
 export function useAppointmentStatus(
@@ -16,36 +16,29 @@ export function useAppointmentStatus(
   // @section State management
   const [appointments, setAppointments] = useState<Appointment[]>(initialAppointments);
   const { toast } = useToast();
+  const { updateAppointmentStatus: repoUpdateAppointmentStatus, loadAppointments } = useAppointmentRepository();
 
   // @api Update appointment status and synchronize state
   const updateAppointmentStatus = async (appointmentId: string, status: string): Promise<void> => {
     try {
-      // @api Call service to update appointment status
-      const updatedAppointment = await mockDataService.updateAppointment(appointmentId, {
-        status: status as 'scheduled' | 'confirmed' | 'canceled' | 'no_show' | 'completed'
-      });
-      
-      // @section Update the local appointments state
-      const updatedAppointments = appointments.map(app => 
-        app.id === appointmentId ? updatedAppointment : app
-      );
-      
-      // @section Update both internal state and parent state if provided
-      setAppointments(updatedAppointments);
+      // Use repository to update appointment status
+      const success = await repoUpdateAppointmentStatus(appointmentId, status);
+      if (!success) throw new Error('Repository failed to update status');
+      // Optionally reload appointments from repository if needed
+      await loadAppointments();
+      // Optionally update local state if you want to keep it in sync
+      setAppointments(prev => prev.map(app =>
+        app.id === appointmentId ? { ...app, status: status as Appointment['status'] } : app
+      ));
       if (setParentAppointments) {
-        setParentAppointments(prevAppointments => 
-          prevAppointments.map(app => 
-            app.id === appointmentId ? updatedAppointment : app
+        setParentAppointments(prevAppointments =>
+          prevAppointments.map(app =>
+            app.id === appointmentId ? { ...app, status: status as Appointment['status'] } : app
           )
         );
       }
-      
-      // We removed the toast from here since it's now handled directly in the dropdown component
-      // for a more immediate visual feedback
-      
     } catch (error) {
       console.error('Error updating appointment status:', error);
-      // @event Show error toast on failure
       toast({
         title: "Erro ao atualizar status",
         description: "Não foi possível atualizar o status do agendamento.",

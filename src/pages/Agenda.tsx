@@ -1,14 +1,14 @@
-
 // @file Agenda.tsx
 // Main agenda page that manages appointment display and interactions
 // across different view modes (day, week, month).
 
 import { useEffect, useRef } from 'react';
 import { useState } from 'react';
-import { mockDataService, Client, Appointment } from '@/services/mockData';
+import { Client, Appointment } from '@/services/mockData';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { useAgenda } from '@/hooks/use-agenda';
 import { useAppointmentStatus } from '@/hooks/use-appointment-status';
+import { useClientRepository } from '@/hooks/use-client-repository';
 
 // @section Import shared utils and components
 import { AgendaHeader } from '@/components/agenda/AgendaHeader';
@@ -58,6 +58,9 @@ const Agenda = () => {
     setFilteredAppointments
   );
 
+  // @section Client repository
+  const { clients: repoClients, loading: clientsLoading } = useClientRepository();
+
   // @effect Set default view to 'day' on mobile devices
   useEffect(() => {
     if (isMobile && !initialViewSet.current) {
@@ -66,20 +69,10 @@ const Agenda = () => {
     }
   }, [isMobile, setView]);
 
-  // @effect Fetch clients data for phone numbers
+  // @effect Sync clients from repository
   useEffect(() => {
-    // @api Fetch clients for phone numbers
-    const fetchClients = async () => {
-      try {
-        const clientsData = await mockDataService.getClients();
-        setClients(clientsData);
-      } catch (error) {
-        console.error('Error fetching clients:', error);
-      }
-    };
-    
-    fetchClients();
-  }, []);
+    setClients(repoClients);
+  }, [repoClients]);
 
   // @event Send WhatsApp reminder with client data
   const handleSendWhatsAppReminder = (appointment: Appointment) => {

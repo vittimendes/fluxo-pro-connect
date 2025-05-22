@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
@@ -11,9 +10,10 @@ import { CalendarIcon } from 'lucide-react';
 interface FinancialDateFieldProps {
   date: Date;
   onDateChange: (date: Date | undefined) => void;
+  disabled?: boolean;
 }
 
-export const FinancialDateField: React.FC<FinancialDateFieldProps> = ({ date, onDateChange }) => {
+export const FinancialDateField: React.FC<FinancialDateFieldProps> = ({ date, onDateChange, disabled }) => {
   return (
     <div className="space-y-2">
       <Label>Data</Label>
@@ -22,6 +22,7 @@ export const FinancialDateField: React.FC<FinancialDateFieldProps> = ({ date, on
           <Button
             variant="outline"
             className="w-full justify-start text-left font-normal"
+            disabled={disabled}
           >
             <CalendarIcon className="mr-2 h-4 w-4" />
             {format(date, "dd 'de' MMMM',' yyyy", { locale: ptBR })}
@@ -33,6 +34,7 @@ export const FinancialDateField: React.FC<FinancialDateFieldProps> = ({ date, on
             selected={date}
             onSelect={onDateChange}
             initialFocus
+            disabled={disabled}
           />
         </PopoverContent>
       </Popover>

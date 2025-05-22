@@ -1,4 +1,3 @@
-
 // @file ClientView.tsx
 // Client details page that displays comprehensive client information 
 // along with their appointment history, financial records, and attachments.
@@ -6,7 +5,9 @@
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Client, Appointment, FinancialRecord } from '@/services/types';
-import { mockDataService } from '@/services/mockData';
+import { clientRepository } from '@/repositories/clientRepository';
+import { appointmentRepository } from '@/repositories/appointmentRepository';
+import { financialRepository } from '@/repositories/financialRepository';
 import { Button } from '@/components/ui/button';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from '@/hooks/use-toast';
@@ -36,7 +37,7 @@ const ClientView = () => {
         if (!id) return;
         
         // @api Fetch client data
-        const clientData = await mockDataService.getClientById(id);
+        const clientData = await clientRepository.getById(id);
         if (!clientData) {
           // @event Handle client not found
           toast({
@@ -51,7 +52,7 @@ const ClientView = () => {
         setClient(clientData);
         
         // @api Fetch client appointments
-        const clientAppointments = await mockDataService.getAppointmentsByClientId(id);
+        const clientAppointments = await appointmentRepository.getByClientId(id);
         
         // @utility Sort appointments by date (newest first)
         const sortedAppointments = [...clientAppointments].sort((a, b) => {
@@ -63,7 +64,7 @@ const ClientView = () => {
         setAppointments(sortedAppointments);
         
         // @api Fetch client financial records
-        const clientRecords = await mockDataService.getFinancialRecordsByClientId(id);
+        const clientRecords = await financialRepository.getByClientId(id);
         
         // @utility Sort financial records by date (newest first)
         const sortedRecords = [...clientRecords].sort((a, b) => {

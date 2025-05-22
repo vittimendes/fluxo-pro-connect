@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { clientRepository } from '@/repositories/clientRepository';
 import { Client } from '@/services/types';
 import { ClientFormData } from '@/types/forms';
@@ -13,11 +12,7 @@ export function useClientRepository() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadClients();
-  }, []);
-
-  async function loadClients() {
+  const loadClients = useCallback(async () => {
     setLoading(true);
     try {
       const data = await clientRepository.getAll();
@@ -32,9 +27,13 @@ export function useClientRepository() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
 
-  async function searchClients(query: string) {
+  useEffect(() => {
+    loadClients();
+  }, [loadClients]);
+
+  const searchClients = useCallback(async (query: string) => {
     setLoading(true);
     try {
       const data = await clientRepository.search(query);
@@ -51,9 +50,9 @@ export function useClientRepository() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
 
-  async function getClientById(id: string) {
+  const getClientById = useCallback(async (id: string) => {
     try {
       return await clientRepository.getById(id);
     } catch (error) {
@@ -65,9 +64,9 @@ export function useClientRepository() {
       });
       return null;
     }
-  }
+  }, [toast]);
 
-  async function createClient(formData: ClientFormData) {
+  const createClient = useCallback(async (formData: ClientFormData) => {
     const validation = validate(clientSchema, formData);
     if (!validation.success) {
       if ('errors' in validation) {
@@ -109,9 +108,9 @@ export function useClientRepository() {
       });
       return false;
     }
-  }
+  }, [toast, loadClients]);
 
-  async function updateClient(id: string, formData: ClientFormData) {
+  const updateClient = useCallback(async (id: string, formData: ClientFormData) => {
     const validation = validate(clientSchema, formData);
     if (!validation.success) {
       if ('errors' in validation) {
@@ -151,9 +150,9 @@ export function useClientRepository() {
       });
       return false;
     }
-  }
+  }, [toast, loadClients]);
 
-  async function deleteClient(id: string) {
+  const deleteClient = useCallback(async (id: string) => {
     try {
       const success = await clientRepository.delete(id);
       
@@ -182,11 +181,12 @@ export function useClientRepository() {
       });
       return false;
     }
-  }
+  }, [toast, loadClients]);
 
   return {
     clients,
     loading,
+    loadClients,
     searchClients,
     getClientById,
     createClient,

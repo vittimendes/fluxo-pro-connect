@@ -1,8 +1,11 @@
 import { useState, useEffect } from 'react';
 import { format } from 'date-fns';
-import { mockDataService, Client, Appointment } from '@/services/mockData';
+import { clientRepository } from '@/repositories/clientRepository';
+import { appointmentRepository } from '@/repositories/appointmentRepository';
+import { financialRepository } from '@/repositories/financialRepository';
 import { useToast } from '@/hooks/use-toast';
 import { FinancialRecordFormData } from '@/types/forms';
+import { Client, Appointment } from '@/services/types';
 
 export const useFinancialRecord = (appointmentId: string | null) => {
   const [clients, setClients] = useState<Client[]>([]);
@@ -15,16 +18,12 @@ export const useFinancialRecord = (appointmentId: string | null) => {
       setLoading(true);
       try {
         // Fetch clients
-        const clientsData = await mockDataService.getClients();
+        const clientsData = await clientRepository.getAll();
         setClients(clientsData);
 
         // If we have an appointmentId, fetch that appointment
         if (appointmentId) {
-          // For simplicity, we'll fetch all appointments and find the one we need
-          // In a real app, we'd have a dedicated endpoint for this
-          const appointments = await mockDataService.getAppointments();
-          const foundAppointment = appointments.find(app => app.id === appointmentId);
-          
+          const foundAppointment = await appointmentRepository.getById(appointmentId);
           if (foundAppointment) {
             setAppointment(foundAppointment);
           }
@@ -40,7 +39,6 @@ export const useFinancialRecord = (appointmentId: string | null) => {
         setLoading(false);
       }
     };
-
     fetchData();
   }, [appointmentId, toast]);
 
@@ -48,11 +46,8 @@ export const useFinancialRecord = (appointmentId: string | null) => {
     try {
       const amount = parseFloat(formData.amount);
       const formattedDate = format(formData.date, 'yyyy-MM-dd');
-      
-      // For expenses, convert amount to negative value
       const finalAmount = formData.type === 'expense' ? -Math.abs(amount) : amount;
-
-      await mockDataService.addFinancialRecord({
+      await financialRepository.create({
         amount: finalAmount,
         description: formData.description,
         date: formattedDate,
@@ -60,14 +55,12 @@ export const useFinancialRecord = (appointmentId: string | null) => {
         category: formData.category || undefined,
         relatedAppointment: formData.relatedAppointment || undefined,
         clientId: formData.clientId || undefined,
-        userId: '' // Adding required field (mockDataService will replace this)
+        userId: '' // Will be set by repository
       });
-
       toast({
         title: "Registro criado",
         description: "O registro financeiro foi criado com sucesso!",
       });
-
       return true;
     } catch (error) {
       console.error('Error creating financial record:', error);
@@ -84,11 +77,8 @@ export const useFinancialRecord = (appointmentId: string | null) => {
     try {
       const amount = parseFloat(formData.amount);
       const formattedDate = format(formData.date, 'yyyy-MM-dd');
-      
-      // For expenses, convert amount to negative value
       const finalAmount = formData.type === 'expense' ? -Math.abs(amount) : amount;
-
-      await mockDataService.updateFinancialRecord(id, {
+      await financialRepository.update(id, {
         amount: finalAmount,
         description: formData.description,
         date: formattedDate,
@@ -97,12 +87,10 @@ export const useFinancialRecord = (appointmentId: string | null) => {
         relatedAppointment: formData.relatedAppointment || undefined,
         clientId: formData.clientId || undefined,
       });
-
       toast({
         title: "Registro atualizado",
         description: "O registro financeiro foi atualizado com sucesso!",
       });
-
       return true;
     } catch (error) {
       console.error('Error updating financial record:', error);

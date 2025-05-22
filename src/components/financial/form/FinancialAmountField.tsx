@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Input } from '@/components/ui/input';
@@ -6,9 +5,10 @@ import { Input } from '@/components/ui/input';
 interface FinancialAmountFieldProps {
   value: string;
   onChange: (value: string) => void;
+  disabled?: boolean;
 }
 
-export const FinancialAmountField: React.FC<FinancialAmountFieldProps> = ({ value, onChange }) => {
+export const FinancialAmountField: React.FC<FinancialAmountFieldProps> = ({ value, onChange, disabled }) => {
   const handleAmountChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     // Remove non-numeric characters and convert to number format
     const newValue = e.target.value.replace(/[^0-9.]/g, '');
@@ -26,6 +26,7 @@ export const FinancialAmountField: React.FC<FinancialAmountFieldProps> = ({ valu
         onChange={handleAmountChange}
         placeholder="0.00"
         required
+        disabled={disabled}
       />
     </div>
   );

@@ -1,4 +1,3 @@
-
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -7,12 +6,12 @@ import { Textarea } from '@/components/ui/textarea';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { useToast } from '@/hooks/use-toast';
 import { UploadIcon } from 'lucide-react';
-import { attachmentService } from '@/services/attachmentService';
+import { Attachment } from '@/services/types';
 
 interface AttachmentFormProps {
   clientId: string;
   appointments?: Array<{ id: string; date: string; type: string; }>;
-  onAttachmentAdded: (attachment: any) => void;
+  onAttachmentAdded: (attachment: Omit<Attachment, 'id' | 'userId' | 'dateUploaded'>) => Promise<void>;
 }
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB limit
@@ -80,12 +79,10 @@ export default function AttachmentForm({ clientId, appointments = [], onAttachme
     
     try {
       const file = newAttachment.file;
-      
-      // Create a blob URL for the file (in a real app, this would be an upload to a storage service)
       const url = URL.createObjectURL(file);
       
-      // Add the attachment to the service
-      const attachment = await attachmentService.addAttachment({
+      // Pass attachment data to parent, which will call addAttachment
+      await onAttachmentAdded({
         name: file.name,
         type: file.type,
         size: file.size,
@@ -95,28 +92,15 @@ export default function AttachmentForm({ clientId, appointments = [], onAttachme
         notes: newAttachment.notes || undefined,
       });
       
-      // Notify parent component
-      onAttachmentAdded(attachment);
-      
       // Reset form
       setNewAttachment({ appointmentId: null, notes: '' });
-      
-      toast({
-        title: "Arquivo anexado com sucesso",
-        description: `${file.name} foi anexado ao cliente.`
-      });
       
       // Reset file input
       const fileInput = document.getElementById('file-upload') as HTMLInputElement;
       if (fileInput) fileInput.value = '';
       
     } catch (error) {
-      console.error('Error uploading attachment:', error);
-      toast({
-        title: "Erro ao anexar arquivo",
-        description: "Não foi possível anexar o arquivo. Tente novamente.",
-        variant: "destructive"
-      });
+      // Error handling is done in parent
     } finally {
       setIsUploading(false);
     }

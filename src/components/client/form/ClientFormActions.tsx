@@ -1,21 +1,34 @@
 
 import { Button } from '@/components/ui/button';
 import { Loader } from 'lucide-react';
-import { useNavigate } from 'react-router-dom';
+import { useNavigate, useParams } from 'react-router-dom';
 
 interface ClientFormActionsProps {
   loading: boolean;
+  isEditing?: boolean;
 }
 
-export const ClientFormActions = ({ loading }: ClientFormActionsProps) => {
+export const ClientFormActions = ({ loading, isEditing = false }: ClientFormActionsProps) => {
   const navigate = useNavigate();
+  const { id } = useParams();
+
+  const handleCancel = () => {
+    // Se estiver editando, volta para a página de detalhes do cliente
+    if (isEditing && id) {
+      navigate(`/clientes/${id}`);
+    } else {
+      // Caso contrário, volta para a lista de clientes
+      navigate('/clientes');
+    }
+  };
 
   return (
     <>
       <Button 
         variant="outline" 
         type="button" 
-        onClick={() => navigate('/clientes')}
+        onClick={handleCancel}
+        disabled={loading}
       >
         Cancelar
       </Button>
@@ -26,9 +39,9 @@ export const ClientFormActions = ({ loading }: ClientFormActionsProps) => {
         {loading ? (
           <>
             <Loader className="mr-2 h-4 w-4 animate-spin" />
-            Salvando...
+            {isEditing ? 'Atualizando...' : 'Salvando...'}
           </>
-        ) : "Salvar"}
+        ) : isEditing ? 'Salvar alterações' : 'Cadastrar cliente'}
       </Button>
     </>
   );

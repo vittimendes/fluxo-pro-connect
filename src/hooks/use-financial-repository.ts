@@ -1,5 +1,4 @@
-
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { financialRepository } from '@/repositories/financialRepository';
 import { FinancialRecord } from '@/services/types';
 import { FinancialRecordFormData } from '@/types/forms';
@@ -14,11 +13,7 @@ export function useFinancialRepository() {
   const [loading, setLoading] = useState(true);
   const { toast } = useToast();
 
-  useEffect(() => {
-    loadRecords();
-  }, []);
-
-  async function loadRecords() {
+  const loadRecords = useCallback(async () => {
     setLoading(true);
     try {
       const data = await financialRepository.getAll();
@@ -33,9 +28,13 @@ export function useFinancialRepository() {
     } finally {
       setLoading(false);
     }
-  }
+  }, [toast]);
 
-  async function getRecordById(id: string) {
+  useEffect(() => {
+    loadRecords();
+  }, [loadRecords]);
+
+  const getRecordById = useCallback(async (id: string) => {
     try {
       return await financialRepository.getById(id);
     } catch (error) {
@@ -47,12 +46,11 @@ export function useFinancialRepository() {
       });
       return null;
     }
-  }
+  }, [toast]);
 
-  async function createRecord(formData: FinancialRecordFormData) {
+  const createRecord = useCallback(async (formData: FinancialRecordFormData) => {
     const validation = validate(financialRecordSchema, formData);
     if (!validation.success) {
-      // Safely access errors only when validation failed
       if ('errors' in validation) {
         Object.entries(validation.errors).forEach(([field, message]) => {
           toast({
@@ -64,14 +62,10 @@ export function useFinancialRepository() {
       }
       return false;
     }
-
     try {
       const amount = parseFloat(formData.amount);
       const formattedDate = format(formData.date, 'yyyy-MM-dd');
-      
-      // For expenses, convert amount to negative value
       const finalAmount = formData.type === 'expense' ? -Math.abs(amount) : amount;
-
       await financialRepository.create({
         amount: finalAmount,
         description: formData.description,
@@ -80,15 +74,13 @@ export function useFinancialRepository() {
         category: formData.category,
         relatedAppointment: formData.relatedAppointment,
         clientId: formData.clientId,
-        userId: getCurrentUserId(), // Add userId field
+        userId: getCurrentUserId(),
       });
-
       toast({
         title: "Registro criado",
         description: "O registro financeiro foi criado com sucesso!",
       });
-
-      await loadRecords(); // Refresh the list
+      await loadRecords();
       return true;
     } catch (error) {
       console.error('Error creating financial record:', error);
@@ -99,12 +91,11 @@ export function useFinancialRepository() {
       });
       return false;
     }
-  }
+  }, [toast, loadRecords]);
 
-  async function updateRecord(id: string, formData: FinancialRecordFormData) {
+  const updateRecord = useCallback(async (id: string, formData: FinancialRecordFormData) => {
     const validation = validate(financialRecordSchema, formData);
     if (!validation.success) {
-      // Safely access errors only when validation failed
       if ('errors' in validation) {
         Object.entries(validation.errors).forEach(([field, message]) => {
           toast({
@@ -116,14 +107,10 @@ export function useFinancialRepository() {
       }
       return false;
     }
-
     try {
       const amount = parseFloat(formData.amount);
       const formattedDate = format(formData.date, 'yyyy-MM-dd');
-      
-      // For expenses, convert amount to negative value
       const finalAmount = formData.type === 'expense' ? -Math.abs(amount) : amount;
-
       await financialRepository.update(id, {
         amount: finalAmount,
         description: formData.description,
@@ -133,13 +120,11 @@ export function useFinancialRepository() {
         relatedAppointment: formData.relatedAppointment,
         clientId: formData.clientId,
       });
-
       toast({
         title: "Registro atualizado",
         description: "O registro financeiro foi atualizado com sucesso!",
       });
-
-      await loadRecords(); // Refresh the list
+      await loadRecords();
       return true;
     } catch (error) {
       console.error('Error updating financial record:', error);
@@ -150,19 +135,17 @@ export function useFinancialRepository() {
       });
       return false;
     }
-  }
+  }, [toast, loadRecords]);
 
-  async function deleteRecord(id: string) {
+  const deleteRecord = useCallback(async (id: string) => {
     try {
       const success = await financialRepository.delete(id);
-      
       if (success) {
         toast({
           title: "Registro excluído",
           description: "O registro financeiro foi excluído com sucesso!",
         });
-        
-        await loadRecords(); // Refresh the list
+        await loadRecords();
       } else {
         toast({
           title: "Erro ao excluir registro",
@@ -170,7 +153,6 @@ export function useFinancialRepository() {
           variant: "destructive",
         });
       }
-      
       return success;
     } catch (error) {
       console.error('Error deleting financial record:', error);
@@ -181,7 +163,7 @@ export function useFinancialRepository() {
       });
       return false;
     }
-  }
+  }, [toast, loadRecords]);
 
   return {
     records,

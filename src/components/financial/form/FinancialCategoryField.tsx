@@ -1,4 +1,3 @@
-
 import React from 'react';
 import { Label } from '@/components/ui/label';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
@@ -6,17 +5,19 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@
 interface FinancialCategoryFieldProps {
   value: string;
   onValueChange: (value: string) => void;
+  disabled?: boolean;
 }
 
-export const FinancialCategoryField: React.FC<FinancialCategoryFieldProps> = ({ value, onValueChange }) => {
+export const FinancialCategoryField: React.FC<FinancialCategoryFieldProps> = ({ value, onValueChange, disabled }) => {
   return (
     <div className="space-y-2">
       <Label htmlFor="category">Categoria (opcional)</Label>
       <Select 
         value={value} 
         onValueChange={(value) => onValueChange(value)}
+        disabled={disabled}
       >
-        <SelectTrigger>
+        <SelectTrigger disabled={disabled}>
           <SelectValue placeholder="Selecione uma categoria" />
         </SelectTrigger>
         <SelectContent>
