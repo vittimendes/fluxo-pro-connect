@@ -1,3 +1,4 @@
+
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Appointment, FinancialRecord, AppointmentType, Client } from '@/services/types';
@@ -194,12 +195,12 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
     if (!appointment) return;
     setIsSubmitting(true);
     try {
-      // Use Date object for date
+      // Format date correctly for the API
       const updated = await updateAppointment(appointment.id, {
         clientId: formData.clientId,
         clientName: formData.clientName,
         type: formData.type,
-        date: new Date(formData.date), // Convert string to Date
+        date: formData.date,
         time: formData.time,
         duration: parseInt(formData.duration),
         location: formData.location as 'online' | 'in_person' | 'home_visit',
@@ -207,12 +208,16 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
         status: formData.status as Appointment['status']
       });
       if (updated) {
+        // Update the local appointment object
         setAppointment({
           ...appointment,
           clientId: formData.clientId,
           clientName: formData.clientName,
           type: formData.type,
-          date: formData.date, 
+          // Convert Date to string format for the appointment object
+          date: typeof formData.date === 'string' 
+            ? formData.date 
+            : formData.date.toISOString().split('T')[0],
           time: formData.time,
           duration: parseInt(formData.duration),
           location: formData.location as 'online' | 'in_person' | 'home_visit',
