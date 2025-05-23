@@ -5,14 +5,14 @@
 
 import { Appointment } from '../types';
 import { appointmentsByUser } from '../store';
-import { generateUniqueId, getCurrentUserIdSync } from '../utils';
+import { generateUniqueId, getCurrentUserId } from '../utils';
 
 // @api Add a new appointment to the data store
 export const addAppointment = (appointment: Omit<Appointment, 'id'>): Promise<Appointment> => {
   return new Promise((resolve) => {
     // @section Simulate API delay
     setTimeout(() => {
-      const userId = getCurrentUserIdSync();
+      const userId = getCurrentUserId();
       
       // @section Create new appointment with generated ID
       const newAppointment = {
@@ -38,7 +38,7 @@ export const updateAppointment = (id: string, data: Partial<Appointment>): Promi
   return new Promise((resolve, reject) => {
     // @section Simulate API delay
     setTimeout(() => {
-      const userId = getCurrentUserIdSync();
+      const userId = getCurrentUserId();
       
       // @rule Check if user has any appointments
       if (!appointmentsByUser[userId]) {
@@ -63,7 +63,7 @@ export const deleteAppointment = (id: string): Promise<boolean> => {
   return new Promise((resolve) => {
     // @section Simulate API delay
     setTimeout(() => {
-      const userId = getCurrentUserIdSync();
+      const userId = getCurrentUserId();
       
       // @rule Check if user has any appointments
       if (!appointmentsByUser[userId]) {

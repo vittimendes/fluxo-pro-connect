@@ -6,7 +6,7 @@ import { useToast } from '@/hooks/use-toast';
 import { format } from 'date-fns';
 import { validate, financialRecordSchema } from '@/utils/validation';
 import { ReactNode } from 'react';
-import { getCurrentUserIdSync } from '@/services/utils';
+import { getCurrentUserId } from '@/services/utils';
 
 export function useFinancialRepository() {
   const [records, setRecords] = useState<FinancialRecord[]>([]);
@@ -74,7 +74,7 @@ export function useFinancialRepository() {
         category: formData.category,
         relatedAppointment: formData.relatedAppointment,
         clientId: formData.clientId,
-        userId: getCurrentUserIdSync(),
+        userId: getCurrentUserId(),
       });
       toast({
         title: "Registro criado",

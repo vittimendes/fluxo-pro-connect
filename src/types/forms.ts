@@ -17,7 +17,7 @@ export interface AppointmentFormData {
   clientId: string;
   clientName: string; // Making this required
   type: string;
-  date: Date | string; // Accept both Date and string
+  date: Date;
   time: string;
   duration: number | string;
   location: 'online' | 'in_person' | 'home_visit' | string;

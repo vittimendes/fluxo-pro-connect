@@ -1,14 +1,14 @@
 
 import { AppointmentType } from './types';
 import { appointmentTypesByUser } from './store';
-import { generateUniqueId, getCurrentUserIdSync } from './utils';
+import { generateUniqueId, getCurrentUserId } from './utils';
 
 export const appointmentTypeService = {
   getAppointmentTypes: (userId?: string): Promise<AppointmentType[]> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (!userId) {
-          userId = getCurrentUserIdSync();
+          userId = getCurrentUserId();
         }
         
         const userAppointmentTypes = appointmentTypesByUser[userId] || [];
@@ -20,13 +20,13 @@ export const appointmentTypeService = {
   addAppointmentType: (appointmentType: Omit<AppointmentType, 'id'>): Promise<AppointmentType> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userId = getCurrentUserIdSync();
+        const userId = getCurrentUserId();
         
         const newAppointmentType = {
           ...appointmentType,
           id: generateUniqueId('type'),
           userId
-        } as AppointmentType;
+        };
         
         if (!appointmentTypesByUser[userId]) {
           appointmentTypesByUser[userId] = [];
@@ -41,7 +41,7 @@ export const appointmentTypeService = {
   updateAppointmentType: (id: string, data: Partial<AppointmentType>): Promise<AppointmentType> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const userId = getCurrentUserIdSync();
+        const userId = getCurrentUserId();
         
         if (!appointmentTypesByUser[userId]) {
           reject(new Error('No appointment types found for this user'));
@@ -62,7 +62,7 @@ export const appointmentTypeService = {
   deleteAppointmentType: (id: string): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userId = getCurrentUserIdSync();
+        const userId = getCurrentUserId();
         
         if (!appointmentTypesByUser[userId]) {
           resolve(false);

@@ -3,7 +3,7 @@
 // Main dashboard page that displays a summary of user data,
 // including upcoming appointments and financial information.
 
-import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { DashboardHeader } from '@/components/dashboard/DashboardHeader';
 import { QuickActions } from '@/components/dashboard/QuickActions';
 import { FinancialSummary } from '@/components/dashboard/FinancialSummary';
@@ -12,7 +12,7 @@ import { DashboardDataLoader } from '@/components/dashboard/DashboardDataLoader'
 
 const Dashboard = () => {
   // @section User context
-  const { user } = useSupabaseAuth();
+  const { user } = useAuth();
 
   return (
     <DashboardDataLoader>

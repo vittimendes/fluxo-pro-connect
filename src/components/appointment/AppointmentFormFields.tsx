@@ -15,11 +15,11 @@ interface AppointmentFormFieldsProps {
     clientId: string;
     clientName: string;
     type: string;
-    date: Date | string; // Accept either Date or string
+    date: Date;
     time: string;
     duration: string | number;
     location: string;
-    notes?: string;
+    notes?: string; // Make notes optional to match AppointmentFormData
     status: string;
   };
   onInputChange: (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
@@ -34,51 +34,44 @@ const AppointmentFormFields: React.FC<AppointmentFormFieldsProps> = ({
   onInputChange,
   onSelectChange,
   onDateChange,
-}) => {
-  // Convert string date to Date object if needed
-  const dateValue = typeof formData.date === 'string' 
-    ? new Date(formData.date) 
-    : formData.date;
+}) => (
+  <>
+    <AppointmentClientField 
+      clients={clients} 
+      value={formData.clientId} 
+      onChange={(value) => onSelectChange('clientId', value)} 
+    />
 
-  return (
-    <>
-      <AppointmentClientField 
-        clients={clients} 
-        value={formData.clientId} 
-        onChange={(value) => onSelectChange('clientId', value)} 
-      />
+    <AppointmentTypeField 
+      appointmentTypes={appointmentTypes} 
+      value={formData.type} 
+      onChange={(value) => onSelectChange('type', value)} 
+    />
 
-      <AppointmentTypeField 
-        appointmentTypes={appointmentTypes} 
-        value={formData.type} 
-        onChange={(value) => onSelectChange('type', value)} 
-      />
+    <AppointmentDateTimeFields 
+      date={formData.date} 
+      time={formData.time}
+      onDateChange={onDateChange}
+      onTimeChange={onInputChange}
+    />
 
-      <AppointmentDateTimeFields 
-        date={dateValue}
-        time={formData.time}
-        onDateChange={onDateChange}
-        onTimeChange={onInputChange}
-      />
+    <AppointmentDurationLocationFields
+      duration={String(formData.duration)} // Convert to string for component consistency
+      location={formData.location}
+      onDurationChange={onInputChange}
+      onLocationChange={(value) => onSelectChange('location', value)}
+    />
 
-      <AppointmentDurationLocationFields
-        duration={String(formData.duration)}
-        location={formData.location}
-        onDurationChange={onInputChange}
-        onLocationChange={(value) => onSelectChange('location', value)}
-      />
+    <AppointmentStatusField 
+      status={formData.status} 
+      onChange={(value) => onSelectChange('status', value)} 
+    />
 
-      <AppointmentStatusField 
-        status={formData.status} 
-        onChange={(value) => onSelectChange('status', value)} 
-      />
-
-      <AppointmentNotesField 
-        notes={formData.notes || ''} 
-        onChange={onInputChange} 
-      />
-    </>
-  );
-};
+    <AppointmentNotesField 
+      notes={formData.notes || ''} // Provide a default empty string if notes is undefined
+      onChange={onInputChange} 
+    />
+  </>
+);
 
 export default AppointmentFormFields;

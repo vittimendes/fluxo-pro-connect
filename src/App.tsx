@@ -1,64 +1,84 @@
 
-import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
-import { Toaster } from '@/components/ui/toaster';
-import AppLayout from '@/components/AppLayout';
-import { SupabaseAuthProvider } from '@/contexts/SupabaseAuthContext';
-import { SupabasePrivateRoute } from '@/components/SupabasePrivateRoute';
-import Auth from '@/pages/Auth';
+// @file App.tsx
+// Main application entry point that sets up routing, providers,
+// and the overall application structure.
 
-// Pages
-import Dashboard from '@/pages/Dashboard';
-import Agenda from '@/pages/Agenda';
-import Clients from '@/pages/Clients';
-import ClientView from '@/pages/ClientView';
-import ClientForm from '@/pages/ClientForm';
-import NovoAgendamento from '@/pages/NovoAgendamento';
-import AppointmentView from '@/pages/AppointmentView';
-import AppointmentTypes from '@/pages/AppointmentTypes';
-import Financeiro from '@/pages/Financeiro';
-import NovoRegistroFinanceiro from '@/pages/NovoRegistroFinanceiro';
-import FinancialView from '@/pages/FinancialView';
-import EditarRegistroFinanceiro from '@/pages/EditarRegistroFinanceiro';
-import Landing from '@/pages/Landing';
-import Profile from '@/pages/Profile';
-import NotFound from '@/pages/NotFound';
+import { Toaster } from "@/components/ui/toaster";
+import { Toaster as Sonner } from "@/components/ui/sonner";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { AuthProvider } from "./contexts/AuthContext";
+import { PrivateRoute } from "./components/PrivateRoute";
+import AppLayout from "./components/AppLayout";
 
-import './App.css';
+// @section Import page components
+import Landing from "./pages/Landing";
+import Login from "./pages/Login";
+import Dashboard from "./pages/Dashboard";
+import Agenda from "./pages/Agenda";
+import NovoAgendamento from "./pages/NovoAgendamento";
+import Financeiro from "./pages/Financeiro";
+import FinancialView from "./pages/FinancialView";
+import NovoRegistroFinanceiro from "./pages/NovoRegistroFinanceiro";
+import EditarRegistroFinanceiro from "./pages/EditarRegistroFinanceiro";
+import Profile from "./pages/Profile";
+import NotFound from "./pages/NotFound";
+import AppointmentView from "./pages/AppointmentView";
+import Register from "./pages/Register";
+import Clients from "./pages/Clients";
+import ClientForm from "./pages/ClientForm";
+import ClientView from "./pages/ClientView";
+import AppointmentTypes from "./pages/AppointmentTypes";
 
-function App() {
-  return (
-    <SupabaseAuthProvider>
-      <Router>
-        <Routes>
-          <Route path="/" element={<Landing />} />
-          <Route path="/auth" element={<Auth />} />
+// @section Initialize React Query client
+const queryClient = new QueryClient();
+
+// @component Main application component
+const App = () => (
+  <QueryClientProvider client={queryClient}>
+    <BrowserRouter>
+      <AuthProvider>
+        <TooltipProvider>
+          {/* @component Global toast notifications */}
+          <Toaster />
+          <Sonner />
           
-          <Route element={<SupabasePrivateRoute />}>
-            <Route element={<AppLayout />}>
-              <Route path="/dashboard" element={<Dashboard />} />
-              <Route path="/agenda" element={<Agenda />} />
-              <Route path="/agenda/:id" element={<AppointmentView />} />
-              <Route path="/novo-agendamento" element={<NovoAgendamento />} />
-              <Route path="/clientes" element={<Clients />} />
-              <Route path="/clientes/:id" element={<ClientView />} />
-              <Route path="/clientes/novo" element={<ClientForm />} />
-              <Route path="/clientes/editar/:id" element={<ClientForm />} />
-              <Route path="/tipos-agendamento" element={<AppointmentTypes />} />
-              <Route path="/financeiro" element={<Financeiro />} />
-              <Route path="/financeiro/novo" element={<NovoRegistroFinanceiro />} />
-              <Route path="/financeiro/:id" element={<FinancialView />} />
-              <Route path="/financeiro/editar/:id" element={<EditarRegistroFinanceiro />} />
-              <Route path="/perfil" element={<Profile />} />
+          {/* @section Application routes */}
+          <Routes>
+            {/* @section Public routes */}
+            <Route path="/" element={<Landing />} />
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/home" element={<Navigate to="/dashboard" replace />} />
+            
+            {/* @section Protected routes */}
+            <Route element={<PrivateRoute />}>
+              <Route element={<AppLayout />}>
+                <Route path="/dashboard" element={<Dashboard />} />
+                <Route path="/agenda" element={<Agenda />} />
+                <Route path="/agenda/novo" element={<NovoAgendamento />} />
+                <Route path="/agenda/:id" element={<AppointmentView />} />
+                <Route path="/financeiro" element={<Financeiro />} />
+                <Route path="/financeiro/novo" element={<NovoRegistroFinanceiro />} />
+                <Route path="/financeiro/:id" element={<FinancialView />} />
+                <Route path="/financeiro/:id/editar" element={<EditarRegistroFinanceiro />} />
+                <Route path="/clientes" element={<Clients />} />
+                <Route path="/clientes/novo" element={<ClientForm />} />
+                <Route path="/clientes/:id" element={<ClientView />} />
+                <Route path="/clientes/:id/editar" element={<ClientForm />} />
+                <Route path="/tipos-de-atendimento" element={<AppointmentTypes />} />
+                <Route path="/perfil" element={<Profile />} />
+              </Route>
             </Route>
-          </Route>
-          
-          <Route path="/404" element={<NotFound />} />
-          <Route path="*" element={<Navigate to="/404" />} />
-        </Routes>
-      </Router>
-      <Toaster />
-    </SupabaseAuthProvider>
-  );
-}
+            
+            {/* @section Fallback route */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </TooltipProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  </QueryClientProvider>
+);
 
 export default App;

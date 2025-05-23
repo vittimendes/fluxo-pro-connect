@@ -1,10 +1,10 @@
-
 import { useState, useEffect, ReactNode, useCallback } from 'react';
-import { supabaseAppointmentRepository } from '@/repositories/supabase/appointmentRepository';
+import { appointmentRepository } from '@/repositories/appointmentRepository';
 import { Appointment } from '@/services/types';
 import { AppointmentFormData } from '@/types/forms';
 import { useToast } from '@/hooks/use-toast';
 import { validate, appointmentSchema } from '@/utils/validation';
+import { getCurrentUserId } from '@/services/utils';
 
 // Type for valid appointment status values
 type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show';
@@ -21,7 +21,7 @@ export function useAppointmentRepository() {
   async function loadAppointments() {
     setLoading(true);
     try {
-      const data = await supabaseAppointmentRepository.getAll();
+      const data = await appointmentRepository.getAll();
       setAppointments(data);
     } catch (error) {
       console.error('Error loading appointments:', error);
@@ -38,7 +38,7 @@ export function useAppointmentRepository() {
   const getAppointmentsByDate = useCallback(async (date: Date) => {
     setLoading(true);
     try {
-      const data = await supabaseAppointmentRepository.getByDate(date);
+      const data = await appointmentRepository.getByDate(date);
       return data;
     } catch (error) {
       console.error('Error getting appointments by date:', error);
@@ -56,7 +56,7 @@ export function useAppointmentRepository() {
   const getAppointmentsByDateRange = useCallback(async (startDate: Date, endDate: Date) => {
     setLoading(true);
     try {
-      const data = await supabaseAppointmentRepository.getByDateRange(startDate, endDate);
+      const data = await appointmentRepository.getByDateRange(startDate, endDate);
       return data;
     } catch (error) {
       console.error('Error getting appointments by date range:', error);
@@ -73,7 +73,7 @@ export function useAppointmentRepository() {
 
   async function getAppointmentById(id: string) {
     try {
-      return await supabaseAppointmentRepository.getById(id);
+      return await appointmentRepository.getById(id);
     } catch (error) {
       console.error('Error getting appointment:', error);
       toast({
@@ -101,7 +101,21 @@ export function useAppointmentRepository() {
     }
 
     try {
-      await supabaseAppointmentRepository.create(formData);
+      // Get client name for the appointment
+      const clientName = formData.clientName;
+      
+      await appointmentRepository.create({
+        clientId: formData.clientId,
+        clientName: clientName,
+        type: formData.type,
+        date: formData.date.toISOString().split('T')[0],
+        time: formData.time,
+        duration: Number(formData.duration),
+        location: formData.location,
+        status: formData.status as AppointmentStatus, // Cast to specific type
+        notes: formData.notes || '',
+        userId: getCurrentUserId(),
+      });
 
       toast({
         title: "Agendamento criado",
@@ -137,7 +151,20 @@ export function useAppointmentRepository() {
     }
 
     try {
-      await supabaseAppointmentRepository.update(id, formData);
+      // Get client name for the appointment
+      const clientName = formData.clientName;
+      
+      await appointmentRepository.update(id, {
+        clientId: formData.clientId,
+        clientName: clientName,
+        type: formData.type,
+        date: formData.date.toISOString().split('T')[0],
+        time: formData.time,
+        duration: Number(formData.duration),
+        location: formData.location,
+        status: formData.status as AppointmentStatus, // Cast to specific type
+        notes: formData.notes || '',
+      });
 
       toast({
         title: "Agendamento atualizado",
@@ -159,7 +186,7 @@ export function useAppointmentRepository() {
 
   async function deleteAppointment(id: string) {
     try {
-      const success = await supabaseAppointmentRepository.delete(id);
+      const success = await appointmentRepository.delete(id);
       
       if (success) {
         toast({
@@ -190,7 +217,7 @@ export function useAppointmentRepository() {
 
   async function updateAppointmentStatus(id: string, status: string) {
     try {
-      await supabaseAppointmentRepository.update(id, { 
+      await appointmentRepository.update(id, { 
         status: status as AppointmentStatus // Cast to specific type
       });
       

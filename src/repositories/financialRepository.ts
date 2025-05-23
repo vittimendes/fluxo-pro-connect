@@ -3,7 +3,7 @@ import { BaseRepository } from '@/lib/repository';
 import { FinancialRepository as IFinancialRepository } from '@/types/repository';
 import { FinancialRecord } from '@/services/types';
 import { financialRecordsByUser } from '@/services/store';
-import { generateUniqueId, getCurrentUserIdSync } from '@/services/utils';
+import { generateUniqueId, getCurrentUserId } from '@/services/utils';
 import { format } from 'date-fns';
 
 export class FinancialRepository extends BaseRepository<FinancialRecord> implements IFinancialRepository<FinancialRecord> {
@@ -17,7 +17,7 @@ export class FinancialRepository extends BaseRepository<FinancialRecord> impleme
   
   async getByPeriod(startDate: Date, endDate: Date, userId?: string): Promise<FinancialRecord[]> {
     if (!userId) {
-      userId = getCurrentUserIdSync();
+      userId = getCurrentUserId();
     }
     
     const allRecords = await this.getAllByUserId(userId);
@@ -30,7 +30,7 @@ export class FinancialRepository extends BaseRepository<FinancialRecord> impleme
   
   async getByClientId(clientId: string, userId?: string): Promise<FinancialRecord[]> {
     if (!userId) {
-      userId = getCurrentUserIdSync();
+      userId = getCurrentUserId();
     }
     
     const allRecords = await this.getAllByUserId(userId);
@@ -39,7 +39,7 @@ export class FinancialRepository extends BaseRepository<FinancialRecord> impleme
   
   async getByCategory(category: string, userId?: string): Promise<FinancialRecord[]> {
     if (!userId) {
-      userId = getCurrentUserIdSync();
+      userId = getCurrentUserId();
     }
     
     const allRecords = await this.getAllByUserId(userId);
@@ -48,7 +48,7 @@ export class FinancialRepository extends BaseRepository<FinancialRecord> impleme
   
   async getSummary(startDate: Date, endDate: Date, userId?: string): Promise<{ income: number, expenses: number, balance: number }> {
     if (!userId) {
-      userId = getCurrentUserIdSync();
+      userId = getCurrentUserId();
     }
     
     const records = await this.getByPeriod(startDate, endDate, userId);

@@ -5,7 +5,7 @@ import { ClientFormData } from '@/types/forms';
 import { useToast } from '@/hooks/use-toast';
 import { validate, clientSchema } from '@/utils/validation';
 import { ReactNode } from 'react';
-import { getCurrentUserIdSync } from '@/services/utils';
+import { getCurrentUserId } from '@/services/utils';
 
 export function useClientRepository() {
   const [clients, setClients] = useState<Client[]>([]);
@@ -89,7 +89,7 @@ export function useClientRepository() {
         notes: formData.notes || '',
         birthdate: formData.birthdate ? formData.birthdate.toISOString().split('T')[0] : undefined,
         feedbackStatus: 'not_sent',
-        userId: getCurrentUserIdSync(),
+        userId: getCurrentUserId(),
       });
 
       toast({

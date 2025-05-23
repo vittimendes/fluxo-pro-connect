@@ -1,14 +1,14 @@
 
 import { FinancialRecord } from './types';
 import { financialRecordsByUser } from './store';
-import { generateUniqueId, getCurrentUserIdSync } from './utils';
+import { generateUniqueId, getCurrentUserId } from './utils';
 
 export const financialService = {
   getFinancialRecords: (userId?: string): Promise<FinancialRecord[]> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (!userId) {
-          userId = getCurrentUserIdSync();
+          userId = getCurrentUserId();
         }
         
         const userRecords = financialRecordsByUser[userId] || [];
@@ -20,7 +20,7 @@ export const financialService = {
   getFinancialRecordById: (id: string): Promise<FinancialRecord | null> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userId = getCurrentUserIdSync();
+        const userId = getCurrentUserId();
         const userRecords = financialRecordsByUser[userId] || [];
         const record = userRecords.find(record => record.id === id);
         
@@ -33,7 +33,7 @@ export const financialService = {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (!userId) {
-          userId = getCurrentUserIdSync();
+          userId = getCurrentUserId();
         }
         
         const userRecords = financialRecordsByUser[userId] || [];
@@ -63,7 +63,7 @@ export const financialService = {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (!userId) {
-          userId = getCurrentUserIdSync();
+          userId = getCurrentUserId();
         }
         
         const userRecords = financialRecordsByUser[userId] || [];
@@ -78,7 +78,7 @@ export const financialService = {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (!userId) {
-          userId = getCurrentUserIdSync();
+          userId = getCurrentUserId();
         }
         
         const userRecords = financialRecordsByUser[userId] || [];
@@ -94,7 +94,7 @@ export const financialService = {
   addFinancialRecord: (record: Omit<FinancialRecord, 'id'>): Promise<FinancialRecord> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userId = getCurrentUserIdSync();
+        const userId = getCurrentUserId();
         
         const newRecord = {
           ...record,
@@ -115,7 +115,7 @@ export const financialService = {
   updateFinancialRecord: (id: string, data: Partial<FinancialRecord>): Promise<FinancialRecord> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const userId = getCurrentUserIdSync();
+        const userId = getCurrentUserId();
         
         if (!financialRecordsByUser[userId]) {
           reject(new Error('No financial records found for this user'));
@@ -136,7 +136,7 @@ export const financialService = {
   deleteFinancialRecord: (id: string): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userId = getCurrentUserIdSync();
+        const userId = getCurrentUserId();
         
         if (!financialRecordsByUser[userId]) {
           resolve(false);

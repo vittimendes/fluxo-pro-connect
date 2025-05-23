@@ -1,13 +1,13 @@
 
 import { Attachment } from './types';
 import { attachmentsByUser } from './store/attachmentsStore'; 
-import { generateUniqueId, getCurrentUserIdSync, formatDate } from './utils';
+import { generateUniqueId, getCurrentUserId, formatDate } from './utils';
 
 export const attachmentService = {
   getAttachmentsByClientId: (clientId: string): Promise<Attachment[]> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userId = getCurrentUserIdSync();
+        const userId = getCurrentUserId();
         const userAttachments = attachmentsByUser[userId] || [];
         const clientAttachments = userAttachments.filter(attachment => attachment.clientId === clientId);
         
@@ -19,7 +19,7 @@ export const attachmentService = {
   addAttachment: (attachment: Omit<Attachment, 'id' | 'userId' | 'dateUploaded'>): Promise<Attachment> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userId = getCurrentUserIdSync();
+        const userId = getCurrentUserId();
         
         const newAttachment = {
           ...attachment,
@@ -41,7 +41,7 @@ export const attachmentService = {
   deleteAttachment: (id: string): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userId = getCurrentUserIdSync();
+        const userId = getCurrentUserId();
         
         if (!attachmentsByUser[userId]) {
           resolve(false);

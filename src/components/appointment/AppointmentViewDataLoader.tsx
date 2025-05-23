@@ -1,4 +1,3 @@
-
 import { useEffect, useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { Appointment, FinancialRecord, AppointmentType, Client } from '@/services/types';
@@ -25,7 +24,7 @@ interface AppointmentViewDataLoaderProps {
       clientId: string;
       clientName: string;
       type: string;
-      date: Date; 
+      date: string; // Change from Date to string
       time: string;
       duration: string;
       location: string;
@@ -54,12 +53,11 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
   const [appointmentTypes, setAppointmentTypes] = useState<AppointmentType[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   
-  // Initialize formData with a default date as a Date object
   const [formData, setFormData] = useState({
     clientId: '',
     clientName: '',
     type: '',
-    date: new Date(), 
+    date: '', // Change to string
     time: '',
     duration: '',
     location: '',
@@ -89,14 +87,11 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
         setClients(clientsData);
         if (foundAppointment) {
           setAppointment(foundAppointment);
-          // Convert string date to Date object
-          const dateObj = new Date(foundAppointment.date);
-          
           setFormData({
             clientId: foundAppointment.clientId,
             clientName: foundAppointment.clientName,
             type: foundAppointment.type,
-            date: dateObj, 
+            date: foundAppointment.date, // Already a string
             time: foundAppointment.time,
             duration: String(foundAppointment.duration),
             location: foundAppointment.location,
@@ -147,7 +142,7 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
 
   const handleDateChange = (date: Date | undefined) => {
     if (date) {
-      setFormData(prev => ({ ...prev, date }));
+      setFormData(prev => ({ ...prev, date: date.toISOString().split('T')[0] }));
     }
   };
 
@@ -195,12 +190,12 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
     if (!appointment) return;
     setIsSubmitting(true);
     try {
-      // Format date correctly for the API
+      // Use Date object for date
       const updated = await updateAppointment(appointment.id, {
         clientId: formData.clientId,
         clientName: formData.clientName,
         type: formData.type,
-        date: formData.date,
+        date: new Date(formData.date), // Convert string to Date
         time: formData.time,
         duration: parseInt(formData.duration),
         location: formData.location as 'online' | 'in_person' | 'home_visit',
@@ -208,16 +203,12 @@ export const AppointmentViewDataLoader: React.FC<AppointmentViewDataLoaderProps>
         status: formData.status as Appointment['status']
       });
       if (updated) {
-        // Update the local appointment object
         setAppointment({
           ...appointment,
           clientId: formData.clientId,
           clientName: formData.clientName,
           type: formData.type,
-          // Convert Date to string format for the appointment object
-          date: typeof formData.date === 'string' 
-            ? formData.date 
-            : formData.date.toISOString().split('T')[0],
+          date: formData.date, // Now a string
           time: formData.time,
           duration: parseInt(formData.duration),
           location: formData.location as 'online' | 'in_person' | 'home_visit',

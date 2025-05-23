@@ -3,7 +3,7 @@ import { BaseRepository } from '@/lib/repository';
 import { ClientRepository as IClientRepository } from '@/types/repository';
 import { Client } from '@/services/types';
 import { clientsByUser } from '@/services/store';
-import { generateUniqueId, getCurrentUserIdSync } from '@/services/utils';
+import { generateUniqueId, getCurrentUserId } from '@/services/utils';
 
 export class ClientRepository extends BaseRepository<Client> implements IClientRepository<Client> {
   protected getStore() {
@@ -16,7 +16,7 @@ export class ClientRepository extends BaseRepository<Client> implements IClientR
 
   async search(query: string, userId?: string): Promise<Client[]> {
     if (!userId) {
-      userId = getCurrentUserIdSync();
+      userId = getCurrentUserId();
     }
     
     const allClients = await this.getAllByUserId(userId);

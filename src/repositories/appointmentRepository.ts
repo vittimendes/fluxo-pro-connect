@@ -3,7 +3,7 @@ import { BaseRepository } from '@/lib/repository';
 import { AppointmentRepository as IAppointmentRepository } from '@/types/repository';
 import { Appointment } from '@/services/types';
 import { appointmentsByUser } from '@/services/store';
-import { generateUniqueId, getCurrentUserIdSync } from '@/services/utils';
+import { generateUniqueId, getCurrentUserId } from '@/services/utils';
 
 export class AppointmentRepository extends BaseRepository<Appointment> implements IAppointmentRepository<Appointment> {
   protected getStore() {
@@ -16,7 +16,7 @@ export class AppointmentRepository extends BaseRepository<Appointment> implement
 
   async getByDate(date: Date, userId?: string): Promise<Appointment[]> {
     if (!userId) {
-      userId = getCurrentUserIdSync();
+      userId = getCurrentUserId();
     }
     
     const formattedDate = date.toISOString().split('T')[0];
@@ -29,7 +29,7 @@ export class AppointmentRepository extends BaseRepository<Appointment> implement
 
   async getByDateRange(startDate: Date, endDate: Date, userId?: string): Promise<Appointment[]> {
     if (!userId) {
-      userId = getCurrentUserIdSync();
+      userId = getCurrentUserId();
     }
     
     const allAppointments = await this.getAllByUserId(userId);
@@ -44,7 +44,7 @@ export class AppointmentRepository extends BaseRepository<Appointment> implement
 
   async getByClientId(clientId: string, userId?: string): Promise<Appointment[]> {
     if (!userId) {
-      userId = getCurrentUserIdSync();
+      userId = getCurrentUserId();
     }
     
     const allAppointments = await this.getAllByUserId(userId);
@@ -56,7 +56,7 @@ export class AppointmentRepository extends BaseRepository<Appointment> implement
 
   async getByStatus(status: string, userId?: string): Promise<Appointment[]> {
     if (!userId) {
-      userId = getCurrentUserIdSync();
+      userId = getCurrentUserId();
     }
     
     const allAppointments = await this.getAllByUserId(userId);
