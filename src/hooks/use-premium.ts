@@ -4,9 +4,14 @@ import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 export function usePremium() {
   const { user } = useSupabaseAuth();
   
-  // Simulate premium status based on user's email domain
-  // This is a simple implementation that can be expanded later
-  const isPro = user?.email?.includes('@pro.com') || false;
+  // Get premium status from user metadata if available
+  const userPlan = user?.user_metadata?.plan;
+  
+  // Simulate premium status based on user's email domain or metadata
+  const isPro = 
+    userPlan === 'pro' || 
+    user?.email?.includes('@pro.com') || 
+    false;
   
   return {
     isPremium: isPro,

@@ -31,7 +31,7 @@ export const getCurrentUserIdSync = (): string => {
   }
   
   // Get user ID from Supabase session as fallback
-  const session = supabase.auth.session();
+  const session = supabase.auth.getSession().data?.session;
   if (session?.user?.id) {
     return session.user.id;
   }
