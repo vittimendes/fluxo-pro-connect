@@ -1,7 +1,8 @@
+
 import { BaseRepository } from '@/lib/repository';
 import { Attachment } from '@/services/types';
 import { attachmentsByUser } from '@/services/store/attachmentsStore';
-import { generateUniqueId, getCurrentUserId, formatDate } from '@/services/utils';
+import { generateUniqueId, getCurrentUserIdSync, formatDate } from '@/services/utils';
 
 export interface AttachmentRepositoryType {
   getAll(): Promise<Attachment[]>;
@@ -22,13 +23,13 @@ export class AttachmentRepository extends BaseRepository<Attachment> implements 
   }
 
   async getByClientId(clientId: string, userId?: string): Promise<Attachment[]> {
-    if (!userId) userId = getCurrentUserId();
+    if (!userId) userId = getCurrentUserIdSync();
     const all = await this.getAllByUserId(userId);
     return all.filter(a => a.clientId === clientId);
   }
 
   async create(item: Omit<Attachment, 'id' | 'userId' | 'dateUploaded'>): Promise<Attachment> {
-    const userId = getCurrentUserId();
+    const userId = getCurrentUserIdSync();
     const newAttachment: Attachment = {
       ...item,
       id: this.generateId(),
@@ -41,7 +42,7 @@ export class AttachmentRepository extends BaseRepository<Attachment> implements 
   }
 
   async delete(id: string): Promise<boolean> {
-    const userId = getCurrentUserId();
+    const userId = getCurrentUserIdSync();
     if (!attachmentsByUser[userId]) return false;
     const idx = attachmentsByUser[userId].findIndex(a => a.id === id);
     if (idx !== -1) {

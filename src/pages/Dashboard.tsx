@@ -30,7 +30,7 @@ const Dashboard = () => {
       }) => (
         <div className="space-y-6 pb-8">
           {/* @component User welcome header */}
-          <DashboardHeader user={user} />
+          <DashboardHeader user={user as any} />
           
           {/* @component Quick action buttons */}
           <QuickActions />

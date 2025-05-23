@@ -1,6 +1,6 @@
 
 import { Repository, UserScopedRepository } from '@/types/repository';
-import { getCurrentUserId } from '@/services/utils';
+import { getCurrentUserIdSync } from '@/services/utils';
 
 /**
  * Base implementation for a repository that works with in-memory data store
@@ -13,7 +13,7 @@ export abstract class BaseRepository<T extends { id: string; userId: string }, I
   protected abstract generateId(): string;
   
   async getAll(): Promise<T[]> {
-    const userId = getCurrentUserId();
+    const userId = getCurrentUserIdSync();
     return this.getAllByUserId(userId);
   }
 
@@ -23,14 +23,14 @@ export abstract class BaseRepository<T extends { id: string; userId: string }, I
   }
 
   async getById(id: ID): Promise<T | null> {
-    const userId = getCurrentUserId();
+    const userId = getCurrentUserIdSync();
     const store = this.getStore();
     const items = store[userId] || [];
     return items.find(item => item.id === id) || null;
   }
 
   async create(item: Omit<T, 'id'>): Promise<T> {
-    const userId = getCurrentUserId();
+    const userId = getCurrentUserIdSync();
     const store = this.getStore();
     
     if (!store[userId]) {
@@ -48,7 +48,7 @@ export abstract class BaseRepository<T extends { id: string; userId: string }, I
   }
 
   async update(id: ID, updates: Partial<T>): Promise<T> {
-    const userId = getCurrentUserId();
+    const userId = getCurrentUserIdSync();
     const store = this.getStore();
     
     if (!store[userId]) {
@@ -65,7 +65,7 @@ export abstract class BaseRepository<T extends { id: string; userId: string }, I
   }
 
   async delete(id: ID): Promise<boolean> {
-    const userId = getCurrentUserId();
+    const userId = getCurrentUserIdSync();
     const store = this.getStore();
     
     if (!store[userId]) {
