@@ -1,13 +1,15 @@
 
-import { useAuth } from '@/contexts/AuthContext';
-import { useIsPro } from '@/lib/use-plan';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 
 export function usePremium() {
-  const { currentUser } = useAuth();
-  const isPro = useIsPro();
+  const { user } = useSupabaseAuth();
+  
+  // Simulate premium status based on user's email domain
+  // This is a simple implementation that can be expanded later
+  const isPro = user?.email?.includes('@pro.com') || false;
   
   return {
     isPremium: isPro,
-    plan: currentUser?.plan || 'free'
+    plan: isPro ? 'pro' : 'free'
   };
 }

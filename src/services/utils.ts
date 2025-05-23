@@ -1,49 +1,61 @@
 
-// @file utils.ts
-// Core utility functions used across the application's services
-// for generating IDs, formatting dates, and user management.
-
-// @utility Generate a unique ID based on timestamp and random number
-export const generateUniqueId = (prefix: string) => {
-  return `${prefix}_${Date.now()}_${Math.floor(Math.random() * 1000)}`;
-};
-
-// @utility Format date to ISO string but only the date part
-export const formatDate = (date: Date) => date.toISOString().split('T')[0];
-
-// @utility Get the current user ID from Supabase
 import { supabase } from '@/integrations/supabase/client';
 
-// Synchronous version that gets user ID from local storage
-// This is used for non-async contexts where we need the ID immediately
-export function getCurrentUserIdSync(): string {
-  try {
-    // Try to get the user from existing session in localStorage
-    const localStorageSession = localStorage.getItem('supabase.auth.token');
-    if (localStorageSession) {
-      const session = JSON.parse(localStorageSession);
-      if (session?.user?.id) {
-        return session.user.id;
-      }
-    }
-    
-    // Fallback to getting the current user from the Supabase client's cache
-    const user = supabase.auth.user();
-    if (!user) {
-      throw new Error("User not authenticated");
-    }
-    return user.id;
-  } catch (error) {
-    console.error("Error getting current user ID:", error);
-    throw new Error("User not authenticated");
-  }
-}
+// Generate a unique ID with an optional prefix
+export const generateUniqueId = (prefix: string = ''): string => {
+  const timestamp = Date.now().toString(36);
+  const randomStr = Math.random().toString(36).substring(2, 8);
+  return `${prefix}_${timestamp}_${randomStr}`;
+};
 
-// Async version that gets user ID from Supabase auth
-export async function getCurrentUserId(): Promise<string> {
-  const { data: { user } } = await supabase.auth.getUser();
-  if (!user) {
-    throw new Error("User not authenticated");
+// Format a date to YYYY-MM-DD string
+export const formatDate = (date: Date): string => {
+  const year = date.getFullYear();
+  const month = (date.getMonth() + 1).toString().padStart(2, '0');
+  const day = date.getDate().toString().padStart(2, '0');
+  return `${year}-${month}-${day}`;
+};
+
+// Get current logged in user's ID from localStorage
+// This is synchronous so can be used in places where we can't await
+export const getCurrentUserIdSync = (): string => {
+  const currentUserJson = localStorage.getItem('currentUser');
+  if (currentUserJson) {
+    try {
+      const currentUser = JSON.parse(currentUserJson);
+      return currentUser.id;
+    } catch (e) {
+      console.error('Error parsing user data from localStorage', e);
+      return 'user_default'; // Fallback user ID
+    }
   }
-  return user.id;
-}
+  
+  // Get user ID from Supabase session as fallback
+  const session = supabase.auth.session();
+  if (session?.user?.id) {
+    return session.user.id;
+  }
+  
+  return 'user_default'; // Fallback user ID if not found
+};
+
+// Get current logged in user's ID (async version)
+export const getCurrentUserId = async (): Promise<string> => {
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session?.user?.id) {
+    return session.user.id;
+  }
+  
+  // Fallback to localStorage if Supabase session not available
+  const currentUserJson = localStorage.getItem('currentUser');
+  if (currentUserJson) {
+    try {
+      const currentUser = JSON.parse(currentUserJson);
+      return currentUser.id;
+    } catch (e) {
+      console.error('Error parsing user data from localStorage', e);
+    }
+  }
+  
+  return 'user_default'; // Fallback user ID
+};
