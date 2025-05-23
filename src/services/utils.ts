@@ -1,4 +1,3 @@
-
 // @file utils.ts
 // Core utility functions used across the application's services
 // for generating IDs, formatting dates, and user management.
@@ -12,11 +11,14 @@ export const generateUniqueId = (prefix: string) => {
 export const formatDate = (date: Date) => date.toISOString().split('T')[0];
 
 // @utility Get the current user ID from localStorage
-export const getCurrentUserId = (): string => {
-  const currentUserJson = localStorage.getItem('currentUser');
-  if (currentUserJson) {
-    const currentUser = JSON.parse(currentUserJson);
-    return currentUser.id;
+import { supabase } from '@/integrations/supabase/client';
+
+export function getCurrentUserId(): string {
+  const user = supabase.auth.getUser();
+  if (!user) {
+    throw new Error("User not authenticated");
   }
-  return '1'; // Default to first user if none found
-};
+  // Temporary solution until we fully integrate Supabase
+  // In non-authenticated development environments, return a mock ID
+  return user?.data?.user?.id || 'mock-user-id';
+}

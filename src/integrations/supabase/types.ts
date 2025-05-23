@@ -9,7 +9,316 @@ export type Json =
 export type Database = {
   public: {
     Tables: {
-      [_ in never]: never
+      appointment_types: {
+        Row: {
+          created_at: string | null
+          description: string | null
+          id: string
+          name: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string | null
+          description?: string | null
+          id?: string
+          name?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointment_types_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      appointments: {
+        Row: {
+          client_id: string
+          client_name: string
+          created_at: string | null
+          date: string
+          duration: number
+          id: string
+          location: Database["public"]["Enums"]["appointment_location"]
+          notes: string | null
+          status: Database["public"]["Enums"]["appointment_status"]
+          time: string
+          type: string
+          user_id: string
+        }
+        Insert: {
+          client_id: string
+          client_name: string
+          created_at?: string | null
+          date: string
+          duration: number
+          id?: string
+          location: Database["public"]["Enums"]["appointment_location"]
+          notes?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"]
+          time: string
+          type: string
+          user_id: string
+        }
+        Update: {
+          client_id?: string
+          client_name?: string
+          created_at?: string | null
+          date?: string
+          duration?: number
+          id?: string
+          location?: Database["public"]["Enums"]["appointment_location"]
+          notes?: string | null
+          status?: Database["public"]["Enums"]["appointment_status"]
+          time?: string
+          type?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      attachments: {
+        Row: {
+          appointment_id: string | null
+          client_id: string
+          created_at: string | null
+          date_uploaded: string
+          id: string
+          name: string
+          notes: string | null
+          size: number
+          type: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          client_id: string
+          created_at?: string | null
+          date_uploaded: string
+          id?: string
+          name: string
+          notes?: string | null
+          size: number
+          type: string
+          url: string
+          user_id: string
+        }
+        Update: {
+          appointment_id?: string | null
+          client_id?: string
+          created_at?: string | null
+          date_uploaded?: string
+          id?: string
+          name?: string
+          notes?: string | null
+          size?: number
+          type?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "attachments_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attachments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "attachments_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          birthdate: string | null
+          created_at: string | null
+          email: string | null
+          feedback_status: Database["public"]["Enums"]["feedback_status"] | null
+          id: string
+          name: string
+          notes: string | null
+          phone: string
+          user_id: string
+        }
+        Insert: {
+          birthdate?: string | null
+          created_at?: string | null
+          email?: string | null
+          feedback_status?:
+            | Database["public"]["Enums"]["feedback_status"]
+            | null
+          id?: string
+          name: string
+          notes?: string | null
+          phone: string
+          user_id: string
+        }
+        Update: {
+          birthdate?: string | null
+          created_at?: string | null
+          email?: string | null
+          feedback_status?:
+            | Database["public"]["Enums"]["feedback_status"]
+            | null
+          id?: string
+          name?: string
+          notes?: string | null
+          phone?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "clients_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      financial_records: {
+        Row: {
+          amount: number
+          appointment_id: string | null
+          category: string | null
+          client_id: string | null
+          client_name: string | null
+          created_at: string | null
+          date: string
+          description: string
+          id: string
+          notes: string | null
+          type: Database["public"]["Enums"]["financial_type"]
+          user_id: string
+        }
+        Insert: {
+          amount: number
+          appointment_id?: string | null
+          category?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string | null
+          date: string
+          description: string
+          id?: string
+          notes?: string | null
+          type: Database["public"]["Enums"]["financial_type"]
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          appointment_id?: string | null
+          category?: string | null
+          client_id?: string | null
+          client_name?: string | null
+          created_at?: string | null
+          date?: string
+          description?: string
+          id?: string
+          notes?: string | null
+          type?: Database["public"]["Enums"]["financial_type"]
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "financial_records_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_records_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "financial_records_user_id_fkey"
+            columns: ["user_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          cancel_policy: string | null
+          created_at: string | null
+          default_message: string | null
+          email: string
+          id: string
+          name: string
+          plan: string | null
+          profession: string | null
+          whatsapp_number: string | null
+          work_hours: string | null
+        }
+        Insert: {
+          cancel_policy?: string | null
+          created_at?: string | null
+          default_message?: string | null
+          email: string
+          id: string
+          name: string
+          plan?: string | null
+          profession?: string | null
+          whatsapp_number?: string | null
+          work_hours?: string | null
+        }
+        Update: {
+          cancel_policy?: string | null
+          created_at?: string | null
+          default_message?: string | null
+          email?: string
+          id?: string
+          name?: string
+          plan?: string | null
+          profession?: string | null
+          whatsapp_number?: string | null
+          work_hours?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -18,7 +327,15 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      appointment_location: "online" | "in_person" | "home_visit"
+      appointment_status:
+        | "scheduled"
+        | "confirmed"
+        | "completed"
+        | "canceled"
+        | "no_show"
+      feedback_status: "not_sent" | "pending" | "completed"
+      financial_type: "income" | "expense"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -133,6 +450,17 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      appointment_location: ["online", "in_person", "home_visit"],
+      appointment_status: [
+        "scheduled",
+        "confirmed",
+        "completed",
+        "canceled",
+        "no_show",
+      ],
+      feedback_status: ["not_sent", "pending", "completed"],
+      financial_type: ["income", "expense"],
+    },
   },
 } as const
