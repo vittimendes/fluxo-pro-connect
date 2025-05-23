@@ -1,20 +1,19 @@
 
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { mockAuthService } from '@/services/mockData';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { useToast } from '@/hooks/use-toast';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Loader } from 'lucide-react';
 
-// Import the newly created components
+// Import the profile components
 import ProfileHeader from '@/components/profile/ProfileHeader';
 import ProfileFormFields from '@/components/profile/ProfileFormFields';
 import ProfileFooter from '@/components/profile/ProfileFooter';
 
 const Profile = () => {
   const navigate = useNavigate();
-  const { currentUser, updateCurrentUser, logout } = useAuth();
+  const { user, updateUserProfile, signOut } = useSupabaseAuth();
   const { toast } = useToast();
   const [isEditing, setIsEditing] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -29,18 +28,18 @@ const Profile = () => {
   });
 
   useEffect(() => {
-    if (currentUser) {
+    if (user) {
       setProfileData({
-        name: currentUser.name,
-        email: currentUser.email,
-        profession: currentUser.profession,
-        workHours: currentUser.workHours,
-        cancelPolicy: currentUser.cancelPolicy,
-        whatsappNumber: currentUser.whatsappNumber,
-        defaultMessage: currentUser.defaultMessage,
+        name: user.user_metadata?.name || '',
+        email: user.email || '',
+        profession: user.user_metadata?.profession || '',
+        workHours: user.user_metadata?.work_hours || '',
+        cancelPolicy: user.user_metadata?.cancel_policy || '',
+        whatsappNumber: user.user_metadata?.whatsapp_number || '',
+        defaultMessage: user.user_metadata?.default_message || '',
       });
     }
-  }, [currentUser]);
+  }, [user]);
 
   const handleInputChange = (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
     const { name, value } = e.target;
@@ -50,13 +49,28 @@ const Profile = () => {
   const handleSaveProfile = async () => {
     setLoading(true);
     try {
-      const updatedUser = await mockAuthService.updateProfile(profileData);
-      updateCurrentUser(updatedUser);
-      toast({
-        title: "Perfil atualizado",
-        description: "Seu perfil foi atualizado com sucesso!",
+      const { success, error } = await updateUserProfile({
+        name: profileData.name,
+        profession: profileData.profession,
+        work_hours: profileData.workHours,
+        cancel_policy: profileData.cancelPolicy,
+        whatsapp_number: profileData.whatsappNumber,
+        default_message: profileData.defaultMessage,
       });
-      setIsEditing(false);
+
+      if (success) {
+        toast({
+          title: "Perfil atualizado",
+          description: "Seu perfil foi atualizado com sucesso!",
+        });
+        setIsEditing(false);
+      } else if (error) {
+        toast({
+          title: "Erro ao atualizar perfil",
+          description: error,
+          variant: "destructive",
+        });
+      }
     } catch (error) {
       console.error('Error updating profile:', error);
       toast({
@@ -72,8 +86,8 @@ const Profile = () => {
   const handleLogout = async () => {
     setLoading(true);
     try {
-      await logout();
-      navigate('/login');
+      await signOut();
+      navigate('/auth');
     } catch (error) {
       console.error('Logout failed:', error);
       toast({
@@ -86,7 +100,7 @@ const Profile = () => {
     }
   };
 
-  if (!currentUser) {
+  if (!user) {
     return (
       <div className="flex justify-center items-center py-16">
         <Loader className="mr-2 h-6 w-6 animate-spin" /> Carregando...

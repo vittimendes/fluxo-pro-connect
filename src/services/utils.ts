@@ -1,4 +1,3 @@
-
 import { supabase } from '@/integrations/supabase/client';
 
 // Generate a unique ID with an optional prefix
@@ -31,9 +30,14 @@ export const getCurrentUserIdSync = (): string => {
   }
   
   // Get user ID from Supabase session as fallback
-  const session = supabase.auth.getSession().data?.session;
-  if (session?.user?.id) {
-    return session.user.id;
+  const sessionStr = localStorage.getItem('supabase.auth.token');
+  if (sessionStr) {
+    try {
+      const sessionData = JSON.parse(sessionStr);
+      return sessionData.user?.id || 'user_default';
+    } catch (e) {
+      console.error('Error parsing Supabase session from localStorage', e);
+    }
   }
   
   return 'user_default'; // Fallback user ID if not found
