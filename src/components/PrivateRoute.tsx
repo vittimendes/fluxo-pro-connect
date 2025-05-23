@@ -1,10 +1,10 @@
 
 import { Navigate, Outlet } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useSupabaseAuth } from '@/contexts/SupabaseAuthContext';
 import { Loader } from 'lucide-react';
 
 export const PrivateRoute = () => {
-  const { user, loading } = useAuth();
+  const { user, loading } = useSupabaseAuth();
 
   if (loading) {
     return (
@@ -15,5 +15,5 @@ export const PrivateRoute = () => {
     );
   }
 
-  return user ? <Outlet /> : <Navigate to="/login" replace />;
+  return user ? <Outlet /> : <Navigate to="/auth" replace />;
 };
