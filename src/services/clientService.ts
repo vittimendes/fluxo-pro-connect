@@ -1,14 +1,14 @@
 
 import { Client } from './types';
 import { clientsByUser } from './store';
-import { generateUniqueId, getCurrentUserId } from './utils';
+import { generateUniqueId, getCurrentUserIdSync } from './utils';
 
 export const clientService = {
   getClients: (userId?: string): Promise<Client[]> => {
     return new Promise((resolve) => {
       setTimeout(() => {
         if (!userId) {
-          userId = getCurrentUserId();
+          userId = getCurrentUserIdSync();
         }
         
         const userClients = clientsByUser[userId] || [];
@@ -20,7 +20,7 @@ export const clientService = {
   getClientById: (id: string): Promise<Client | null> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userId = getCurrentUserId();
+        const userId = getCurrentUserIdSync();
         const userClients = clientsByUser[userId] || [];
         const client = userClients.find(client => client.id === id);
         
@@ -32,7 +32,7 @@ export const clientService = {
   addClient: (client: Omit<Client, 'id'>): Promise<Client> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userId = getCurrentUserId();
+        const userId = getCurrentUserIdSync();
         
         const newClient = {
           ...client,
@@ -53,7 +53,7 @@ export const clientService = {
   updateClient: (id: string, data: Partial<Client>): Promise<Client> => {
     return new Promise((resolve, reject) => {
       setTimeout(() => {
-        const userId = getCurrentUserId();
+        const userId = getCurrentUserIdSync();
         
         if (!clientsByUser[userId]) {
           reject(new Error('No clients found for this user'));
@@ -74,7 +74,7 @@ export const clientService = {
   deleteClient: (id: string): Promise<boolean> => {
     return new Promise((resolve) => {
       setTimeout(() => {
-        const userId = getCurrentUserId();
+        const userId = getCurrentUserIdSync();
         
         if (!clientsByUser[userId]) {
           resolve(false);

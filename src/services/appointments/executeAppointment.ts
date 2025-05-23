@@ -5,14 +5,14 @@
 
 import { Appointment, FinancialRecord } from '../types';
 import { appointmentsByUser, financialRecordsByUser } from '../store';
-import { generateUniqueId, formatDate, getCurrentUserId } from '../utils';
+import { generateUniqueId, formatDate, getCurrentUserIdSync } from '../utils';
 
 // @api Mark an appointment as executed/completed and optionally create a financial record
 export const executeAppointment = (id: string, financialData?: { amount: number, description: string, type: 'income' | 'expense' }): Promise<{ appointment: Appointment, financialRecord?: FinancialRecord }> => {
   return new Promise((resolve, reject) => {
     // @section Simulate API delay
     setTimeout(() => {
-      const userId = getCurrentUserId();
+      const userId = getCurrentUserIdSync();
       
       // @rule Check if user has any appointments
       if (!appointmentsByUser[userId]) {

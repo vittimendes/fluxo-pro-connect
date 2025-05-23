@@ -5,7 +5,7 @@
 
 import { Appointment } from '../types';
 import { appointmentsByUser } from '../store';
-import { formatDate, getCurrentUserId } from '../utils';
+import { formatDate, getCurrentUserIdSync } from '../utils';
 
 // @api Get all appointments for a user
 export const getAppointments = (userId?: string): Promise<Appointment[]> => {
@@ -13,7 +13,7 @@ export const getAppointments = (userId?: string): Promise<Appointment[]> => {
     // @section Simulate API delay
     setTimeout(() => {
       if (!userId) {
-        userId = getCurrentUserId();
+        userId = getCurrentUserIdSync();
       }
       
       const userAppointments = appointmentsByUser[userId] || [];
@@ -29,7 +29,7 @@ export const getTodayAppointments = (userId?: string): Promise<Appointment[]> =>
     // @section Simulate API delay
     setTimeout(() => {
       if (!userId) {
-        userId = getCurrentUserId();
+        userId = getCurrentUserIdSync();
       }
       
       const userAppointments = appointmentsByUser[userId] || [];
@@ -45,7 +45,7 @@ export const getAppointmentsByDate = (date: string, userId?: string): Promise<Ap
     // @section Simulate API delay
     setTimeout(() => {
       if (!userId) {
-        userId = getCurrentUserId();
+        userId = getCurrentUserIdSync();
       }
       
       const userAppointments = appointmentsByUser[userId] || [];
@@ -61,7 +61,7 @@ export const getAppointmentsByWeek = (startDate: Date, endDate: Date, userId?: s
     // @section Simulate API delay
     setTimeout(() => {
       if (!userId) {
-        userId = getCurrentUserId();
+        userId = getCurrentUserIdSync();
       }
       
       const start = formatDate(startDate);
@@ -84,7 +84,7 @@ export const getAppointmentsByClientId = (clientId: string, userId?: string): Pr
     // @section Simulate API delay
     setTimeout(() => {
       if (!userId) {
-        userId = getCurrentUserId();
+        userId = getCurrentUserIdSync();
       }
       
       const userAppointments = appointmentsByUser[userId] || [];
