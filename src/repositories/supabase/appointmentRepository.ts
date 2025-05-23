@@ -4,11 +4,20 @@ import { Appointment } from '@/services/types';
 import { AppointmentFormData } from '@/types/forms';
 import { format } from 'date-fns';
 
+// Define the appointment status type to match the enum in the database
+type AppointmentStatus = 'scheduled' | 'confirmed' | 'completed' | 'canceled' | 'no_show';
+type AppointmentLocation = 'online' | 'in_person' | 'home_visit';
+
 export class SupabaseAppointmentRepository {
   async getAll(): Promise<Appointment[]> {
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    
     const { data, error } = await supabase
       .from('appointments')
       .select('*')
+      .eq('user_id', user.id)
       .order('date', { ascending: true })
       .order('time', { ascending: true });
     
@@ -21,10 +30,15 @@ export class SupabaseAppointmentRepository {
   }
 
   async getById(id: string): Promise<Appointment | null> {
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    
     const { data, error } = await supabase
       .from('appointments')
       .select('*')
       .eq('id', id)
+      .eq('user_id', user.id)
       .single();
     
     if (error) {
@@ -36,11 +50,16 @@ export class SupabaseAppointmentRepository {
   }
 
   async getByDate(date: Date): Promise<Appointment[]> {
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    
     const formattedDate = format(date, 'yyyy-MM-dd');
     const { data, error } = await supabase
       .from('appointments')
       .select('*')
       .eq('date', formattedDate)
+      .eq('user_id', user.id)
       .order('time', { ascending: true });
     
     if (error) {
@@ -52,12 +71,17 @@ export class SupabaseAppointmentRepository {
   }
 
   async getByDateRange(startDate: Date, endDate: Date): Promise<Appointment[]> {
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    
     const startFormatted = format(startDate, 'yyyy-MM-dd');
     const endFormatted = format(endDate, 'yyyy-MM-dd');
     
     const { data, error } = await supabase
       .from('appointments')
       .select('*')
+      .eq('user_id', user.id)
       .gte('date', startFormatted)
       .lte('date', endFormatted)
       .order('date', { ascending: true })
@@ -72,10 +96,15 @@ export class SupabaseAppointmentRepository {
   }
 
   async getByClientId(clientId: string): Promise<Appointment[]> {
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    
     const { data, error } = await supabase
       .from('appointments')
       .select('*')
       .eq('client_id', clientId)
+      .eq('user_id', user.id)
       .order('date', { ascending: false });
     
     if (error) {
@@ -86,11 +115,16 @@ export class SupabaseAppointmentRepository {
     return data.map(this.mapToAppointment);
   }
 
-  async getByStatus(status: string): Promise<Appointment[]> {
+  async getByStatus(status: AppointmentStatus): Promise<Appointment[]> {
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    
     const { data, error } = await supabase
       .from('appointments')
       .select('*')
       .eq('status', status)
+      .eq('user_id', user.id)
       .order('date', { ascending: true });
     
     if (error) {
@@ -102,6 +136,10 @@ export class SupabaseAppointmentRepository {
   }
 
   async create(formData: AppointmentFormData): Promise<Appointment> {
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    
     // Format date correctly
     const formattedDate = typeof formData.date === 'string' 
       ? formData.date 
@@ -112,6 +150,12 @@ export class SupabaseAppointmentRepository {
       ? parseInt(formData.duration)
       : formData.duration;
 
+    // Ensure location is one of the allowed values
+    const location = this.validateLocation(formData.location);
+    
+    // Status should be one of the allowed values
+    const status = formData.status as AppointmentStatus;
+
     // Prepare data for Supabase
     const appointmentData = {
       client_id: formData.clientId,
@@ -120,9 +164,10 @@ export class SupabaseAppointmentRepository {
       date: formattedDate,
       time: formData.time,
       duration: duration,
-      location: formData.location,
-      status: formData.status,
+      location: location,
+      status: status,
       notes: formData.notes || '',
+      user_id: user.id // Add the authenticated user's ID
     };
 
     const { data, error } = await supabase
@@ -140,6 +185,10 @@ export class SupabaseAppointmentRepository {
   }
 
   async update(id: string, formData: Partial<AppointmentFormData>): Promise<Appointment> {
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    
     // Prepare update object
     const updateData: Record<string, any> = {};
 
@@ -148,8 +197,15 @@ export class SupabaseAppointmentRepository {
     if (formData.clientName !== undefined) updateData.client_name = formData.clientName;
     if (formData.type !== undefined) updateData.type = formData.type;
     if (formData.time !== undefined) updateData.time = formData.time;
-    if (formData.location !== undefined) updateData.location = formData.location;
-    if (formData.status !== undefined) updateData.status = formData.status;
+    
+    if (formData.location !== undefined) {
+      updateData.location = this.validateLocation(formData.location);
+    }
+    
+    if (formData.status !== undefined) {
+      updateData.status = formData.status as AppointmentStatus;
+    }
+    
     if (formData.notes !== undefined) updateData.notes = formData.notes || '';
     
     // Format duration as number if present
@@ -170,6 +226,7 @@ export class SupabaseAppointmentRepository {
       .from('appointments')
       .update(updateData)
       .eq('id', id)
+      .eq('user_id', user.id)
       .select()
       .single();
     
@@ -182,10 +239,15 @@ export class SupabaseAppointmentRepository {
   }
 
   async delete(id: string): Promise<boolean> {
+    // Get the current user ID
+    const { data: { user } } = await supabase.auth.getUser();
+    if (!user) throw new Error('User not authenticated');
+    
     const { error } = await supabase
       .from('appointments')
       .delete()
-      .eq('id', id);
+      .eq('id', id)
+      .eq('user_id', user.id);
     
     if (error) {
       console.error('Error deleting appointment:', error);
@@ -193,6 +255,15 @@ export class SupabaseAppointmentRepository {
     }
     
     return true;
+  }
+
+  // Helper method to validate location
+  private validateLocation(location: string): AppointmentLocation {
+    const validLocations: AppointmentLocation[] = ['online', 'in_person', 'home_visit'];
+    if (!validLocations.includes(location as AppointmentLocation)) {
+      throw new Error(`Invalid location: ${location}. Must be one of: ${validLocations.join(', ')}`);
+    }
+    return location as AppointmentLocation;
   }
 
   private mapToAppointment(data: any): Appointment {
